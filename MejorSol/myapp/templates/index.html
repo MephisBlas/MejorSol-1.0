@@ -1,0 +1,316 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SIEER Chile - Servicios de Ingeniería Eléctrica</title>
+    <meta name="description" content="Expertos en soluciones de ingeniería eléctrica para proyectos industriales, comerciales y residenciales en Chile">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Hoja de estilos principal -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <img src="{% static 'img/logo-sieer.png' %}" alt="SIEER Chile Logo" class="logo-img">
+                    <div class="logo-text">
+                        <h1><a href="/">SIEER Chile</a></h1>
+                        <span>Servicios de Ingeniería Eléctrica</span>
+                    </div>
+                </div>
+                
+                <nav class="nav nav-centered">
+                    <ul>
+                        <li><a href="#inicio">Inicio</a></li>
+                        <li><a href="#servicios">Servicios</a></li>
+                        <li><a href="#nosotros">Nosotros</a></li>
+                        <li><a href="#proyectos">Proyectos</a></li>
+                        <li><a href="#contacto">Contacto</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="auth-buttons">
+                    {% if user.is_authenticated %}
+                        <span style="color: var(--primary); margin-right: 15px; font-weight: 500;">
+                            <i class="fas fa-user"></i> Hola, {{ user.username }}
+                        </span>
+                        <!-- FORMULARIO CORREGIDO -->
+                        <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline">
+                                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </a>
+                        <a href="{% url 'registro' %}" class="btn btn-solid">
+                            <i class="fas fa-user-plus"></i> Registrarse
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="inicio" class="hero">
+        <!-- Video de fondo -->
+        <video autoplay muted loop playsinline class="hero-bg">
+            <source src="{% static 'media/mp4/panel.mp4' %}" type="video/mp4">
+            Tu navegador no soporta videos en HTML5.
+        </video>
+
+        <!-- Contenido encima -->
+        <div class="hero-overlay">
+            <div class="container">
+                <div class="hero-content">
+                    <h2>Soluciones eléctricas integrales</h2>
+                    <p>Expertos en ingeniería eléctrica para proyectos industriales, comerciales y residenciales</p>
+                    <div class="hero-buttons">
+                        <a href="#servicios" class="btn btn-primary">Nuestros Servicios</a>
+                        <a href="#contacto" class="btn btn-secondary">Contáctenos</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Servicios Section -->
+    <section id="servicios" class="services">
+        <div class="container">
+            <div class="section-header">
+                <h2>Nuestros Servicios</h2>
+                <p>Ofrecemos soluciones especializadas en ingeniería eléctrica</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Instalaciones Eléctricas</h3>
+                    <p>Diseño e implementación de sistemas eléctricos para todo tipo de proyectos.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-solar-panel"></i>
+                    </div>
+                    <h3>Energías Renovables</h3>
+                    <p>Soluciones sostenibles con paneles solares y sistemas de energía alternativa.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-charging-station"></i>
+                    </div>
+                    <h3>Automatización</h3>
+                    <p>Sistemas de control y automatización para procesos industriales.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h3>Mantenimiento</h3>
+                    <p>Programas de mantenimiento preventivo y correctivo para instalaciones eléctricas.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3>Iluminación Eficiente</h3>
+                    <p>Diseño e implementación de sistemas de iluminación de bajo consumo.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3>Asesorías Técnicas</h3>
+                    <p>Consultoría especializada en proyectos eléctricos y normativas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="nosotros" class="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>Sobre Nosotros</h2>
+                    <p>En SIEER Chile nos especializamos en proveer soluciones integrales de ingeniería eléctrica. Con más de 10 años de experiencia en el mercado, nuestro equipo de profesionales altamente capacitados garantiza el más alto estándar de calidad en cada proyecto.</p>
+                    <p>Nuestra misión es entregar servicios eléctricos confiables, eficientes y seguros, contribuyendo al desarrollo de infraestructura eléctrica sostenible en Chile.</p>
+                    <ul class="about-features">
+                        <li><i class="fas fa-check-circle"></i> Personal calificado y certificado</li>
+                        <li><i class="fas fa-check-circle"></i> Cumplimiento de normativas vigentes</li>
+                        <li><i class="fas fa-check-circle"></i> Soluciones a medida para cada cliente</li>
+                        <li><i class="fas fa-check-circle"></i> Atención personalizada y soporte continuo</li>
+                    </ul>
+                </div>
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="Ingeniero eléctrico trabajando">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="proyectos" class="projects">
+        <div class="container">
+            <div class="section-header">
+                <h2>Proyectos Destacados</h2>
+                <p>Algunos de nuestros trabajos más relevantes</p>
+            </div>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="Proyecto industrial">
+                    </div>
+                    <div class="project-info">
+                        <h3>Planta Industrial</h3>
+                        <p>Instalación eléctrica completa para planta manufacturera en Santiago.</p>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="Proyecto comercial">
+                    </div>
+                    <div class="project-info">
+                        <h3>Centro Comercial</h3>
+                        <p>Sistema de iluminación eficiente para centro comercial en Viña del Mar.</p>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="Proyecto solar">
+                    </div>
+                    <div class="project-info">
+                        <h3>Granja Solar</h3>
+                        <p>Instalación de sistema fotovoltaico para empresa agrícola en el sur de Chile.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contacto" class="contact">
+        <div class="container">
+            <div class="section-header">
+                <h2>Contáctenos</h2>
+                <p>Estamos listos para atender sus requerimientos</p>
+            </div>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Ubicación</h3>
+                            <p>Av. Principal 1234, Santiago, Chile</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Teléfono</h3>
+                            <p>+56 2 2345 6789</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Email</h3>
+                            <p>contacto@sieerchile.cl</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Horario de atención</h3>
+                            <p>Lunes a Viernes: 9:00 - 18:00 hrs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="logo">
+                        <h3>SIEER Chile</h3>
+                        <span>Servicios de Ingeniería Eléctrica</span>
+                    </div>
+                    <p>Expertos en soluciones eléctricas integrales para proyectos industriales, comerciales y residenciales.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces rápidos</h4>
+                    <ul>
+                        <li><a href="#inicio">Inicio</a></li>
+                        <li><a href="#servicios">Servicios</a></li>
+                        <li><a href="#nosotros">Nosotros</a></li>
+                        <li><a href="#proyectos">Proyectos</a></li>
+                        <li><a href="#contacto">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Servicios</h4>
+                    <ul>
+                        <li><a href="#">Instalaciones Eléctricas</a></li>
+                        <li><a href="#">Energías Renovables</a></li>
+                        <li><a href="#">Automatización</a></li>
+                        <li><a href="#">Mantenimiento</a></li>
+                        <li><a href="#">Iluminación Eficiente</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Suscríbete</h4>
+                    <p>Recibe nuestras novedades y promociones</p>
+                    <form class="subscribe-form">
+                        <input type="email" placeholder="Tu correo electrónico">
+                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 SIEER Chile - Servicios de Ingeniería Eléctrica. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>
