@@ -3,137 +3,226 @@
 
 {% block title %}Registro - SIEER Chile{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/registro.css' %}">
+{% endblock %}
+
 {% block content %}
-<div style="min-height: calc(100vh - 80px); display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem 1rem;">
-    <div style="background: white; padding: 2.5rem; border-radius: 15px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); width: 100%; max-width: 450px;">
-        <h2 style="text-align: center; margin-bottom: 2rem; color: #0057a3; font-family: 'Montserrat', sans-serif;">Registrarse</h2>
+<div class="register-container">
+    <!-- Partículas flotantes -->
+    <div class="floating-particles" id="particles"></div>
+    
+    <div class="register-card">
+        <h2>Crear Cuenta</h2>
         
-        {% if messages %}
-            {% for message in messages %}
-                <div style="padding: 12px 15px; border-radius: 8px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; background-color: {% if message.tags == 'success' %}#d4edda{% else %}#f8d7da{% endif %}; color: {% if message.tags == 'success' %}#155724{% else %}#721c24{% endif %}; border: 1px solid {% if message.tags == 'success' %}#c3e6cb{% else %}#f5c6cb{% endif %};">
-                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-triangle{% endif %}"></i>
-                    {{ message }}
-                </div>
-            {% endfor %}
+        {% if form.errors %}
+        <div class="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            Por favor, corrige los errores en el formulario.
+        </div>
         {% endif %}
         
         <form method="post">
             {% csrf_token %}
             
-            {% for field in form %}
-                <div style="margin-bottom: 1.5rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #222222;">
-                        {{ field.label }}
+            <!-- Información Básica -->
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}">
+                        {{ form.first_name.label }} *
                     </label>
-                    {{ field }}
-                    
-                    {% if field.help_text %}
-                        <small style="color: #6c757d; font-size: 0.875rem; display: block; margin-top: 0.25rem;">
-                            {{ field.help_text }}
-                        </small>
-                    {% endif %}
-                    
-                    {% for error in field.errors %}
-                        <div style="color: #dc3545; font-size: 0.875rem; margin-top: 0.25rem;">
-                            <i class="fas fa-exclamation-circle"></i> {{ error }}
+                    <div class="form-input-wrapper">
+                        {{ form.first_name }}
+                    </div>
+                    {% if form.first_name.errors %}
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {% for error in form.first_name.errors %}
+                                {{ error }}
+                            {% endfor %}
                         </div>
-                    {% endfor %}
+                    {% endif %}
                 </div>
-            {% endfor %}
+                
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}">
+                        {{ form.last_name.label }} *
+                    </label>
+                    <div class="form-input-wrapper">
+                        {{ form.last_name }}
+                    </div>
+                    {% if form.last_name.errors %}
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {% for error in form.last_name.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
             
-            <button type="submit" style="width: 100%; padding: 12px; background-color: #0057a3; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-family: 'Montserrat', sans-serif;">
-                <i class="fas fa-user-plus"></i> Registrarse
+            <!-- Credenciales -->
+            <div class="form-group full-width">
+                <label for="{{ form.username.id_for_label }}">
+                    {{ form.username.label }} *
+                </label>
+                <div class="form-input-wrapper">
+                    {{ form.username }}
+                </div>
+                {% if form.username.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {% for error in form.username.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <small class="helptext">Requerido. 150 carácteres como máximo. Únicamente letras, dígitos y @/./+/-/_.</small>
+            </div>
+            
+            <div class="form-group full-width">
+                <label for="{{ form.email.id_for_label }}">
+                    {{ form.email.label }} *
+                </label>
+                <div class="form-input-wrapper">
+                    {{ form.email }}
+                </div>
+                {% if form.email.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {% for error in form.email.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Contraseñas -->
+            <div class="form-group full-width">
+                <div class="form-group">
+                    <label for="{{ form.password1.id_for_label }}">
+                        {{ form.password1.label }} *
+                    </label>
+                    <div class="form-input-wrapper">
+                        {{ form.password1 }}
+                    </div>
+                    {% if form.password1.errors %}
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {% for error in form.password1.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if form.password1.help_text %}
+                        <small class="helptext">{{ form.password1.help_text }}</small>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.password2.id_for_label }}">
+                        {{ form.password2.label }} *
+                    </label>
+                    <div class="form-input-wrapper">
+                        {{ form.password2 }}
+                    </div>
+                    {% if form.password2.errors %}
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {% for error in form.password2.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Información Adicional -->
+            <div class="form-group full-width">
+                <label for="{{ form.telefono.id_for_label }}">
+                    {{ form.telefono.label }}
+                </label>
+                <div class="form-input-wrapper">
+                    {{ form.telefono }}
+                </div>
+            </div>
+            
+            <div class="form-group full-width">
+                <label for="{{ form.direccion.id_for_label }}">
+                    {{ form.direccion.label }}
+                </label>
+                <div class="form-input-wrapper">
+                    {{ form.direccion }}
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-register">
+                <i class="fas fa-user-plus"></i> Crear Cuenta
             </button>
         </form>
         
-        <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e9ecef;">
-            <p style="margin: 0; color: #6c757d;">
+        <div class="register-links">
+            <p>
                 ¿Ya tienes cuenta? 
-                <a href="{% url 'login' %}" style="color: #0057a3; font-weight: 500; text-decoration: none;">
-                    Inicia sesión aquí
-                </a>
+                <a href="{% url 'login' %}">Inicia sesión aquí</a>
             </p>
         </div>
     </div>
 </div>
 
-<style>
-    /* Estilos para los campos del formulario */
-    input[type="text"],
-    input[type="password"],
-    input[type="email"] {
-        width: 100%;
-        padding: 12px 15px;
-        border: 2px solid #e9ecef;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        font-family: 'Roboto', sans-serif;
-        box-sizing: border-box;
-    }
-    
-    input[type="text"]:focus,
-    input[type="password"]:focus,
-    input[type="email"]:focus {
-        outline: none;
-        border-color: #0057a3;
-        box-shadow: 0 0 0 3px rgba(0, 87, 163, 0.1);
-    }
-    
-    button:hover {
-        background-color: #003b70 !important;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-    
-    a:hover {
-        text-decoration: underline !important;
-    }
-    
-    /* Estilos responsivos */
-    @media (max-width: 480px) {
-        .login-container {
-            padding: 1rem !important;
-        }
-        
-        .login-card {
-            padding: 2rem 1.5rem !important;
-        }
-    }
-</style>
-
 <script>
-    // Agregar placeholders y mejorar la experiencia de usuario
+    // Crear partículas flotantes para registro
     document.addEventListener('DOMContentLoaded', function() {
-        // Agregar placeholders a los campos
-        const usernameField = document.querySelector('#id_username');
-        const password1Field = document.querySelector('#id_password1');
-        const password2Field = document.querySelector('#id_password2');
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 15;
         
-        if (usernameField) {
-            usernameField.placeholder = 'Ingresa tu nombre de usuario';
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            // Tamaño y posición aleatoria
+            const size = Math.random() * 8 + 2;
+            const left = Math.random() * 100;
+            const top = Math.random() * 100;
+            const delay = Math.random() * 5;
+            
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${left}%`;
+            particle.style.top = `${top}%`;
+            particle.style.animationDelay = `${delay}s`;
+            particle.style.opacity = Math.random() * 0.1 + 0.05;
+            
+            particlesContainer.appendChild(particle);
         }
-        if (password1Field) {
-            password1Field.placeholder = 'Crea una contraseña segura';
-        }
-        if (password2Field) {
-            password2Field.placeholder = 'Confirma tu contraseña';
-        }
+    });
+
+    // JavaScript para manejar los requisitos que se muestran al hacer focus
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('.form-input');
         
-        // Validación en tiempo real
-        const form = document.querySelector('form');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                const password1 = document.querySelector('#id_password1');
-                const password2 = document.querySelector('#id_password2');
-                
-                if (password1 && password2 && password1.value !== password2.value) {
-                    e.preventDefault();
-                    alert('Las contraseñas no coinciden. Por favor, verifica.');
-                    password2.focus();
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                // Encontrar el helptext asociado a este input
+                const helptext = this.parentElement.nextElementSibling;
+                if (helptext && helptext.classList.contains('helptext')) {
+                    helptext.style.maxHeight = '100px';
+                    helptext.style.opacity = '1';
+                    helptext.style.transform = 'translateY(0)';
                 }
             });
-        }
+            
+            input.addEventListener('blur', function() {
+                // Ocultar el helptext cuando se pierde el foco
+                const helptext = this.parentElement.nextElementSibling;
+                if (helptext && helptext.classList.contains('helptext')) {
+                    helptext.style.maxHeight = '0';
+                    helptext.style.opacity = '0';
+                    helptext.style.transform = 'translateY(-10px)';
+                }
+            });
+        });
     });
 </script>
 {% endblock %}

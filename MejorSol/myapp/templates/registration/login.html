@@ -3,8 +3,15 @@
 
 {% block title %}Iniciar Sesión - SIEER Chile{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="login-container">
+    <!-- Partículas flotantes -->
+    <div class="floating-particles" id="particles"></div>
+    
     <div class="login-card">
         <h2>Iniciar Sesión</h2>
         
@@ -20,21 +27,25 @@
             
             <div class="form-group">
                 <label for="id_username">Usuario:</label>
-                <input type="text" name="username" id="id_username" 
-                       class="form-input"
-                       placeholder="Ingresa tu usuario"
-                       required autofocus>
+                <div class="form-input-wrapper">
+                    <input type="text" name="username" id="id_username" 
+                           class="form-input"
+                           placeholder="Ingresa tu usuario"
+                           required autofocus>
+                </div>
             </div>
             
             <div class="form-group">
                 <label for="id_password">Contraseña:</label>
-                <input type="password" name="password" id="id_password" 
-                       class="form-input"
-                       placeholder="Ingresa tu contraseña"
-                       required>
+                <div class="form-input-wrapper">
+                    <input type="password" name="password" id="id_password" 
+                           class="form-input"
+                           placeholder="Ingresa tu contraseña"
+                           required>
+                </div>
             </div>
             
-            <button type="submit" class="btn btn-primary btn-full">
+            <button type="submit" class="btn btn-full">
                 <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
             </button>
         </form>
@@ -45,94 +56,31 @@
     </div>
 </div>
 
-<style>
-    .login-container {
-        min-height: calc(100vh - 80px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 2rem 1rem;
-    }
-    
-    .login-card {
-        background: white;
-        padding: 2.5rem;
-        border-radius: 15px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 400px;
-    }
-    
-    .login-card h2 {
-        text-align: center;
-        margin-bottom: 2rem;
-        color: var(--primary);
-        font-family: 'Montserrat', sans-serif;
-    }
-    
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-    
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-        color: var(--dark);
-    }
-    
-    .form-input {
-        width: 100%;
-        padding: 12px 15px;
-        border: 2px solid var(--light-gray);
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: var(--transition);
-        font-family: 'Roboto', sans-serif;
-    }
-    
-    .form-input:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(0, 87, 163, 0.1);
-    }
-    
-    .btn-full {
-        width: 100%;
-        padding: 12px;
-        font-size: 1rem;
-    }
-    
-    .alert {
-        padding: 12px 15px;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .alert-error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-    
-    .login-links {
-        text-align: center;
-        margin-top: 1.5rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid var(--light-gray);
-    }
-    
-    .login-links a {
-        color: var(--primary);
-        font-weight: 500;
-    }
-    
-    .login-links a:hover {
-        text-decoration: underline;
-    }
-</style>
+<script>
+    // Crear partículas flotantes
+    document.addEventListener('DOMContentLoaded', function() {
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 15;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            // Tamaño y posición aleatoria
+            const size = Math.random() * 8 + 2;
+            const left = Math.random() * 100;
+            const top = Math.random() * 100;
+            const delay = Math.random() * 5;
+            
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${left}%`;
+            particle.style.top = `${top}%`;
+            particle.style.animationDelay = `${delay}s`;
+            particle.style.opacity = Math.random() * 0.1 + 0.05;
+            
+            particlesContainer.appendChild(particle);
+        }
+    });
+</script>
 {% endblock %}

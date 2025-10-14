@@ -1,69 +1,191 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}MejorSol{% endblock %}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .navbar {
-            background-color: #333;
-            padding: 1rem;
-        }
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            margin-right: 1rem;
-        }
-        .navbar a:hover {
-            color: #ddd;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-        .messages {
-            list-style: none;
-            padding: 0;
-        }
-        .messages li {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-        }
-        .success { background-color: #d4edda; color: #155724; }
-        .error { background-color: #f8d7da; color: #721c24; }
-    </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}SIEER Chile - Servicios de Ingeniería Eléctrica{% endblock %}</title>
+    <meta name="description" content="Expertos en soluciones de ingeniería eléctrica para proyectos industriales, comerciales y residenciales en Chile">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Hoja de estilos principal -->
+    <link rel="stylesheet" href="{% static 'css/static' %}">
+    
+    <!-- Estilos separados para mejor organización -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/utils.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="{% static 'css/registro.css' %}">
 </head>
 <body>
-    <nav class="navbar">
-        <a href="{% url 'index' %}">Inicio</a>
-        {% if user.is_authenticated %}
-            <span style="color: white;">Hola, {{ user.username }}</span>
-            <a href="{% url 'logout' %}">Cerrar Sesión</a>
-        {% else %}
-            <a href="{% url 'login' %}">Iniciar Sesión</a>
-            <a href="{% url 'registro' %}">Registrarse</a>
-        {% endif %}
-    </nav>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <img src="{% static 'img/logo-sieer.png' %}" alt="SIEER Chile Logo" class="logo-img">
+                    <div class="logo-text">
+                        <h1><a href="/">SIEER Chile</a></h1>
+                        <span>Servicios de Ingeniería Eléctrica</span>
+                    </div>
+                </div>
+                
+                <nav class="nav nav-centered">
+                    <ul>
+                        <li><a href="{% url 'index' %}">Inicio</a></li>
+                        {% if user.is_authenticated %}
+                            {% if user.perfil.tipo_usuario == 'admin' %}
+                                <li><a href="{% url 'vista_admin' %}">Panel Admin</a></li>
+                            {% else %}
+                                <li><a href="{% url 'vista_cliente' %}">Productos</a></li>
+                            {% endif %}
+                        {% endif %}
+                        <li><a href="#servicios">Servicios</a></li>
+                        <li><a href="#nosotros">Nosotros</a></li>
+                        <li><a href="#contacto">Contacto</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="auth-buttons">
+                    {% if user.is_authenticated %}
+                        <span>
+                            <i class="fas fa-user"></i> 
+                            Hola, {{ user.username }}
+                            {% if user.perfil.tipo_usuario == 'admin' %}
+                                <small>(Admin)</small>
+                            {% endif %}
+                        </span>
+                        <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline">
+                                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </a>
+                        <a href="{% url 'registro' %}" class="btn btn-solid">
+                            <i class="fas fa-user-plus"></i> Registrarse
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </header>
 
-    <div class="container">
+    <!-- Contenido principal -->
+    <main>
         {% if messages %}
-            <ul class="messages">
+            <div class="messages-container">
                 {% for message in messages %}
-                    <li class="{{ message.tags }}">{{ message }}</li>
+                    <div class="alert alert-{{ message.tags }}">
+                        <i class="fas 
+                            {% if message.tags == 'success' %}fa-check-circle
+                            {% elif message.tags == 'error' %}fa-exclamation-triangle
+                            {% else %}fa-info-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
                 {% endfor %}
-            </ul>
+            </div>
         {% endif %}
 
         {% block content %}
         {% endblock %}
-    </div>
+    </main>
+
+    <!-- Footer Elegante -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="logo">
+                        <h3>SIEER Chile</h3>
+                        <span>Servicios de Ingeniería Eléctrica</span>
+                    </div>
+                    <p>Expertos en soluciones eléctricas integrales para proyectos industriales, comerciales y residenciales.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces rápidos</h4>
+                    <ul>
+                        <li><a href="#inicio">Inicio</a></li>
+                        <li><a href="#servicios">Servicios</a></li>
+                        <li><a href="#nosotros">Nosotros</a></li>
+                        <li><a href="#proyectos">Proyectos</a></li>
+                        <li><a href="#contacto">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Servicios</h4>
+                    <ul>
+                        <li><a href="#">Instalaciones Eléctricas</a></li>
+                        <li><a href="#">Energías Renovables</a></li>
+                        <li><a href="#">Automatización</a></li>
+                        <li><a href="#">Mantenimiento</a></li>
+                        <li><a href="#">Iluminación Eficiente</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Suscríbete</h4>
+                    <p>Recibe nuestras novedades y promociones</p>
+                    <form class="subscribe-form">
+                        <input type="email" placeholder="Tu correo electrónico">
+                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 SIEER Chile - Servicios de Ingeniería Eléctrica. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{% static 'js/script.js' %}"></script>
+
+    <script>
+        // Efecto de transparencia al hacer scroll
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 100) {
+                header.classList.add('sticky');
+            } else {
+                header.classList.remove('sticky');
+            }
+        });
+
+        // Menú móvil
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            const nav = document.querySelector('.nav-centered');
+            
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    nav.classList.toggle('active');
+                    this.classList.toggle('fa-bars');
+                    this.classList.toggle('fa-times');
+                });
+            }
+        });
+    </script>
 </body>
 </html>
