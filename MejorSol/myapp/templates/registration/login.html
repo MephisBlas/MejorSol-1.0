@@ -16,7 +16,7 @@
         <h2>Iniciar Sesión</h2>
         
         {% if form.errors %}
-        <div class="alert alert-error">
+        <div class="alert-error">
             <i class="fas fa-exclamation-triangle"></i>
             Usuario o contraseña incorrectos. Por favor, intenta nuevamente.
         </div>
@@ -27,7 +27,7 @@
             
             <div class="form-group">
                 <label for="id_username">Usuario:</label>
-                <div class="form-input-wrapper">
+                <div class="form-input-wrapper" id="id_username-container">
                     <input type="text" name="username" id="id_username" 
                            class="form-input"
                            placeholder="Ingresa tu usuario"
@@ -37,7 +37,7 @@
             
             <div class="form-group">
                 <label for="id_password">Contraseña:</label>
-                <div class="form-input-wrapper">
+                <div class="form-input-wrapper" id="id_password-container">
                     <input type="password" name="password" id="id_password" 
                            class="form-input"
                            placeholder="Ingresa tu contraseña"
@@ -66,7 +66,6 @@
             const particle = document.createElement('div');
             particle.className = 'particle';
             
-            // Tamaño y posición aleatoria
             const size = Math.random() * 8 + 2;
             const left = Math.random() * 100;
             const top = Math.random() * 100;

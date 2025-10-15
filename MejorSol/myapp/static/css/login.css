@@ -1,3 +1,19 @@
+/* login.css - Estilos CORREGIDOS para el login */
+
+:root {
+    --primary-green: #00ff88;
+    --dark-green: #00cc6a;
+    --light-green: #33ff99;
+    --accent-green: #00ffaa;
+    --neon-glow: 0 0 20px rgba(0, 255, 136, 0.5);
+    --dark-bg: rgba(15, 15, 20, 0.95);
+    --darker-bg: rgba(10, 10, 15, 0.98);
+    --card-bg: rgba(25, 25, 35, 0.9);
+    --text-light: #ffffff;
+    --text-gray: #b0b0b0;
+    --border-glow: 1px solid rgba(0, 255, 136, 0.3);
+    --transition: all 0.3s ease;
+}
 
 .login-container {
     min-height: calc(100vh - 80px);
@@ -9,6 +25,7 @@
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
+    background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
 }
 
 /* Efectos de fondo animados mejorados */
@@ -20,7 +37,7 @@
     width: 200%;
     height: 200%;
     background: 
-        radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 30% 30%, rgba(0, 255, 136, 0.15) 0%, transparent 50%),
         radial-gradient(circle at 70% 70%, rgba(52, 211, 153, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 50% 20%, rgba(5, 150, 105, 0.08) 0%, transparent 50%);
     animation: float 8s ease-in-out infinite;
@@ -33,32 +50,31 @@
     66% { transform: translateY(10px) rotate(-0.5deg) scale(0.98); }
 }
 
-/* Contenedor transparente con marco sutil */
+/* Contenedor principal corregido */
 .login-card {
-    background: rgba(255, 255, 255, 0.08); /* Muy transparente */
+    background: rgba(25, 25, 35, 0.95);
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
-    border: 1px solid rgba(0, 0, 0, 0.15); /* Marco negro muy sutil */
+    border: 1px solid rgba(0, 255, 136, 0.2);
     padding: 3rem 2.5rem;
     border-radius: 20px;
     box-shadow: 
-        0 25px 50px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+        0 25px 50px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(0, 255, 136, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     width: 100%;
     max-width: 420px;
     min-width: 320px;
     box-sizing: border-box;
     margin: 0 auto;
     position: relative;
-    z-index: 1;
+    z-index: 2;
     animation: slideUp 0.8s ease-out;
-    transform-style: preserve-3d;
     overflow: hidden;
 }
 
-/* Efecto de borde luminoso sutil */
-.login-card::after {
+/* Efecto de borde luminoso CORREGIDO - Sin problemas de mask */
+.login-card::before {
     content: '';
     position: absolute;
     top: 0;
@@ -66,27 +82,18 @@
     right: 0;
     bottom: 0;
     border-radius: 20px;
-    padding: 1px;
     background: linear-gradient(135deg, 
-        rgba(16, 185, 129, 0.3), 
-        rgba(52, 211, 153, 0.2),
-        rgba(16, 185, 129, 0.1));
-    /* Propiedad estándar primero, luego prefijos de vendedor */
-    mask: 
-        linear-gradient(#fff 0 0) content-box, 
-        linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    -webkit-mask: 
-        linear-gradient(#fff 0 0) content-box, 
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    pointer-events: none;
-    animation: borderGlow 4s ease-in-out infinite;
+        rgba(0, 255, 136, 0.6), 
+        rgba(0, 204, 106, 0.4),
+        rgba(0, 255, 136, 0.2));
+    z-index: -1;
+    animation: borderGlow 3s ease-in-out infinite;
+    opacity: 0.5;
 }
 
 @keyframes borderGlow {
     0%, 100% { opacity: 0.3; }
-    50% { opacity: 0.6; }
+    50% { opacity: 0.8; }
 }
 
 @keyframes slideUp {
@@ -103,25 +110,15 @@
 .login-card h2 {
     text-align: center;
     margin-bottom: 2.5rem;
-    color: var(--very-light-green); /* Texto más visible sobre fondo oscuro */
+    color: var(--text-light);
     font-family: 'Montserrat', sans-serif;
     font-weight: 700;
     font-size: 2.2rem;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, var(--text-light), var(--primary-green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     position: relative;
-    animation: textGlow 3s ease-in-out infinite alternate;
-}
-
-@keyframes textGlow {
-    0% { 
-        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3),
-                     0 0 20px rgba(16, 185, 129, 0.1); 
-    }
-    100% { 
-        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4),
-                     0 0 30px rgba(16, 185, 129, 0.2),
-                     0 0 40px rgba(16, 185, 129, 0.1); 
-    }
 }
 
 .form-group {
@@ -145,59 +142,19 @@
     display: block;
     margin-bottom: 0.8rem;
     font-weight: 600;
-    color: var(--very-light-green); /* Texto claro para contraste */
+    color: var(--text-light);
     font-family: 'Montserrat', sans-serif;
     font-size: 1rem;
     transition: var(--transition);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .form-input-wrapper {
     position: relative;
 }
 
-.form-input {
-    width: 100%;
-    padding: 16px 20px 16px 50px;
-    border: 1.5px solid rgba(255, 255, 255, 0.2); /* Borde más sutil */
-    border-radius: 12px;
-    font-size: 1rem;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    font-family: 'Roboto', sans-serif;
-    box-sizing: border-box;
-    background: rgba(255, 255, 255, 0.08); /* Inputs también transparentes */
-    color: var(--very-light-green); /* Texto claro */
-    box-shadow: 
-        0 4px 15px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-}
-
-.form-input::placeholder {
-    color: rgba(255, 255, 255, 0.6); /* Placeholder más visible */
-    opacity: 0.8;
-    transition: var(--transition);
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: rgba(16, 185, 129, 0.6); /* Borde verde sutil al focus */
-    background: rgba(255, 255, 255, 0.12);
-    box-shadow: 
-        0 6px 20px rgba(0, 0, 0, 0.15),
-        0 0 0 2px rgba(16, 185, 129, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    color: var(--very-light-green);
-    transform: translateY(-2px);
-}
-
-.form-input:focus::placeholder {
-    opacity: 0.5;
-    transform: translateX(5px);
-}
-
-/* Íconos en SVG para los inputs */
+/* Íconos usando Font Awesome */
 .form-input-wrapper::before {
+    content: '';
     font-family: 'Font Awesome 6 Free';
     font-weight: 900;
     position: absolute;
@@ -207,17 +164,67 @@
     color: rgba(255, 255, 255, 0.7);
     z-index: 2;
     transition: var(--transition);
+    pointer-events: none;
 }
 
-#id_username + .form-input-wrapper::before {
+/* Ícono de usuario para username */
+#id_username {
+    padding-left: 50px !important;
+}
+
+#id_username-container::before {
     content: '\f007'; /* Icono de usuario */
 }
 
-#id_password + .form-input-wrapper::before {
+/* Ícono de candado para password */
+#id_password {
+    padding-left: 50px !important;
+}
+
+#id_password-container::before {
     content: '\f023'; /* Icono de candado */
 }
 
-.form-input:focus + .form-input-wrapper::before {
+.form-input {
+    width: 100%;
+    padding: 16px 20px;
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    font-family: 'Roboto', sans-serif;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-light);
+    box-shadow: 
+        0 4px 15px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+}
+
+.form-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    opacity: 0.8;
+    transition: var(--transition);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 
+        0 6px 20px rgba(0, 0, 0, 0.15),
+        0 0 0 2px rgba(0, 255, 136, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    transform: translateY(-2px);
+}
+
+.form-input:focus::placeholder {
+    opacity: 0.5;
+}
+
+.form-input:focus ~ .form-input-wrapper::before {
     color: var(--primary-green);
     transform: translateY(-50%) scale(1.1);
 }
@@ -226,24 +233,23 @@
     width: 100%;
     padding: 16px;
     font-size: 1.1rem;
-    background: linear-gradient(135deg, 
-        rgba(16, 185, 129, 0.8), 
-        rgba(5, 150, 105, 0.7));
-    color: white;
+    background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+    color: #000000 !important;
     border: none;
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     font-family: 'Montserrat', sans-serif;
-    font-weight: 600;
+    font-weight: 700;
     margin-top: 1.5rem;
     position: relative;
     overflow: hidden;
     box-shadow: 
-        0 8px 25px rgba(0, 0, 0, 0.2),
+        0 8px 25px rgba(0, 255, 136, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .btn-full::before {
@@ -255,18 +261,16 @@
     height: 100%;
     background: linear-gradient(90deg, 
         transparent, 
-        rgba(255, 255, 255, 0.2), 
+        rgba(255, 255, 255, 0.3), 
         transparent);
     transition: left 0.6s;
 }
 
 .btn-full:hover {
-    background: linear-gradient(135deg, 
-        rgba(16, 185, 129, 0.9), 
-        rgba(5, 150, 105, 0.8));
+    background: linear-gradient(135deg, var(--light-green), var(--primary-green));
     transform: translateY(-3px);
     box-shadow: 
-        0 12px 30px rgba(0, 0, 0, 0.25),
+        0 12px 30px rgba(0, 255, 136, 0.5),
         inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
@@ -277,22 +281,23 @@
 .btn-full:active {
     transform: translateY(-1px);
     box-shadow: 
-        0 6px 20px rgba(0, 0, 0, 0.2),
+        0 6px 20px rgba(0, 255, 136, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-.alert {
+/* Alert corregido */
+.alert-error {
     padding: 1rem 1.5rem;
     border-radius: 12px;
     margin-bottom: 2rem;
     display: flex;
     align-items: center;
     gap: 12px;
-    background: rgba(248, 215, 218, 0.9);
-    border: 1px solid rgba(245, 198, 203, 0.6);
+    background: rgba(220, 53, 69, 0.9);
+    border: 1px solid rgba(220, 53, 69, 0.6);
     backdrop-filter: blur(10px);
     animation: shake 0.5s ease-in-out;
-    color: #721c24;
+    color: white;
 }
 
 @keyframes shake {
@@ -310,22 +315,20 @@
 }
 
 .login-links p {
-    color: var(--very-light-green);
+    color: var(--text-light);
     margin: 0;
     font-weight: 500;
     font-size: 1rem;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .login-links a {
-    color: var(--light-green);
+    color: var(--primary-green);
     font-weight: 700;
     text-decoration: none;
     transition: all 0.3s ease;
     position: relative;
     padding: 0.3rem 0.6rem;
     border-radius: 6px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .login-links a::after {
@@ -335,21 +338,20 @@
     left: 0;
     width: 0;
     height: 2px;
-    background: var(--light-green);
+    background: var(--primary-green);
     transition: width 0.3s ease;
 }
 
 .login-links a:hover {
-    color: var(--very-light-green);
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-1px);
+    color: var(--text-light);
+    background: rgba(0, 255, 136, 0.2);
 }
 
 .login-links a:hover::after {
     width: 100%;
 }
 
-/* Partículas flotantes mejoradas */
+/* Partículas flotantes */
 .floating-particles {
     position: absolute;
     top: 0;
@@ -357,12 +359,12 @@
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 0;
+    z-index: 1;
 }
 
 .particle {
     position: absolute;
-    background: rgba(16, 185, 129, 0.15);
+    background: rgba(0, 255, 136, 0.15);
     border-radius: 50%;
     animation: floatParticle 10s ease-in-out infinite;
 }
@@ -392,7 +394,6 @@
         padding: 2.5rem 2rem;
         margin: 1rem;
         border-radius: 16px;
-        background: rgba(255, 255, 255, 0.07);
     }
     
     .login-card h2 {
@@ -400,6 +401,15 @@
     }
     
     .form-input {
-        padding: 14px 18px 14px 45px;
+        padding: 14px 18px;
+    }
+    
+    #id_username,
+    #id_password {
+        padding-left: 45px !important;
+    }
+    
+    .form-input-wrapper::before {
+        left: 15px;
     }
 }

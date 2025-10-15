@@ -15,14 +15,16 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Hoja de estilos principal -->
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <!-- Hoja de estilos CORREGIDA -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <div class="container">
             <div class="header-content">
+                <!-- Logo a la IZQUIERDA -->
                 <div class="logo-container">
                     <img src="{% static 'img/logo-sieer.png' %}" alt="SIEER Chile Logo" class="logo-img">
                     <div class="logo-text">
@@ -31,22 +33,12 @@
                     </div>
                 </div>
                 
-                <nav class="nav nav-centered">
-                    <ul>
-                        <li><a href="#inicio">Inicio</a></li>
-                        <li><a href="#servicios">Servicios</a></li>
-                        <li><a href="#nosotros">Nosotros</a></li>
-                        <li><a href="#proyectos">Proyectos</a></li>
-                        <li><a href="#contacto">Contacto</a></li>
-                    </ul>
-                </nav>
-                
+                <!-- Botones a la DERECHA -->
                 <div class="auth-buttons">
                     {% if user.is_authenticated %}
-                        <span style="color: var(--primary); margin-right: 15px; font-weight: 500;">
+                        <span>
                             <i class="fas fa-user"></i> Hola, {{ user.username }}
                         </span>
-                        <!-- FORMULARIO CORREGIDO -->
                         <form method="post" action="{% url 'logout' %}" style="display: inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-outline">
@@ -63,6 +55,7 @@
                     {% endif %}
                 </div>
                 
+                <!-- Menú móvil -->
                 <div class="mobile-menu-toggle">
                     <i class="fas fa-bars"></i>
                 </div>
@@ -288,11 +281,11 @@
                 <div class="footer-section">
                     <h4>Servicios</h4>
                     <ul>
-                        <li><a href="#">Instalaciones Eléctricas</a></li>
-                        <li><a href="#">Energías Renovables</a></li>
-                        <li><a href="#">Automatización</a></li>
-                        <li><a href="#">Mantenimiento</a></li>
-                        <li><a href="#">Iluminación Eficiente</a></li>
+                        <li><a href="#servicios">Instalaciones Eléctricas</a></li>
+                        <li><a href="#servicios">Energías Renovables</a></li>
+                        <li><a href="#servicios">Automatización</a></li>
+                        <li><a href="#servicios">Mantenimiento</a></li>
+                        <li><a href="#servicios">Iluminación Eficiente</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -311,6 +304,161 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="{% static 'js/script.js' %}"></script>
+    <script>
+        // Efecto de transparencia al hacer scroll
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 100) {
+                header.classList.add('sticky');
+            } else {
+                header.classList.remove('sticky');
+            }
+        });
+
+        // Menú móvil
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    // Crear menú móvil dinámico
+                    if (!document.querySelector('.mobile-menu')) {
+                        const mobileMenu = document.createElement('div');
+                        mobileMenu.className = 'mobile-menu';
+                        mobileMenu.innerHTML = `
+                            <div class="mobile-menu-content">
+                                {% if user.is_authenticated %}
+                                    <div class="mobile-user-info">
+                                        <i class="fas fa-user"></i>
+                                        <span>Hola, {{ user.username }}</span>
+                                    </div>
+                                    <form method="post" action="{% url 'logout' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline">
+                                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <a href="{% url 'login' %}" class="btn btn-outline">
+                                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                                    </a>
+                                    <a href="{% url 'registro' %}" class="btn btn-solid">
+                                        <i class="fas fa-user-plus"></i> Registrarse
+                                    </a>
+                                {% endif %}
+                                <div class="mobile-nav">
+                                    <a href="#inicio">Inicio</a>
+                                    <a href="#servicios">Servicios</a>
+                                    <a href="#nosotros">Nosotros</a>
+                                    <a href="#proyectos">Proyectos</a>
+                                    <a href="#contacto">Contacto</a>
+                                </div>
+                            </div>
+                        `;
+                        document.body.appendChild(mobileMenu);
+                        
+                        // Cerrar menú al hacer clic fuera
+                        mobileMenu.addEventListener('click', function(e) {
+                            if (e.target === mobileMenu) {
+                                mobileMenu.remove();
+                                mobileMenuToggle.querySelector('i').classList.remove('fa-times');
+                                mobileMenuToggle.querySelector('i').classList.add('fa-bars');
+                            }
+                        });
+                    } else {
+                        document.querySelector('.mobile-menu').remove();
+                    }
+                    
+                    // Cambiar ícono
+                    const icon = this.querySelector('i');
+                    if (icon.classList.contains('fa-bars')) {
+                        icon.classList.remove('fa-bars');
+                        icon.classList.add('fa-times');
+                    } else {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                });
+            }
+
+            // Animación de scroll para secciones
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            // Observar todas las secciones
+            document.querySelectorAll('.services, .about, .projects, .contact').forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+
+    <style>
+        /* Estilos para el menú móvil */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .mobile-menu-content {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 300px;
+            width: 90%;
+        }
+
+        .mobile-user-info {
+            margin-bottom: 1rem;
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+
+        .mobile-nav {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mobile-nav a {
+            color: var(--dark);
+            text-decoration: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .mobile-nav a:hover {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        @media (min-width: 769px) {
+            .mobile-menu-toggle {
+                display: none;
+            }
+        }
+    </style>
 </body>
 </html>
