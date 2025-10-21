@@ -25,7 +25,7 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo-container">
-                    <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo" class="logo-img">
+                    <img src="{% static 'myapp/img/logo.png' %}" alt="SIEER Chile Logo" class="logo-img">
                     <div class="logo-text">
                         <h1><a href="{% if user.is_authenticated and user.perfil.tipo_usuario == 'admin' %}{% url 'vista_admin' %}{% else %}/{% endif %}">SIEER Chile</a></h1>
                         <span>Servicios de Ingeniería Eléctrica</span>
@@ -117,7 +117,7 @@
                     <ul>
                         <li><a href="#">Instalaciones Eléctricas</a></li>
                         <li><a href="#">Energías Renovables</a></li>
-                        <li><a href="#">Automatización</a></li>
+                        <li><a href="{% url 'productos' %}">Productos</a></li>
                         <li><a href="#">Mantenimiento</a></li>
                         <li><a href="#">Iluminación Eficiente</a></li>
                     </ul>
@@ -149,7 +149,6 @@
                 header.classList.remove('sticky');
             }
         });
-
         // Menú móvil
         document.addEventListener('DOMContentLoaded', function() {
             const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');

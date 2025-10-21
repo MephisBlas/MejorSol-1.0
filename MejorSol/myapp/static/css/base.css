@@ -462,3 +462,30 @@ main {
         font-size: 0.8rem;
     }
 }
+/* ===== HOTFIX: Header full-bleed (no centrado) ===== */
+.header .container{
+  max-width: none !important;   /* quita el ancho fijo que lo centra */
+  width: 100% !important;
+  margin: 0 !important;         /* evita margin:auto que centra */
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+
+.header-content{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  min-height: 64px;
+}
+html, body{ margin:0 !important; padding:0 !important; }
+.header .container{
+  display: block !important;  
+}
+/* === Mantener el header igual en todas las páginas === */
+.header {
+  background: rgba(18, 18, 18, 0.65) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+  transition: 0.3s ease;
+}

@@ -1,228 +1,231 @@
-{% extends 'base.html' %}
-{% load static %}
+<body class="registro-page">
 
-{% block title %}Registro - SIEER Chile{% endblock %}
+    {% extends 'base.html' %}
+    {% load static %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/registro.css' %}">
-{% endblock %}
+    {% block title %}Registro - SIEER Chile{% endblock %}
 
-{% block content %}
-<div class="register-container">
-    <!-- Partículas flotantes -->
-    <div class="floating-particles" id="particles"></div>
-    
-    <div class="register-card">
-        <h2>Crear Cuenta</h2>
-        
-        {% if form.errors %}
-        <div class="alert">
-            <i class="fas fa-exclamation-triangle"></i>
-            Por favor, corrige los errores en el formulario.
-        </div>
-        {% endif %}
-        
-        <form method="post">
-            {% csrf_token %}
-            
-            <!-- Información Básica -->
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="{{ form.first_name.id_for_label }}">
-                        {{ form.first_name.label }} *
-                    </label>
-                    <div class="form-input-wrapper">
-                        {{ form.first_name }}
-                    </div>
-                    {% if form.first_name.errors %}
+    {% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/registro.css' %}">
+    {% endblock %}
+
+    {% block content %}
+    <div class="register-container">
+        <!-- Partículas flotantes -->
+        <div class="floating-particles" id="particles"></div>
+
+        <div class="register-card">
+            <h2>Crear Cuenta</h2>
+
+            {% if form.errors %}
+            <div class="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                Por favor, corrige los errores en el formulario.
+            </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- Información Básica -->
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.first_name.id_for_label }}">
+                            {{ form.first_name.label }} *
+                        </label>
+                        <div class="form-input-wrapper">
+                            {{ form.first_name }}
+                        </div>
+                        {% if form.first_name.errors %}
                         <div class="error-message">
                             <i class="fas fa-exclamation-circle"></i>
                             {% for error in form.first_name.errors %}
-                                {{ error }}
+                            {{ error }}
                             {% endfor %}
                         </div>
-                    {% endif %}
-                </div>
-                
-                <div class="form-group">
-                    <label for="{{ form.last_name.id_for_label }}">
-                        {{ form.last_name.label }} *
-                    </label>
-                    <div class="form-input-wrapper">
-                        {{ form.last_name }}
+                        {% endif %}
                     </div>
-                    {% if form.last_name.errors %}
+
+                    <div class="form-group">
+                        <label for="{{ form.last_name.id_for_label }}">
+                            {{ form.last_name.label }} *
+                        </label>
+                        <div class="form-input-wrapper">
+                            {{ form.last_name }}
+                        </div>
+                        {% if form.last_name.errors %}
                         <div class="error-message">
                             <i class="fas fa-exclamation-circle"></i>
                             {% for error in form.last_name.errors %}
-                                {{ error }}
+                            {{ error }}
                             {% endfor %}
                         </div>
-                    {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Credenciales -->
-            <div class="form-group full-width">
-                <label for="{{ form.username.id_for_label }}">
-                    {{ form.username.label }} *
-                </label>
-                <div class="form-input-wrapper">
-                    {{ form.username }}
-                </div>
-                {% if form.username.errors %}
+
+                <!-- Credenciales -->
+                <div class="form-group full-width">
+                    <label for="{{ form.username.id_for_label }}">
+                        {{ form.username.label }} *
+                    </label>
+                    <div class="form-input-wrapper">
+                        {{ form.username }}
+                    </div>
+                    {% if form.username.errors %}
                     <div class="error-message">
                         <i class="fas fa-exclamation-circle"></i>
                         {% for error in form.username.errors %}
-                            {{ error }}
+                        {{ error }}
                         {% endfor %}
                     </div>
-                {% endif %}
-                <small class="helptext">Requerido. 150 carácteres como máximo. Únicamente letras, dígitos y @/./+/-/_.</small>
-            </div>
-            
-            <div class="form-group full-width">
-                <label for="{{ form.email.id_for_label }}">
-                    {{ form.email.label }} *
-                </label>
-                <div class="form-input-wrapper">
-                    {{ form.email }}
+                    {% endif %}
+                    <small class="helptext">Requerido. 150 carácteres como máximo. Únicamente letras, dígitos y
+                        @/./+/-/_.</small>
                 </div>
-                {% if form.email.errors %}
+
+                <div class="form-group full-width">
+                    <label for="{{ form.email.id_for_label }}">
+                        {{ form.email.label }} *
+                    </label>
+                    <div class="form-input-wrapper">
+                        {{ form.email }}
+                    </div>
+                    {% if form.email.errors %}
                     <div class="error-message">
                         <i class="fas fa-exclamation-circle"></i>
                         {% for error in form.email.errors %}
-                            {{ error }}
+                        {{ error }}
                         {% endfor %}
                     </div>
-                {% endif %}
-            </div>
-            
-            <!-- Contraseñas -->
-            <div class="form-group full-width">
-                <div class="form-group">
-                    <label for="{{ form.password1.id_for_label }}">
-                        {{ form.password1.label }} *
-                    </label>
-                    <div class="form-input-wrapper">
-                        {{ form.password1 }}
-                    </div>
-                    {% if form.password1.errors %}
+                    {% endif %}
+                </div>
+
+                <!-- Contraseñas -->
+                <div class="form-group full-width">
+                    <div class="form-group">
+                        <label for="{{ form.password1.id_for_label }}">
+                            {{ form.password1.label }} *
+                        </label>
+                        <div class="form-input-wrapper">
+                            {{ form.password1 }}
+                        </div>
+                        {% if form.password1.errors %}
                         <div class="error-message">
                             <i class="fas fa-exclamation-circle"></i>
                             {% for error in form.password1.errors %}
-                                {{ error }}
+                            {{ error }}
                             {% endfor %}
                         </div>
-                    {% endif %}
-                    {% if form.password1.help_text %}
+                        {% endif %}
+                        {% if form.password1.help_text %}
                         <small class="helptext">{{ form.password1.help_text }}</small>
-                    {% endif %}
-                </div>
-                
-                <div class="form-group">
-                    <label for="{{ form.password2.id_for_label }}">
-                        {{ form.password2.label }} *
-                    </label>
-                    <div class="form-input-wrapper">
-                        {{ form.password2 }}
+                        {% endif %}
                     </div>
-                    {% if form.password2.errors %}
+
+                    <div class="form-group">
+                        <label for="{{ form.password2.id_for_label }}">
+                            {{ form.password2.label }} *
+                        </label>
+                        <div class="form-input-wrapper">
+                            {{ form.password2 }}
+                        </div>
+                        {% if form.password2.errors %}
                         <div class="error-message">
                             <i class="fas fa-exclamation-circle"></i>
                             {% for error in form.password2.errors %}
-                                {{ error }}
+                            {{ error }}
                             {% endfor %}
                         </div>
-                    {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Información Adicional -->
-            <div class="form-group full-width">
-                <label for="{{ form.telefono.id_for_label }}">
-                    {{ form.telefono.label }}
-                </label>
-                <div class="form-input-wrapper">
-                    {{ form.telefono }}
+
+                <!-- Información Adicional -->
+                <div class="form-group full-width">
+                    <label for="{{ form.telefono.id_for_label }}">
+                        {{ form.telefono.label }}
+                    </label>
+                    <div class="form-input-wrapper">
+                        {{ form.telefono }}
+                    </div>
                 </div>
-            </div>
-            
-            <div class="form-group full-width">
-                <label for="{{ form.direccion.id_for_label }}">
-                    {{ form.direccion.label }}
-                </label>
-                <div class="form-input-wrapper">
-                    {{ form.direccion }}
+
+                <div class="form-group full-width">
+                    <label for="{{ form.direccion.id_for_label }}">
+                        {{ form.direccion.label }}
+                    </label>
+                    <div class="form-input-wrapper">
+                        {{ form.direccion }}
+                    </div>
                 </div>
+
+                <button type="submit" class="btn-register">
+                    <i class="fas fa-user-plus"></i> Crear Cuenta
+                </button>
+            </form>
+
+            <div class="register-links">
+                <p>
+                    ¿Ya tienes cuenta?
+                    <a href="{% url 'login' %}">Inicia sesión aquí</a>
+                </p>
             </div>
-            
-            <button type="submit" class="btn-register">
-                <i class="fas fa-user-plus"></i> Crear Cuenta
-            </button>
-        </form>
-        
-        <div class="register-links">
-            <p>
-                ¿Ya tienes cuenta? 
-                <a href="{% url 'login' %}">Inicia sesión aquí</a>
-            </p>
         </div>
     </div>
-</div>
 
-<script>
-    // Crear partículas flotantes para registro
-    document.addEventListener('DOMContentLoaded', function() {
-        const particlesContainer = document.getElementById('particles');
-        const particleCount = 15;
-        
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            
-            // Tamaño y posición aleatoria
-            const size = Math.random() * 8 + 2;
-            const left = Math.random() * 100;
-            const top = Math.random() * 100;
-            const delay = Math.random() * 5;
-            
-            particle.style.width = `${size}px`;
-            particle.style.height = `${size}px`;
-            particle.style.left = `${left}%`;
-            particle.style.top = `${top}%`;
-            particle.style.animationDelay = `${delay}s`;
-            particle.style.opacity = Math.random() * 0.1 + 0.05;
-            
-            particlesContainer.appendChild(particle);
-        }
-    });
+    <script>
+        // Crear partículas flotantes para registro
+        document.addEventListener('DOMContentLoaded', function () {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 15;
 
-    // JavaScript para manejar los requisitos que se muestran al hacer focus
-    document.addEventListener('DOMContentLoaded', function() {
-        const inputs = document.querySelectorAll('.form-input');
-        
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                // Encontrar el helptext asociado a este input
-                const helptext = this.parentElement.nextElementSibling;
-                if (helptext && helptext.classList.contains('helptext')) {
-                    helptext.style.maxHeight = '100px';
-                    helptext.style.opacity = '1';
-                    helptext.style.transform = 'translateY(0)';
-                }
-            });
-            
-            input.addEventListener('blur', function() {
-                // Ocultar el helptext cuando se pierde el foco
-                const helptext = this.parentElement.nextElementSibling;
-                if (helptext && helptext.classList.contains('helptext')) {
-                    helptext.style.maxHeight = '0';
-                    helptext.style.opacity = '0';
-                    helptext.style.transform = 'translateY(-10px)';
-                }
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+
+                // Tamaño y posición aleatoria
+                const size = Math.random() * 8 + 2;
+                const left = Math.random() * 100;
+                const top = Math.random() * 100;
+                const delay = Math.random() * 5;
+
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${left}%`;
+                particle.style.top = `${top}%`;
+                particle.style.animationDelay = `${delay}s`;
+                particle.style.opacity = Math.random() * 0.1 + 0.05;
+
+                particlesContainer.appendChild(particle);
+            }
+        });
+
+        // JavaScript para manejar los requisitos que se muestran al hacer focus
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputs = document.querySelectorAll('.form-input');
+
+            inputs.forEach(input => {
+                input.addEventListener('focus', function () {
+                    // Encontrar el helptext asociado a este input
+                    const helptext = this.parentElement.nextElementSibling;
+                    if (helptext && helptext.classList.contains('helptext')) {
+                        helptext.style.maxHeight = '100px';
+                        helptext.style.opacity = '1';
+                        helptext.style.transform = 'translateY(0)';
+                    }
+                });
+
+                input.addEventListener('blur', function () {
+                    // Ocultar el helptext cuando se pierde el foco
+                    const helptext = this.parentElement.nextElementSibling;
+                    if (helptext && helptext.classList.contains('helptext')) {
+                        helptext.style.maxHeight = '0';
+                        helptext.style.opacity = '0';
+                        helptext.style.transform = 'translateY(-10px)';
+                    }
+                });
             });
         });
-    });
-</script>
-{% endblock %}
+    </script>
+    {% endblock %}

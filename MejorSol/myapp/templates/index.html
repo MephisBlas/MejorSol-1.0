@@ -1,24 +1,29 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SIEER Chile - Servicios de Ingeniería Eléctrica</title>
-    <meta name="description" content="Expertos en soluciones de ingeniería eléctrica para proyectos industriales, comerciales y residenciales en Chile">
-    
+    <meta name="description"
+        content="Expertos en soluciones de ingeniería eléctrica para proyectos industriales, comerciales y residenciales en Chile">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap"
+        rel="stylesheet">
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <!-- Hoja de estilos CORREGIDA -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
 </head>
+
 <body>
     <!-- Header -->
     <header class="header">
@@ -32,29 +37,29 @@
                         <span>Servicios de Ingeniería Eléctrica</span>
                     </div>
                 </div>
-                
+
                 <!-- Botones a la DERECHA -->
                 <div class="auth-buttons">
                     {% if user.is_authenticated %}
-                        <span>
-                            <i class="fas fa-user"></i> Hola, {{ user.username }}
-                        </span>
-                        <form method="post" action="{% url 'logout' %}" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline">
-                                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                            </button>
-                        </form>
+                    <span>
+                        <i class="fas fa-user"></i> Hola, {{ user.username }}
+                    </span>
+                    <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                        </button>
+                    </form>
                     {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-outline">
-                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                        </a>
-                        <a href="{% url 'registro' %}" class="btn btn-solid">
-                            <i class="fas fa-user-plus"></i> Registrarse
-                        </a>
+                    <a href="{% url 'login' %}" class="btn btn-outline">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </a>
+                    <a href="{% url 'registro' %}" class="btn btn-solid">
+                        <i class="fas fa-user-plus"></i> Registrarse
+                    </a>
                     {% endif %}
                 </div>
-                
+
                 <!-- Menú móvil -->
                 <div class="mobile-menu-toggle">
                     <i class="fas fa-bars"></i>
@@ -88,56 +93,56 @@
 
     <!-- Servicios Section -->
     <section id="servicios" class="services">
-        <div class="container">
-            <div class="section-header">
-                <h2>Nuestros Servicios</h2>
-                <p>Ofrecemos soluciones especializadas en ingeniería eléctrica</p>
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3>Instalaciones Eléctricas</h3>
+                <p>Diseño e implementación de sistemas eléctricos para todo tipo de proyectos.</p>
             </div>
-            <div class="services-grid">
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                    <h3>Instalaciones Eléctricas</h3>
-                    <p>Diseño e implementación de sistemas eléctricos para todo tipo de proyectos.</p>
+
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fas fa-solar-panel"></i>
                 </div>
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-solar-panel"></i>
-                    </div>
-                    <h3>Energías Renovables</h3>
-                    <p>Soluciones sostenibles con paneles solares y sistemas de energía alternativa.</p>
+                <h3>Energías Renovables</h3>
+                <p>Soluciones sostenibles con paneles solares y sistemas de energía alternativa.</p>
+            </div>
+
+            <a href="{% url 'productos' %}" class="service-card card-link">
+                <div class="service-icon">
+                    <i class="fas fa-charging-station"></i>
                 </div>
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-charging-station"></i>
-                    </div>
-                    <h3>Automatización</h3>
-                    <p>Sistemas de control y automatización para procesos industriales.</p>
+                <h3>Productos</h3>
+                <p>Sistemas de control y automatización para procesos industriales.</p>
+            </a>
+
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fas fa-tachometer-alt"></i>
                 </div>
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-tachometer-alt"></i>
-                    </div>
-                    <h3>Mantenimiento</h3>
-                    <p>Programas de mantenimiento preventivo y correctivo para instalaciones eléctricas.</p>
+                <h3>Mantenimiento</h3>
+                <p>Programas de mantenimiento preventivo y correctivo para instalaciones eléctricas.</p>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fas fa-lightbulb"></i>
                 </div>
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-lightbulb"></i>
-                    </div>
-                    <h3>Iluminación Eficiente</h3>
-                    <p>Diseño e implementación de sistemas de iluminación de bajo consumo.</p>
+                <h3>Iluminación Eficiente</h3>
+                <p>Diseño e implementación de sistemas de iluminación de bajo consumo.</p>
+            </div>
+
+            <div class="service-card">
+                <div class="service-icon">
+                    <i class="fas fa-file-alt"></i>
                 </div>
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <h3>Asesorías Técnicas</h3>
-                    <p>Consultoría especializada en proyectos eléctricos y normativas.</p>
-                </div>
+                <h3>Asesorías Técnicas</h3>
+                <p>Consultoría especializada en proyectos eléctricos y normativas.</p>
             </div>
         </div>
+
     </section>
 
     <!-- About Section -->
@@ -146,8 +151,11 @@
             <div class="about-content">
                 <div class="about-text">
                     <h2>Sobre Nosotros</h2>
-                    <p>En SIEER Chile nos especializamos en proveer soluciones integrales de ingeniería eléctrica. Con más de 10 años de experiencia en el mercado, nuestro equipo de profesionales altamente capacitados garantiza el más alto estándar de calidad en cada proyecto.</p>
-                    <p>Nuestra misión es entregar servicios eléctricos confiables, eficientes y seguros, contribuyendo al desarrollo de infraestructura eléctrica sostenible en Chile.</p>
+                    <p>En SIEER Chile nos especializamos en proveer soluciones integrales de ingeniería eléctrica. Con
+                        más de 10 años de experiencia en el mercado, nuestro equipo de profesionales altamente
+                        capacitados garantiza el más alto estándar de calidad en cada proyecto.</p>
+                    <p>Nuestra misión es entregar servicios eléctricos confiables, eficientes y seguros, contribuyendo
+                        al desarrollo de infraestructura eléctrica sostenible en Chile.</p>
                     <ul class="about-features">
                         <li><i class="fas fa-check-circle"></i> Personal calificado y certificado</li>
                         <li><i class="fas fa-check-circle"></i> Cumplimiento de normativas vigentes</li>
@@ -156,7 +164,8 @@
                     </ul>
                 </div>
                 <div class="about-image">
-                    <img src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="Ingeniero eléctrico trabajando">
+                    <img src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                        alt="Ingeniero eléctrico trabajando">
                 </div>
             </div>
         </div>
@@ -172,7 +181,8 @@
             <div class="projects-grid">
                 <div class="project-card">
                     <div class="project-image">
-                        <img src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="Proyecto industrial">
+                        <img src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                            alt="Proyecto industrial">
                     </div>
                     <div class="project-info">
                         <h3>Planta Industrial</h3>
@@ -181,7 +191,8 @@
                 </div>
                 <div class="project-card">
                     <div class="project-image">
-                        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="Proyecto comercial">
+                        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                            alt="Proyecto comercial">
                     </div>
                     <div class="project-info">
                         <h3>Centro Comercial</h3>
@@ -190,7 +201,8 @@
                 </div>
                 <div class="project-card">
                     <div class="project-image">
-                        <img src="https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="Proyecto solar">
+                        <img src="https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                            alt="Proyecto solar">
                     </div>
                     <div class="project-info">
                         <h3>Granja Solar</h3>
@@ -260,7 +272,8 @@
                         <h3>SIEER Chile</h3>
                         <span>Servicios de Ingeniería Eléctrica</span>
                     </div>
-                    <p>Expertos en soluciones eléctricas integrales para proyectos industriales, comerciales y residenciales.</p>
+                    <p>Expertos en soluciones eléctricas integrales para proyectos industriales, comerciales y
+                        residenciales.</p>
                     <div class="social-links">
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
@@ -306,7 +319,7 @@
     <!-- Scripts -->
     <script>
         // Efecto de transparencia al hacer scroll
-        window.addEventListener('scroll', function() {
+        window.addEventListener('scroll', function () {
             const header = document.querySelector('.header');
             if (window.scrollY > 100) {
                 header.classList.add('sticky');
@@ -316,11 +329,11 @@
         });
 
         // Menú móvil
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
-            
+
             if (mobileMenuToggle) {
-                mobileMenuToggle.addEventListener('click', function() {
+                mobileMenuToggle.addEventListener('click', function () {
                     // Crear menú móvil dinámico
                     if (!document.querySelector('.mobile-menu')) {
                         const mobileMenu = document.createElement('div');
@@ -356,9 +369,9 @@
                             </div>
                         `;
                         document.body.appendChild(mobileMenu);
-                        
+
                         // Cerrar menú al hacer clic fuera
-                        mobileMenu.addEventListener('click', function(e) {
+                        mobileMenu.addEventListener('click', function (e) {
                             if (e.target === mobileMenu) {
                                 mobileMenu.remove();
                                 mobileMenuToggle.querySelector('i').classList.remove('fa-times');
@@ -368,7 +381,7 @@
                     } else {
                         document.querySelector('.mobile-menu').remove();
                     }
-                    
+
                     // Cambiar ícono
                     const icon = this.querySelector('i');
                     if (icon.classList.contains('fa-bars')) {
@@ -459,6 +472,119 @@
                 display: none;
             }
         }
+
+        /* ======= SECCIÓN SERVICIOS ======= */
+        .services {
+            padding: 5rem 0;
+            background-color: #0d0d0d;
+            text-align: center;
+        }
+
+        .section-header h2 {
+            color: #00ff88;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header p {
+            color: #ccc;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+        }
+
+        /* GRID BONITA */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2.5rem;
+            justify-items: center;
+            align-items: stretch;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* TARJETAS */
+        .service-card {
+            background: #121212;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 20px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            max-width: 350px;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.05);
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px);
+            border-color: #00ff88;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.3);
+        }
+
+        /* ÍCONO */
+        .service-icon {
+            background: radial-gradient(circle, #00ff88, #00884e);
+            color: #000;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+        }
+
+        /* TEXTO */
+        .service-card h3 {
+            color: #fff;
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .service-card p {
+            color: #bdbdbd;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Enlace en “Productos” */
+        .service-card a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .service-card a:hover {
+            text-decoration: underline;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 992px) {
+            .services-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card-link:hover {
+            transform: translateY(-5px);
+            text-decoration: none;
+        }
     </style>
 </body>
+
 </html>
