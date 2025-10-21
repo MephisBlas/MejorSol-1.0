@@ -12,30 +12,59 @@
     overflow: hidden;
 }
 
-/* Partículas flotantes */
-.floating-particles .particle {
+/* Fondo de partículas */
+.floating-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+}
+
+/* Partículas neón fuertes y animación constante */
+.particle {
     position: absolute;
-    background: #00ff88;
+    background: radial-gradient(circle,  #00cc66 100%);
     border-radius: 50%;
-    animation: float 10s linear infinite;
+    box-shadow: 0 0 25px rgba(0, 255, 136, 0.9);
+ 
+    transform: translate3d(0,0,0);
+    animation: floatMove linear infinite;
 }
 
-@keyframes float {
+/* Variaciones naturales */
+.particle:nth-child(2n) {
+    background: radial-gradient(circle,  #00dd88 100%);
+}
+.particle:nth-child(3n) {
+    background: radial-gradient(circle,  #00cc99 100%);
+}
+.particle:nth-child(4n) {
+    background: radial-gradient(circle, #00cc88 100%);
+}
+
+/* Movimiento aleatorio continuo */
+@keyframes floatMove {
     0% {
-        transform: translateY(0) scale(1);
-        opacity: 0.2;
+        transform: translate(0, 0) scale(1);
     }
-
+    25% {
+        transform: translate(20px, -40px) scale(1.2);
+    }
     50% {
-        transform: translateY(-30px) scale(1.3);
-        opacity: 0.5;
+        transform: translate(-30px, -60px) scale(1.1);
     }
-
+    75% {
+        transform: translate(15px, -30px) scale(1.3);
+    }
     100% {
-        transform: translateY(0) scale(1);
-        opacity: 0.2;
+        transform: translate(0, 0) scale(1);
     }
 }
+
 
 /* Tarjeta del formulario */
 .register-card {

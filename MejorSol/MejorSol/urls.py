@@ -26,4 +26,6 @@ urlpatterns = [
     path('registro/', views.registro, name='registro'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('productos/', views.productos, name='productos'),
+    path('admin-panel/', views.admin_panel, name='admin_panel'),
+    path('login/', views.CustomLoginView.as_view(), name='login'),
 ]
