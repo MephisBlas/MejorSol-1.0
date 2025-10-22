@@ -57,3 +57,22 @@ def admin_panel(request):
         'user': request.user,
     }
     return render(request, 'admin/admin_panel.html', context)
+
+def custom_login(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            
+            # Verificar si es administrador
+            if user.is_staff or user.is_superuser:
+                return redirect('admin_panel')  # Redirigir al panel admin
+            else:
+                return redirect('index')  # Redirigir al index para usuarios normales
+        else:
+            messages.error(request, 'Usuario o contraseña incorrectos.')
+    
+    return render(request, 'login.html')

@@ -57,3 +57,5 @@ class ProductoAdmin(admin.ModelAdmin):
     #         return mark_safe(f'<img src="{obj.imagen.url}" width="100" />')
     #     return "No image"
     # imagen_preview.short_description = 'Vista Previa'
+    
+    
