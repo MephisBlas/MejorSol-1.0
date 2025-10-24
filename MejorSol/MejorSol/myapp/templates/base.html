@@ -1,0 +1,333 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}SIEER Chile - Servicios de Ingeniería Eléctrica{% endblock %}</title>
+    <meta name="description" content="Expertos en soluciones de ingeniería eléctrica para proyectos industriales, comerciales y residenciales en Chile">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Hojas de estilo -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-container">
+                    <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo" class="logo-img">
+                    <div class="logo-text">
+                        <h1><a href="{% if user.is_authenticated and user.is_staff %}{% url 'admin_panel' %}{% else %}{% url 'index' %}{% endif %}">SIEER Chile</a></h1>
+                        <span>Servicios de Ingeniería Eléctrica</span>
+                    </div>
+                </div>
+                
+                <div class="auth-buttons">
+                    {% if user.is_authenticated %}
+                        <span class="user-welcome">
+                            <i class="fas fa-user"></i> 
+                            Hola, {{ user.first_name|default:user.username }}
+                            {% if user.is_staff %}
+                                <small>(Admin)</small>
+                            {% endif %}
+                        </span>
+                        <form method="post" action="{% url 'logout' %}" class="logout-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline">
+                                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                            </button>
+                        </form>
+                        {% if user.is_staff %}
+                            <a href="{% url 'admin_panel' %}" class="btn btn-solid">
+                                <i class="fas fa-cog"></i> Panel Admin
+                            </a>
+                        {% else %}
+                            <a href="{% url 'client_dashboard' %}" class="btn btn-solid">
+                                <i class="fas fa-user"></i> Mi Panel
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </a>
+                        <a href="{% url 'registro' %}" class="btn btn-solid">
+                            <i class="fas fa-user-plus"></i> Registrarse
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido principal -->
+    <main>
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <i class="fas 
+                            {% if message.tags == 'success' %}fa-check-circle
+                            {% elif message.tags == 'error' %}fa-exclamation-triangle
+                            {% else %}fa-info-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% if not user.is_authenticated or not user.is_staff %}
+    <!-- Footer Elegante -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="logo">
+                        <h3>SIEER Chile</h3>
+                        <span>Servicios de Ingeniería Eléctrica</span>
+                    </div>
+                    <p>Expertos en soluciones eléctricas integrales para proyectos industriales, comerciales y residenciales.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces rápidos</h4>
+                    <ul>
+                        <li><a href="{% url 'index' %}">Inicio</a></li>
+                        <li><a href="#servicios">Servicios</a></li>
+                        <li><a href="#nosotros">Nosotros</a></li>
+                        <li><a href="#proyectos">Proyectos</a></li>
+                        <li><a href="#contacto">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Servicios</h4>
+                    <ul>
+                        <li><a href="#">Instalaciones Eléctricas</a></li>
+                        <li><a href="#">Energías Renovables</a></li>
+                        <li><a href="{% url 'productos' %}">Productos</a></li>
+                        <li><a href="#">Mantenimiento</a></li>
+                        <li><a href="#">Iluminación Eficiente</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Suscríbete</h4>
+                    <p>Recibe nuestras novedades y promociones</p>
+                    <form class="subscribe-form">
+                        <input type="email" placeholder="Tu correo electrónico">
+                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SIEER Chile - Servicios de Ingeniería Eléctrica. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    {% endif %}
+
+    <!-- Scripts -->
+    <script>
+        // Efecto de transparencia al hacer scroll
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 100) {
+                header.classList.add('sticky');
+            } else {
+                header.classList.remove('sticky');
+            }
+        });
+
+        // Menú móvil
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    // Crear menú móvil dinámico
+                    if (!document.querySelector('.mobile-menu')) {
+                        const mobileMenu = document.createElement('div');
+                        mobileMenu.className = 'mobile-menu';
+                        
+                        // Determinar contenido según autenticación
+                        let userContent = '';
+                        if ({% if user.is_authenticated %}true{% else %}false{% endif %}) {
+                            userContent = `
+                                <div class="mobile-user-info">
+                                    <i class="fas fa-user"></i>
+                                    <span>Hola, {{ user.first_name|default:user.username }}</span>
+                                    {% if user.is_staff %}
+                                        <small>(Admin)</small>
+                                    {% endif %}
+                                </div>
+                                {% if user.is_staff %}
+                                    <a href="{% url 'admin_panel' %}" class="btn btn-solid">
+                                        <i class="fas fa-cog"></i> Panel Admin
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'client_dashboard' %}" class="btn btn-solid">
+                                        <i class="fas fa-user"></i> Mi Panel
+                                    </a>
+                                {% endif %}
+                                <form method="post" action="{% url 'logout' %}" class="logout-form-mobile">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline">
+                                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                                    </button>
+                                </form>
+                            `;
+                        } else {
+                            userContent = `
+                                <a href="{% url 'login' %}" class="btn btn-outline">
+                                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                                </a>
+                                <a href="{% url 'registro' %}" class="btn btn-solid">
+                                    <i class="fas fa-user-plus"></i> Registrarse
+                                </a>
+                            `;
+                        }
+                        
+                        mobileMenu.innerHTML = `
+                            <div class="mobile-menu-content">
+                                ${userContent}
+                                <div class="mobile-nav">
+                                    <a href="{% url 'index' %}">Inicio</a>
+                                    <a href="#servicios">Servicios</a>
+                                    <a href="#nosotros">Nosotros</a>
+                                    <a href="{% url 'productos' %}">Productos</a>
+                                    <a href="#contacto">Contacto</a>
+                                </div>
+                            </div>
+                        `;
+                        document.body.appendChild(mobileMenu);
+                        
+                        // Cerrar menú al hacer clic fuera
+                        mobileMenu.addEventListener('click', function(e) {
+                            if (e.target === mobileMenu) {
+                                mobileMenu.remove();
+                                mobileMenuToggle.querySelector('i').classList.remove('fa-times');
+                                mobileMenuToggle.querySelector('i').classList.add('fa-bars');
+                            }
+                        });
+                    } else {
+                        document.querySelector('.mobile-menu').remove();
+                    }
+                    
+                    // Cambiar ícono
+                    const icon = this.querySelector('i');
+                    if (icon.classList.contains('fa-bars')) {
+                        icon.classList.remove('fa-bars');
+                        icon.classList.add('fa-times');
+                    } else {
+                        icon.classList.remove('fa-times');
+                        icon.classList.add('fa-bars');
+                    }
+                });
+            }
+        });
+    </script>
+
+    <style>
+        /* Menú móvil */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .mobile-menu-content {
+            background: rgba(25, 25, 35, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 300px;
+            width: 90%;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .mobile-user-info {
+            margin-bottom: 1rem;
+            color: var(--primary-green, #00ff88);
+            font-weight: 600;
+        }
+
+        .mobile-nav {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mobile-nav a {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .mobile-nav a:hover {
+            background: var(--primary-green, #00ff88);
+            color: #000000;
+        }
+
+        .logout-form-mobile {
+            margin: 1rem 0;
+        }
+
+        .user-welcome {
+            color: var(--primary-green, #00ff88);
+            font-weight: 500;
+            margin-right: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .auth-buttons {
+                display: none;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .mobile-menu-toggle {
+                display: none;
+            }
+        }
+    </style>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

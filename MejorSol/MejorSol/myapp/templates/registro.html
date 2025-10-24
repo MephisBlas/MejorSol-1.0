@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Registro - SIEER Chile
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/registro.css' %}" />
+{% endblock %}
+
+{% block content %}
+  <body class="registro-page">
+    <div class="register-container">
+      <!-- Partículas flotantes -->
+      <div class="floating-particles" id="particles"></div>
+
+      <div class="register-card">
+        <h2>Crear Cuenta</h2>
+
+        {% if form.errors %}
+          <div class="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            Por favor, corrige los errores en el formulario.
+          </div>
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+
+          <!-- Información Básica -->
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }} *</label>
+              <div class="form-input-wrapper">{{ form.first_name }}</div>
+              {% if form.first_name.errors %}
+                <div class="error-message">
+                  <i class="fas fa-exclamation-circle"></i>
+                  {% for error in form.first_name.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="form-group">
+              <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }} *</label>
+              <div class="form-input-wrapper">{{ form.last_name }}</div>
+              {% if form.last_name.errors %}
+                <div class="error-message">
+                  <i class="fas fa-exclamation-circle"></i>
+                  {% for error in form.last_name.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Credenciales -->
+          <div class="form-group full-width">
+            <label for="{{ form.username.id_for_label }}">{{ form.username.label }} *</label>
+            <div class="form-input-wrapper">{{ form.username }}</div>
+            {% if form.username.errors %}
+              <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                {% for error in form.username.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+            <small class="helptext">Requerido. 150 carácteres como máximo. Únicamente letras, dígitos y @/./+/-/_.</small>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="{{ form.email.id_for_label }}">{{ form.email.label }} *</label>
+            <div class="form-input-wrapper">{{ form.email }}</div>
+            {% if form.email.errors %}
+              <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                {% for error in form.email.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Contraseñas -->
+          <div class="form-group full-width">
+            <div class="form-group">
+              <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }} *</label>
+              <div class="form-input-wrapper">{{ form.password1 }}</div>
+              {% if form.password1.errors %}
+                <div class="error-message">
+                  <i class="fas fa-exclamation-circle"></i>
+                  {% for error in form.password1.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+              {% if form.password1.help_text %}
+                <small class="helptext">{{ form.password1.help_text }}</small>
+              {% endif %}
+            </div>
+
+            <div class="form-group">
+              <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }} *</label>
+              <div class="form-input-wrapper">{{ form.password2 }}</div>
+              {% if form.password2.errors %}
+                <div class="error-message">
+                  <i class="fas fa-exclamation-circle"></i>
+                  {% for error in form.password2.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Información Adicional -->
+          <div class="form-group full-width">
+            <label for="{{ form.telefono.id_for_label }}">{{ form.telefono.label }}</label>
+            <div class="form-input-wrapper">{{ form.telefono }}</div>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="{{ form.direccion.id_for_label }}">{{ form.direccion.label }}</label>
+            <div class="form-input-wrapper">{{ form.direccion }}</div>
+          </div>
+
+          <button type="submit" class="btn-register"><i class="fas fa-user-plus"></i> Crear Cuenta</button>
+        </form>
+
+        <div class="register-links">
+          <p>
+            ¿Ya tienes cuenta?
+            <a href="{% url 'login' %}">Inicia sesión aquí</a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="floating-particles">
+      <div class="particle" style="width:8px; height:8px; top:10%; left:20%;"></div>
+      <div class="particle" style="width:12px; height:12px; top:30%; left:70%;"></div>
+      <div class="particle" style="width:6px; height:6px; top:80%; left:50%;"></div>
+      <div class="particle" style="width:10px; height:10px; top:60%; left:40%;"></div>
+      <div class="particle" style="width:14px; height:14px; top:25%; left:10%;"></div>
+      <div class="particle" style="width:7px; height:7px; top:50%; left:90%;"></div>
+      <div class="particle" style="width:9px; height:9px; top:75%; left:65%;"></div>
+      <div class="particle" style="width:11px; height:11px; top:15%; left:55%;"></div>
+      <div class="particle" style="width:10px; height:10px; top:45%; left:30%;"></div>
+      <div class="particle" style="width:13px; height:13px; top:70%; left:15%;"></div>
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const particlesContainer = document.getElementById('particles');
+    const particleCount = 40; // densidad
+    const particles = [];
+
+    for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+
+        const size = Math.random() * 8 + 3;
+        const left = Math.random() * 100;
+        const top = Math.random() * 100;
+        const duration = 5 + Math.random() * 8;
+
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.left = `${left}%`;
+        particle.style.top = `${top}%`;
+        particle.style.animationDuration = `${duration}s`;
+        particle.style.animationDelay = `0s`; // ❗sin delay para que arranque de inmediato
+
+        particles.push(particle);
+        particlesContainer.appendChild(particle);
+    }
+
+    // 🔧 Forzar render inmediato y reinicio de animaciones
+    requestAnimationFrame(() => {
+        particles.forEach(p => {
+            p.style.animation = 'none';
+            // obligamos un reflow para que el navegador reinicie la animación
+            void p.offsetWidth;
+            p.style.animation = '';
+        });
+    });
+});
+</script>
+
+  </body>
+{% endblock %}
