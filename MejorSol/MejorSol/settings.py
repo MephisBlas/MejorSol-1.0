@@ -147,4 +147,3 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 load_dotenv()
 
-OPENAI_API_KEY = os.getenv('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')
