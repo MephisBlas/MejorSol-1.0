@@ -178,3 +178,4 @@ class ClientDashboard {
 
 // Inicializar la aplicación
 const clientApp = new ClientDashboard();
+

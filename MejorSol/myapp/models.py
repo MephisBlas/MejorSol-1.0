@@ -47,3 +47,19 @@ def crear_perfil_usuario(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def guardar_perfil_usuario(sender, instance, **kwargs):
     instance.perfil.save()
+    
+
+class ChatConversation(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    session_id = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class ChatMessage(models.Model):
+    conversation = models.ForeignKey(ChatConversation, on_delete=models.CASCADE, related_name='messages')
+    message = models.TextField()
+    is_bot = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['timestamp']    

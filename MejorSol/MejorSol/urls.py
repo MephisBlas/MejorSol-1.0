@@ -29,4 +29,7 @@ urlpatterns = [
     path('admin-panel/', views.admin_panel, name='admin_panel'),
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('client-dashboard/', views.client_dashboard, name='client_dashboard'),
+    path('send_message/', views.send_message, name='send_message'),
+    path('chatbot-demo/', views.chatbot_demo, name='chatbot_demo'),
+    path('conversation-history/<str:session_id>/', views.get_conversation_history, name='conversation_history'),
 ]

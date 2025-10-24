@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -143,3 +144,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+load_dotenv()
+
+OPENAI_API_KEY = os.getenv('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')
