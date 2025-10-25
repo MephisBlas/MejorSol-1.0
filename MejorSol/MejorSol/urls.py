@@ -32,4 +32,9 @@ urlpatterns = [
     path('send_message/', views.send_message, name='send_message'),
     path('chatbot-demo/', views.chatbot_demo, name='chatbot_demo'),
     path('conversation-history/<str:session_id>/', views.get_conversation_history, name='conversation_history'),
+    path("cotizaciones/", views.cotizaciones_view, name="cotizaciones"),
+    path("cotizaciones/nueva/", views.crear_cotizacion, name="crear_cotizacion"),
+    path("cotizaciones/<int:cot_id>/", views.ver_cotizacion, name="ver_cotizacion"),
+    path("cotizaciones/<int:cot_id>/editar/", views.editar_cotizacion, name="editar_cotizacion"),
+    path("cotizaciones/<int:cot_id>/eliminar/", views.eliminar_cotizacion, name="eliminar_cotizacion"),
 ]

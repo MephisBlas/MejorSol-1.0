@@ -1,20 +1,24 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin - SIEER Chile</title>
-    
+
     <!-- Mismas dependencias que index -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
 </head>
+
 <body>
     <div class="admin-container">
         <!-- Sidebar -->
@@ -45,12 +49,14 @@
                                 <span>Cálculos y Estadísticas</span>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="#">
+                        <li class="nav-item {% if 'cotizaciones' in request.path %}active{% endif %}">
+                            <a href="{% url 'cotizaciones' %}">
                                 <i class="fas fa-file-alt"></i>
                                 <span>Cotizaciones</span>
                             </a>
                         </li>
+
+
                         <li class="nav-item">
                             <a href="#">
                                 <i class="fas fa-boxes"></i>
@@ -287,4 +293,5 @@
 
     <script src="{% static 'js/admin_panel.js' %}"></script>
 </body>
+
 </html>

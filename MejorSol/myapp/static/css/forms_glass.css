@@ -1,0 +1,116 @@
+/* === Formulario Estilo Glass - SIEER Chile === */
+
+.page-wrap {
+  min-height: calc(100vh - 80px);
+  display: grid;
+  place-items: start center;
+  padding: clamp(1rem, 2vw, 2rem) 1rem;
+}
+
+.glass-card {
+  width: min(860px, 100%);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  color: #eaf1ff;
+  overflow: hidden;
+  animation: fadeIn 0.4s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.card-head {
+  padding: 1.1rem 1.4rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, 0));
+  border-bottom: 1px solid rgba(255, 255, 255, .12);
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+}
+.card-head i {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-content: center;
+  background: rgba(0, 255, 136, .15);
+  color: #00e28f;
+}
+.card-head h1 {
+  margin: 0;
+  font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+  letter-spacing: .2px;
+}
+
+.card-body {
+  padding: 1.4rem;
+  display: grid;
+  gap: 1.1rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+@media (max-width: 680px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
+
+.form-item { display: grid; gap: .45rem; }
+.form-item.full { grid-column: 1 / -1; }
+.label { color: #cdd6ea; font-size: .93rem; }
+
+.input, .select, .textarea {
+  width: 100%;
+  padding: .85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  background: rgba(0, 0, 0, .35);
+  color: #eaf1ff;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s, background .15s;
+}
+.input::placeholder { color: #9fb0c9; }
+.input:focus, .select:focus, .textarea:focus {
+  border-color: #00e28f;
+  box-shadow: 0 0 0 3px rgba(0, 226, 143, .15);
+  background: rgba(0, 0, 0, .28);
+}
+
+.actions {
+  display: flex;
+  gap: .7rem;
+  justify-content: flex-end;
+  padding-top: .4rem;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .85rem 1.1rem;
+  border-radius: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform .06s, filter .2s;
+}
+.btn:active { transform: translateY(1px); }
+.btn-ghost {
+  color: #eaf1ff;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, .22);
+}
+.btn-ghost:hover { filter: brightness(1.1); }
+.btn-primary {
+  color: #081a14;
+  border: none;
+  background: linear-gradient(135deg, #00ff88, #00c275);
+}
+.btn-primary:hover { filter: brightness(1.05); }
+.helper { color: #9bd7c0; font-size: .85rem; }

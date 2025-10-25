@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Detalle de Cotización - SIEER Chile{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms_glass.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<section class="page-wrap">
+  <div class="glass-card" style="max-width:700px;">
+    <div class="card-head">
+      <i class="fas fa-file-invoice"></i>
+      <h1>Detalle de Cotización #{{ cot.id }}</h1>
+    </div>
+
+    <div class="card-body" style="text-align:left; line-height:1.7;">
+      <div class="form-item full">
+        <p><span class="label"><i class="fas fa-user"></i> Cliente:</span><br>
+          <span style="font-size:1.05rem;">{{ cot.cliente }}</span>
+        </p>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-item">
+          <p><span class="label"><i class="fas fa-calendar-alt"></i> Fecha:</span><br>
+            {{ cot.fecha|date:"d/m/Y" }}
+          </p>
+        </div>
+
+        <div class="form-item">
+          <p><span class="label"><i class="fas fa-money-bill-wave"></i> Total:</span><br>
+            <strong>${{ cot.total }}</strong>
+          </p>
+        </div>
+      </div>
+
+      <div class="form-item full">
+        <p><span class="label"><i class="fas fa-clipboard-check"></i> Estado:</span><br>
+          <span class="badge {% if cot.estado == 'Aprobada' %}badge-success{% elif cot.estado == 'Pendiente' %}badge-warning{% else %}badge-secondary{% endif %}">
+            {{ cot.estado }}
+          </span>
+        </p>
+      </div>
+    </div>
+
+    <div class="actions" style="justify-content:center; margin-top:1rem;">
+      <a href="{% url 'editar_cotizacion' cot.id %}" class="btn btn-primary">
+        <i class="fas fa-edit"></i> Editar
+      </a>
+      <a href="{% url 'cotizaciones' %}" class="btn btn-ghost">
+        <i class="fas fa-arrow-left"></i> Volver
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Ajuste de badges para mantener el look */
+  .badge {
+    display: inline-block;
+    padding: 0.35rem 0.7rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #fff;
+  }
+  .badge-success { background: #16a34a; }
+  .badge-warning { background: #f59e0b; }
+  .badge-secondary { background: #6b7280; }
+</style>
+{% endblock %}

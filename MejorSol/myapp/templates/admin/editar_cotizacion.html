@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Editar Cotización - SIEER Chile{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/forms_glass.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<section class="page-wrap">
+  <form class="glass-card" method="post" action="">
+    {% csrf_token %}
+
+    <div class="card-head">
+      <i class="fas fa-file-pen"></i>
+      <h1>Editar cotización #{{ cot.id }}</h1>
+    </div>
+
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-item full">
+          <label class="label" for="cliente">Cliente</label>
+          <input id="cliente" class="input" type="text" name="cliente"
+                 value="{{ cot.cliente }}" autocomplete="name" required>
+        </div>
+
+        <div class="form-item">
+          <label class="label" for="fecha">Fecha</label>
+          <input id="fecha" class="input" type="date" name="fecha"
+                 value="{{ cot.fecha|date:'Y-m-d' }}" required>
+        </div>
+
+        <div class="form-item">
+          <label class="label" for="total">Total ($)</label>
+          <input id="total" class="input" type="number" name="total"
+                 value="{{ cot.total }}" min="0" step="100" inputmode="numeric" required>
+        </div>
+
+        <div class="form-item full">
+          <label class="label" for="estado">Estado</label>
+          <select id="estado" class="select" name="estado" required>
+            <option value="Pendiente"  {% if cot.estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+            <option value="Aprobada"   {% if cot.estado == 'Aprobada' %}selected{% endif %}>Aprobada</option>
+            <option value="Rechazada"  {% if cot.estado == 'Rechazada' %}selected{% endif %}>Rechazada</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a href="{% url 'cotizaciones' %}" class="btn btn-ghost">
+          <i class="fas fa-arrow-left"></i> Volver
+        </a>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-floppy-disk"></i> Actualizar
+        </button>
+      </div>
+    </div>
+  </form>
+</section>
+{% endblock %}
