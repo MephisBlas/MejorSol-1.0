@@ -3,7 +3,6 @@
 
 {% block title %}Nueva Cotización - SIEER Chile{% endblock %}
 
-{# Si tu base.html tiene un bloque para CSS extra, úsalo. #}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/forms_glass.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,226 +10,192 @@
 
 {% block content %}
 <section class="page-wrap">
-    <form class="glass-card" method="post" action="">
-        {% csrf_token %}
+  <form class="glass-card" method="post" action="">
+    {% csrf_token %}
 
-        <div class="card-head">
-            <i class="fas fa-file-circle-plus"></i>
-            <h1>Nueva cotización</h1>
+    <div class="card-head">
+      <i class="fas fa-file-circle-plus"></i>
+      <h1>Nueva cotización</h1>
+    </div>
+
+    <div class="card-body">
+      <div class="form-grid">
+        <!-- CLIENTE -->
+        <div class="form-item full">
+          <label class="label" for="cliente">Cliente</label>
+          <input id="cliente" class="input" type="text" name="cliente"
+                 placeholder="Nombre del cliente" autocomplete="name" required autofocus>
         </div>
 
-        <div class="card-body">
-            <div class="form-grid">
-                <div class="form-item full">
-                    <label class="label" for="cliente">Cliente</label>
-                    <input id="cliente" class="input" type="text" name="cliente" placeholder="Nombre del cliente"
-                        autocomplete="name" required autofocus>
-                    <div class="helper">Ej: Juan Pérez / Empresa ABC</div>
-                </div>
-
-                <div class="form-item">
-                    <label class="label" for="fecha">Fecha</label>
-                    <input id="fecha" class="input" type="date" name="fecha" required>
-                </div>
-
-                <!-- Tipo de sistema + Consumo -->
-                <div class="form-item">
-                    <label class="label" for="tipo_sistema">Tipo de sistema</label>
-                    <select id="tipo_sistema" class="select" name="tipo_sistema" required>
-                        <option value="ongrid">On-Grid</option>
-                        <option value="offgrid">Off-Grid</option>
-                    </select>
-                </div>
-
-                <div class="form-item">
-                    <label class="label" for="consumo_kwh">Consumo mensual (kWh)</label>
-                    <input id="consumo_kwh" class="input" type="number" step="1" min="0" name="consumo_kwh"
-                        placeholder="ej: 350">
-                    <div class="helper">Usamos esto para sugerir un kit.</div>
-                </div>
-
-                <!-- Kit + precio -->
-                <div class="form-item full">
-                    <label class="label" for="kit_id">Kit</label>
-                    <select id="kit_id" class="select" name="kit_id"></select>
-                    <div class="helper" id="kit_helper"></div>
-                </div>
-
-                <!-- Precio, cantidad, descuento, IVA -->
-                <div class="form-item">
-                    <label class="label" for="precio_unit">Precio unitario ($)</label>
-                    <input id="precio_unit" class="input" type="number" min="0" step="100" name="precio_unit"
-                        placeholder="0" required>
-                </div>
-
-                <div class="form-item">
-                    <label class="label" for="cantidad">Cantidad</label>
-                    <input id="cantidad" class="input" type="number" min="1" step="1" name="cantidad" value="1"
-                        required>
-                </div>
-
-                <div class="form-item">
-                    <label class="label" for="descuento">Descuento (%)</label>
-                    <input id="descuento" class="input" type="number" min="0" max="100" step="1" name="descuento"
-                        value="0">
-                </div>
-
-                <div class="form-item">
-                    <label class="label" for="iva">IVA (%)</label>
-                    <input id="iva" class="input" type="number" min="0" max="30" step="1" name="iva" value="19">
-                </div>
-
-                <!-- Totales (el “total” visible lo calculamos; el real se envía en un hidden) -->
-                <input type="hidden" id="total" name="total" value="0">
-
-                <div class="form-item full" style="margin-top:.25rem;">
-                    <div class="form-grid">
-                        <div class="form-item"><span class="label">Subtotal</span>
-                            <div id="v_subtotal" class="helper">$0</div>
-                        </div>
-                        <div class="form-item"><span class="label">Descuento</span>
-                            <div id="v_desc" class="helper">$0</div>
-                        </div>
-                        <div class="form-item"><span class="label">IVA</span>
-                            <div id="v_iva" class="helper">$0</div>
-                        </div>
-                        <div class="form-item"><span class="label"><strong>Total</strong></span>
-                            <div id="v_total" class="helper" style="font-weight:700;">$0</div>
-                        </div>
-                    </div>
-                </div>
-
-
-                <div class="form-item full">
-                    <label class="label" for="estado">Estado</label>
-                    <select id="estado" class="select" name="estado" required>
-                        <option value="Pendiente">Pendiente</option>
-                        <option value="Aprobada">Aprobada</option>
-                        <option value="Rechazada">Rechazada</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="actions">
-                <a href="{% url 'cotizaciones' %}" class="btn btn-ghost">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-floppy-disk"></i> Guardar
-                </button>
-            </div>
+        <!-- FECHA -->
+        <div class="form-item">
+          <label class="label" for="fecha">Fecha</label>
+          <input id="fecha" class="input" type="date" name="fecha" required>
         </div>
-    </form>
-    <script>
-        // Carga segura del JSON desde Django
-        // (escapejs evita romper el JS si hay comillas, saltos de línea, etc.)
-        const KITS = JSON.parse('{{ kits_json|escapejs }}');       // { ongrid:[], offgrid:[] }
-        const KWH_TABLE = JSON.parse('{{ kwh_json|escapejs }}');   // [{kwh:..., sugerencia:...}]
 
-        const tipoSel = document.getElementById('tipo_sistema');
-        const kitSel = document.getElementById('kit_id');
-        const kitHelp = document.getElementById('kit_helper');
+        <!-- TIPO DE SISTEMA -->
+        <div class="form-item">
+          <label class="label" for="tipo_sistema">Tipo de sistema</label>
+          <select id="tipo_sistema" class="select" name="tipo_sistema" required>
+            <option value="ongrid">On-Grid</option>
+            <option value="offgrid">Off-Grid</option>
+          </select>
+        </div>
 
-        const inputs = {
-            precio: document.getElementById('precio_unit'),
-            cantidad: document.getElementById('cantidad'),
-            desc: document.getElementById('descuento'),
-            iva: document.getElementById('iva'),
-            total: document.getElementById('total'),
-        };
+        <!-- CONSUMO -->
+        <div class="form-item">
+          <label class="label" for="consumo_kwh">Consumo mensual (kWh)</label>
+          <input id="consumo_kwh" class="input" type="number" name="consumo_kwh" placeholder="ej: 350">
+        </div>
 
-        const out = {
-            subtotal: document.getElementById('v_subtotal'),
-            desc: document.getElementById('v_desc'),
-            iva: document.getElementById('v_iva'),
-            total: document.getElementById('v_total'),
-        };
+        <!-- KIT -->
+        <div class="form-item full">
+          <label class="label" for="kit_id">Kit</label>
+          <select id="kit_id" class="select" name="kit_id" required></select>
+          <div class="helper" id="kit_helper"></div>
+        </div>
 
-        function format(n) { return new Intl.NumberFormat('es-CL').format(Math.round(+n || 0)); }
+        <!-- PRECIO -->
+        <div class="form-item">
+          <label class="label" for="precio_unit">Precio unitario ($)</label>
+          <input id="precio_unit" class="input" type="number" min="0" step="100" name="precio_unit" required>
+        </div>
 
-        function fillKits() {
-            const t = (tipoSel.value || 'ongrid');
-            const list = (KITS && KITS[t]) ? KITS[t] : [];
-            kitSel.innerHTML = '';
+        <div class="form-item">
+          <label class="label" for="cantidad">Cantidad</label>
+          <input id="cantidad" class="input" type="number" min="1" step="1" name="cantidad" value="1">
+        </div>
 
-            list.forEach(function (k) {
-                const opt = document.createElement('option');
-                opt.value = k.id;
-                // Evitamos backticks dentro de backticks; construimos con concatenación
-                var potTxt = k.potencia ? (' (' + k.potencia + ' kW)') : '';
-                opt.textContent = k.nombre + potTxt + ' — $' + format(k.precio);
-                opt.dataset.precio = k.precio;
-                opt.dataset.potencia = k.potencia || 0;
-                kitSel.appendChild(opt);
-            });
+        <div class="form-item">
+          <label class="label" for="descuento">Descuento (%)</label>
+          <input id="descuento" class="input" type="number" min="0" max="100" name="descuento" value="0">
+        </div>
 
-            if (list.length) {
-                inputs.precio.value = Math.round(list[0].precio || 0);
-                kitHelp.textContent = list[0].potencia ? ('Potencia aprox: ' + list[0].potencia + ' kW') : '';
-            } else {
-                inputs.precio.value = '';
-                kitHelp.textContent = 'No hay kits cargados para este tipo.';
-            }
-            compute();
-        }
+        <div class="form-item">
+          <label class="label" for="iva">IVA (%)</label>
+          <input id="iva" class="input" type="number" min="0" max="30" name="iva" value="19">
+        </div>
 
-        function suggestByKwh() {
-            var inputKwh = document.getElementById('consumo_kwh');
-            if (!inputKwh) return;
-            var kwh = parseFloat(inputKwh.value || 0);
-            if (!kwh || !Array.isArray(KWH_TABLE) || !KWH_TABLE.length) return;
+        <!-- TOTAL -->
+        <input type="hidden" id="total" name="total" value="0">
+        <div class="form-item full">
+          <div class="form-grid">
+            <div class="form-item"><span class="label">Subtotal</span>
+              <div id="v_subtotal" class="helper">$0</div>
+            </div>
+            <div class="form-item"><span class="label">Descuento</span>
+              <div id="v_desc" class="helper">$0</div>
+            </div>
+            <div class="form-item"><span class="label">IVA</span>
+              <div id="v_iva" class="helper">$0</div>
+            </div>
+            <div class="form-item"><span class="label"><strong>Total</strong></span>
+              <div id="v_total" class="helper" style="font-weight:700;">$0</div>
+            </div>
+          </div>
+        </div>
 
-            var sug = null;
-            for (var i = 0; i < KWH_TABLE.length; i++) {
-                if (kwh <= KWH_TABLE[i].kwh) { sug = KWH_TABLE[i]; break; }
-            }
-            if (!sug) sug = KWH_TABLE[KWH_TABLE.length - 1];
+        <!-- ESTADO -->
+        <div class="form-item full">
+          <label class="label" for="estado">Estado</label>
+          <select id="estado" class="select" name="estado">
+            <option value="Pendiente">Pendiente</option>
+            <option value="Aprobada">Aprobada</option>
+            <option value="Rechazada">Rechazada</option>
+          </select>
+        </div>
+      </div>
 
-            kitHelp.textContent = 'Sugerencia por ' + kwh + ' kWh/mes: ' + (sug.sugerencia || '');
-        }
+      <div class="actions">
+        <a href="{% url 'cotizaciones' %}" class="btn btn-ghost">
+          <i class="fas fa-arrow-left"></i> Volver
+        </a>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-floppy-disk"></i> Guardar
+        </button>
+      </div>
+    </div>
+  </form>
 
-        function onKitChange() {
-            var opt = kitSel.options[kitSel.selectedIndex];
-            if (!opt) return;
-            inputs.precio.value = Math.round(parseFloat(opt.dataset.precio || 0));
-            var pot = parseFloat(opt.dataset.potencia || 0);
-            kitHelp.textContent = pot ? ('Potencia aprox: ' + pot + ' kW') : '';
-            compute();
-        }
+  <!-- SCRIPT -->
+  <script>
+    // Recibe los datos desde la vista Django
+    const KITS = JSON.parse('{{ kits_json|escapejs }}');
+    const KWH_TABLE = JSON.parse('{{ kwh_json|escapejs }}');
 
-        function compute() {
-            var precio = parseFloat(inputs.precio.value || 0);
-            var cant = parseInt(inputs.cantidad.value || 1, 10);
-            var desc = parseFloat(inputs.desc.value || 0);
-            var iva = parseFloat(inputs.iva.value || 19);
+    const tipoSel = document.getElementById('tipo_sistema');
+    const kitSel = document.getElementById('kit_id');
+    const kitHelp = document.getElementById('kit_helper');
 
-            var subtotal = precio * cant;
-            var mDesc = subtotal * (desc / 100);
-            var base = subtotal - mDesc;
-            var mIva = base * (iva / 100);
-            var total = base + mIva;
+    const inputs = {
+      precio: document.getElementById('precio_unit'),
+      cantidad: document.getElementById('cantidad'),
+      desc: document.getElementById('descuento'),
+      iva: document.getElementById('iva'),
+      total: document.getElementById('total'),
+    };
 
-            out.subtotal.textContent = '$' + format(subtotal);
-            out.desc.textContent = '$' + format(mDesc);
-            out.iva.textContent = '$' + format(mIva);
-            out.total.textContent = '$' + format(total);
-            inputs.total.value = Math.round(total);
-        }
+    const out = {
+      subtotal: document.getElementById('v_subtotal'),
+      desc: document.getElementById('v_desc'),
+      iva: document.getElementById('v_iva'),
+      total: document.getElementById('v_total'),
+    };
 
-        // Eventos
-        tipoSel.addEventListener('change', fillKits);
-        kitSel.addEventListener('change', onKitChange);
-        var kwhInput = document.getElementById('consumo_kwh');
-        if (kwhInput) kwhInput.addEventListener('input', suggestByKwh);
-        ['precio_unit', 'cantidad', 'descuento', 'iva'].forEach(function (id) {
-            var el = document.getElementById(id);
-            if (el) el.addEventListener('input', compute);
-        });
+    function format(n) { return new Intl.NumberFormat('es-CL').format(Math.round(+n || 0)); }
 
-        // Init
-        fillKits();
-        compute();
-    </script>
+    function fillKits() {
+      const t = (tipoSel.value || 'ongrid');
+      const list = (KITS && KITS[t]) ? KITS[t] : [];
+      kitSel.innerHTML = '';
 
+      list.forEach(function (k) {
+        const opt = document.createElement('option');
+        opt.value = k.id;
+        const potTxt = k.potencia ? (' (' + k.potencia + ' kW)') : '';
+        opt.textContent = k.nombre + potTxt + ' — $' + format(k.precio);
+        opt.dataset.precio = k.precio;
+        opt.dataset.potencia = k.potencia || 0;
+        kitSel.appendChild(opt);
+      });
+
+      if (list.length) {
+        inputs.precio.value = Math.round(list[0].precio || 0);
+        kitHelp.textContent = list[0].potencia ? ('Potencia aprox: ' + list[0].potencia + ' kW') : '';
+      } else {
+        inputs.precio.value = '';
+        kitHelp.textContent = 'No hay kits cargados para este tipo.';
+      }
+      compute();
+    }
+
+    function compute() {
+      const precio = parseFloat(inputs.precio.value || 0);
+      const cant = parseInt(inputs.cantidad.value || 1, 10);
+      const desc = parseFloat(inputs.desc.value || 0);
+      const iva = parseFloat(inputs.iva.value || 19);
+
+      const subtotal = precio * cant;
+      const mDesc = subtotal * (desc / 100);
+      const base = subtotal - mDesc;
+      const mIva = base * (iva / 100);
+      const total = base + mIva;
+
+      out.subtotal.textContent = '$' + format(subtotal);
+      out.desc.textContent = '$' + format(mDesc);
+      out.iva.textContent = '$' + format(mIva);
+      out.total.textContent = '$' + format(total);
+      inputs.total.value = Math.round(total);
+    }
+
+    tipoSel.addEventListener('change', fillKits);
+    ['precio_unit', 'cantidad', 'descuento', 'iva'].forEach(id => {
+      document.getElementById(id).addEventListener('input', compute);
+    });
+
+    // Inicializar
+    fillKits();
+    compute();
+  </script>
 </section>
 {% endblock %}
