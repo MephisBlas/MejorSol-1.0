@@ -10,39 +10,86 @@
 
 {% block content %}
 <section class="page-wrap">
-  <div class="glass-card" style="max-width:700px;">
+  <div class="glass-card" style="max-width:900px;">
     <div class="card-head">
       <i class="fas fa-file-invoice"></i>
       <h1>Detalle de Cotización #{{ cot.id }}</h1>
     </div>
 
     <div class="card-body" style="text-align:left; line-height:1.7;">
+      <!-- Cliente -->
       <div class="form-item full">
         <p><span class="label"><i class="fas fa-user"></i> Cliente:</span><br>
           <span style="font-size:1.05rem;">{{ cot.cliente }}</span>
         </p>
       </div>
 
+      <!-- Fecha / Estado -->
       <div class="form-grid">
         <div class="form-item">
           <p><span class="label"><i class="fas fa-calendar-alt"></i> Fecha:</span><br>
             {{ cot.fecha|date:"d/m/Y" }}
           </p>
         </div>
-
         <div class="form-item">
-          <p><span class="label"><i class="fas fa-money-bill-wave"></i> Total:</span><br>
-            <strong>${{ cot.total }}</strong>
+          <p><span class="label"><i class="fas fa-clipboard-check"></i> Estado:</span><br>
+            <span class="badge {% if cot.estado == 'Aprobada' %}badge-success{% elif cot.estado == 'Pendiente' %}badge-warning{% else %}badge-secondary{% endif %}">
+              {{ cot.estado }}
+            </span>
           </p>
         </div>
       </div>
 
+      <!-- Parámetros técnicos/comerciales -->
+      <div class="form-grid">
+        <div class="form-item">
+          <p><span class="label"><i class="fas fa-plug"></i> Tipo de sistema:</span><br>
+            {{ cot.tipo_sistema|capfirst }}
+          </p>
+        </div>
+        <div class="form-item">
+          <p><span class="label"><i class="fas fa-bolt"></i> Consumo mensual:</span><br>
+            {{ cot.consumo_kwh|default:'—' }} kWh
+          </p>
+        </div>
+        <div class="form-item full">
+          <p><span class="label"><i class="fas fa-box-open"></i> Kit seleccionado:</span><br>
+            {{ cot.kit_nombre|default_if_none:'' }}{% if cot.kit_potencia %} ({{ cot.kit_potencia }} kW){% endif %}
+            {% if not cot.kit_nombre %}ID: {{ cot.kit_id }}{% endif %}
+          </p>
+        </div>
+      </div>
+
+      <!-- Resumen económico -->
       <div class="form-item full">
-        <p><span class="label"><i class="fas fa-clipboard-check"></i> Estado:</span><br>
-          <span class="badge {% if cot.estado == 'Aprobada' %}badge-success{% elif cot.estado == 'Pendiente' %}badge-warning{% else %}badge-secondary{% endif %}">
-            {{ cot.estado }}
-          </span>
-        </p>
+        <div class="form-grid">
+          <div class="form-item">
+            <span class="label">Precio unitario</span>
+            <div class="helper">${{ cot.precio_unit|floatformat:0 }}</div>
+          </div>
+          <div class="form-item">
+            <span class="label">Cantidad</span>
+            <div class="helper">{{ cot.cantidad }}</div>
+          </div>
+          <div class="form-item">
+            <span class="label">Descuento</span>
+            <div class="helper">{{ cot.descuento }}%</div>
+          </div>
+          <div class="form-item">
+            <span class="label">IVA</span>
+            <div class="helper">{{ cot.iva }}%</div>
+          </div>
+          <div class="form-item">
+            <span class="label">Subtotal</span>
+            <div class="helper">${{ cot.precio_unit|default:0|floatformat:0 }}</div>
+          </div>
+          <div class="form-item">
+            <span class="label">Total</span>
+            <div class="helper" style="font-weight:700;">
+              ${{ cot.total|floatformat:0 }}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -58,7 +105,6 @@
 </section>
 
 <style>
-  /* Ajuste de badges para mantener el look */
   .badge {
     display: inline-block;
     padding: 0.35rem 0.7rem;

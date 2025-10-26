@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Editar Cotización - SIEER Chile{% endblock %}
+{% block title %}Editar cotización - SIEER Chile{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/forms_glass.css' %}">
@@ -14,36 +14,104 @@
     {% csrf_token %}
 
     <div class="card-head">
-      <i class="fas fa-file-pen"></i>
+      <i class="fas fa-clipboard-check"></i>
       <h1>Editar cotización #{{ cot.id }}</h1>
     </div>
 
     <div class="card-body">
       <div class="form-grid">
+        <!-- CLIENTE -->
         <div class="form-item full">
           <label class="label" for="cliente">Cliente</label>
           <input id="cliente" class="input" type="text" name="cliente"
-                 value="{{ cot.cliente }}" autocomplete="name" required>
+                 value="{{ cot.cliente }}" placeholder="Nombre del cliente" autocomplete="name" required>
         </div>
 
+        <!-- FECHA -->
         <div class="form-item">
           <label class="label" for="fecha">Fecha</label>
           <input id="fecha" class="input" type="date" name="fecha"
                  value="{{ cot.fecha|date:'Y-m-d' }}" required>
         </div>
 
+        <!-- TIPO DE SISTEMA -->
         <div class="form-item">
-          <label class="label" for="total">Total ($)</label>
-          <input id="total" class="input" type="number" name="total"
-                 value="{{ cot.total }}" min="0" step="100" inputmode="numeric" required>
+          {% with tipo=cot.tipo_sistema|default_if_none:''|lower|cut:'-'|cut:' ' %}
+          <label class="label" for="tipo_sistema">Tipo de sistema</label>
+          <select id="tipo_sistema" class="select" name="tipo_sistema" required>
+            <option value="ongrid"  {% if tipo == 'ongrid' %}selected{% endif %}>On-Grid</option>
+            <option value="offgrid" {% if tipo == 'offgrid' %}selected{% endif %}>Off-Grid</option>
+          </select>
+          {% endwith %}
         </div>
 
+        <!-- CONSUMO -->
+        <div class="form-item">
+          <label class="label" for="consumo_kwh">Consumo mensual (kWh)</label>
+          <input id="consumo_kwh" class="input" type="number" name="consumo_kwh"
+                 value="{{ cot.consumo_kwh|default_if_none:'' }}" placeholder="ej: 350">
+        </div>
+
+        <!-- KIT -->
+        <div class="form-item full">
+          <label class="label" for="kit_id">Kit</label>
+          <select id="kit_id" class="select" name="kit_id" required></select>
+          <div class="helper" id="kit_helper"></div>
+        </div>
+
+        <!-- PRECIO / CANTIDAD / DESCUENTOS -->
+        <div class="form-item">
+          <label class="label" for="precio_unit">Precio unitario ($)</label>
+          <input id="precio_unit" class="input" type="number" min="0" step="100" name="precio_unit"
+                 value="{{ cot.precio_unit|default_if_none:0 }}" required>
+        </div>
+
+        <div class="form-item">
+          <label class="label" for="cantidad">Cantidad</label>
+          <input id="cantidad" class="input" type="number" min="1" step="1" name="cantidad"
+                 value="{{ cot.cantidad|default_if_none:1 }}">
+        </div>
+
+        <div class="form-item">
+          <label class="label" for="descuento">Descuento (%)</label>
+          <input id="descuento" class="input" type="number" min="0" max="100" name="descuento"
+                 value="{{ cot.descuento|default_if_none:0 }}">
+        </div>
+
+        <div class="form-item">
+          <label class="label" for="iva">IVA (%)</label>
+          <input id="iva" class="input" type="number" min="0" max="30" name="iva"
+                 value="{{ cot.iva|default_if_none:19 }}">
+        </div>
+
+        <!-- TOTALES -->
+        <input type="hidden" id="total" name="total" value="{{ cot.total|default_if_none:0 }}">
+        <div class="form-item full">
+          <div class="form-grid">
+            <div class="form-item"><span class="label">Subtotal</span>
+              <div id="v_subtotal" class="helper">$0</div>
+            </div>
+            <div class="form-item"><span class="label">Descuento</span>
+              <div id="v_desc" class="helper">$0</div>
+            </div>
+            <div class="form-item"><span class="label">IVA</span>
+              <div id="v_iva" class="helper">$0</div>
+            </div>
+            <div class="form-item"><span class="label"><strong>Total</strong></span>
+              <div id="v_total" class="helper" style="font-weight:700;">$0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ESTADO -->
         <div class="form-item full">
           <label class="label" for="estado">Estado</label>
-          <select id="estado" class="select" name="estado" required>
-            <option value="Pendiente"  {% if cot.estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
-            <option value="Aprobada"   {% if cot.estado == 'Aprobada' %}selected{% endif %}>Aprobada</option>
-            <option value="Rechazada"  {% if cot.estado == 'Rechazada' %}selected{% endif %}>Rechazada</option>
+          <select id="estado" class="select" name="estado">
+            {% with e=cot.estado|default_if_none:'' %}
+            <option value="Pendiente" {% if e == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+            <option value="Aprobada"  {% if e == 'Aprobada' %}selected{% endif %}>Aprobada</option>
+            <option value="Rechazada" {% if e == 'Rechazada' %}selected{% endif %}>Rechazada</option>
+            {% endwith %}
           </select>
         </div>
       </div>
@@ -53,10 +121,133 @@
           <i class="fas fa-arrow-left"></i> Volver
         </a>
         <button type="submit" class="btn btn-primary">
-          <i class="fas fa-floppy-disk"></i> Actualizar
+          <i class="fas fa-floppy-disk"></i> Guardar cambios
         </button>
       </div>
     </div>
   </form>
+
+  <!-- SCRIPT -->
+  <script>
+    // ===== Datos desde Django =====
+    const COT_KIT_ID = "{{ cot.kit_id|default_if_none:''|escapejs }}";
+    const COT_TIPO   = "{{ cot.tipo_sistema|default_if_none:''|lower|cut:'-'|cut:' ' }}";
+
+    let KITS = {};
+    try {
+      KITS = JSON.parse('{{ kits_json|escapejs|default:"{}" }}');
+    } catch (_) { KITS = {}; }
+
+    // ===== DOM =====
+    const tipoSel = document.getElementById('tipo_sistema');
+    const kitSel  = document.getElementById('kit_id');
+    const kitHelp = document.getElementById('kit_helper');
+
+    const inputs = {
+      precio:   document.getElementById('precio_unit'),
+      cantidad: document.getElementById('cantidad'),
+      desc:     document.getElementById('descuento'),
+      iva:      document.getElementById('iva'),
+      total:    document.getElementById('total'),
+    };
+
+    const out = {
+      subtotal: document.getElementById('v_subtotal'),
+      desc:     document.getElementById('v_desc'),
+      iva:      document.getElementById('v_iva'),
+      total:    document.getElementById('v_total'),
+    };
+
+    // ===== Helpers =====
+    const fmt = (n) => new Intl.NumberFormat('es-CL').format(Math.round(+n || 0));
+    const normType = (v) => String(v || 'ongrid').toLowerCase().replace(/[\s\-]/g, '');
+
+    function currentList() {
+      const key = normType(tipoSel.value || COT_TIPO);
+      if (key === 'ongrid')  return KITS.ongrid  || [];
+      if (key === 'offgrid') return KITS.offgrid || [];
+      return [];
+    }
+
+    function selectByValue(select, value) {
+      if (!value) return false;
+      const target = String(value);
+      for (const opt of select.options) {
+        if (String(opt.value) === target) { opt.selected = true; return true; }
+      }
+      return false;
+    }
+
+    function fillKits() {
+      const list = currentList();
+      kitSel.innerHTML = '';
+
+      if (!list.length) {
+        const op = document.createElement('option');
+        op.value = '';
+        op.textContent = '— Sin kits para este tipo —';
+        kitSel.appendChild(op);
+        kitHelp.textContent = 'No hay kits cargados para este tipo.';
+        return compute();
+      }
+
+      list.forEach(k => {
+        const op = document.createElement('option');
+        op.value = k.id;
+        const pot = k.potencia ? ` (${k.potencia} kW)` : '';
+        op.textContent = `${k.nombre}${pot} — $${fmt(k.precio)}`;
+        op.dataset.precio = k.precio || 0;
+        op.dataset.potencia = k.potencia || 0;
+        kitSel.appendChild(op);
+      });
+
+      // Intentar seleccionar el kit de la cotización; si no, el primero
+      if (!selectByValue(kitSel, COT_KIT_ID)) {
+        kitSel.selectedIndex = 0;
+      }
+
+      // Precio y helper según opción seleccionada
+      const sel = kitSel.options[kitSel.selectedIndex];
+      inputs.precio.value = Math.round(+sel.dataset.precio || 0);
+      kitHelp.textContent = sel && +sel.dataset.potencia ? `Potencia aprox: ${sel.dataset.potencia} kW` : '';
+
+      compute();
+    }
+
+    function compute() {
+      const precio = parseFloat(inputs.precio.value || 0);
+      const cant   = parseInt(inputs.cantidad.value || 1, 10);
+      const desc   = parseFloat(inputs.desc.value || 0);
+      const iva    = parseFloat(inputs.iva.value || 19);
+
+      const subtotal = precio * cant;
+      const mDesc    = subtotal * (desc / 100);
+      const base     = subtotal - mDesc;
+      const mIva     = base * (iva / 100);
+      const total    = base + mIva;
+
+      out.subtotal.textContent = '$' + fmt(subtotal);
+      out.desc.textContent     = '$' + fmt(mDesc);
+      out.iva.textContent      = '$' + fmt(mIva);
+      out.total.textContent    = '$' + fmt(total);
+      inputs.total.value       = Math.round(total);
+    }
+
+    // ===== Eventos =====
+    tipoSel.addEventListener('change', fillKits);
+    kitSel.addEventListener('change', () => {
+      const sel = kitSel.options[kitSel.selectedIndex];
+      inputs.precio.value = Math.round(+sel.dataset.precio || 0);
+      kitHelp.textContent = sel && +sel.dataset.potencia ? `Potencia aprox: ${sel.dataset.potencia} kW` : '';
+      compute();
+    });
+    ['precio_unit','cantidad','descuento','iva'].forEach(id => {
+      document.getElementById(id).addEventListener('input', compute);
+    });
+
+    // ===== Init =====
+    fillKits();
+    compute();
+  </script>
 </section>
 {% endblock %}
