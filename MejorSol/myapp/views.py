@@ -220,8 +220,63 @@ KWH_TABLE = [
 
 @login_required
 @user_passes_test(is_admin)
+
+@login_required
 def cotizaciones_view(request):
-    return render(request, "admin/cotizaciones.html", {"cotizaciones": COTIZACIONES})
+    # Campos opcionales que la plantilla puede intentar leer
+    optional_fields = [
+        "rut", "contacto",
+        "kit_nombre", "tipo_sistema",
+        "potencia_aprox", "consumo_kwh",
+        "cantidad", "precio_unitario",
+        "descuento", "descuento_porcentaje",
+        "iva", "iva_porcentaje", "subtotal",
+    ]
+
+    cotzs = []
+    for c in COTIZACIONES:
+        d = dict(c)  # copia
+        # asegura presencia de todas las claves opcionales
+        for f in optional_fields:
+            d.setdefault(f, None)
+
+        # si no hay objeto 'kit', crea uno mínimo para que 'cot.kit.nombre' y 'cot.kit.potencia' funcionen
+        if "kit" not in d or d["kit"] is None:
+            d["kit"] = {
+                "nombre": d.get("kit_nombre"),
+                "potencia": d.get("potencia_aprox"),
+            }
+
+        # si no tienes 'subtotal/iva/total' calculados, puedes derivarlos (opcional)
+        if d.get("subtotal") is None and d.get("precio_unitario") and d.get("cantidad"):
+            try:
+                pu = int(d["precio_unitario"])
+                qty = int(d.get("cantidad") or 1)
+                d["subtotal"] = pu * qty
+            except Exception:
+                pass
+
+        if d.get("iva") is None and d.get("subtotal") and d.get("iva_porcentaje"):
+            try:
+                iva_pct = int(d["iva_porcentaje"])
+                d["iva"] = d["subtotal"] * iva_pct // 100
+            except Exception:
+                pass
+
+        # si no hay 'total' en el dict original, re-calcular
+        if d.get("total") is None and d.get("subtotal"):
+            total = d["subtotal"] + (d.get("iva") or 0)
+            if d.get("descuento"):
+                try:
+                    total -= int(d["descuento"])
+                except Exception:
+                    pass
+            d["total"] = total
+
+        cotzs.append(d)
+
+    return render(request, "admin/cotizaciones.html", {"cotizaciones": cotzs})
+
 
 @login_required
 @user_passes_test(is_admin)
