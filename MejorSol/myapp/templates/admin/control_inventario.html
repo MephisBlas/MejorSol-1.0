@@ -1,0 +1,190 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Inventario - SIEER Chile</title>
+
+  <!-- mismas dependencias del panel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
+  <link rel="stylesheet" href="{% static 'css/inventario.css' %}">
+</head>
+<body>
+<div class="admin-container">
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <div class="admin-logo">
+        <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo">
+        <div class="logo-text">
+          <h2>SIEER Chile</h2>
+          <span>Panel Administrativo</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <h3>Facturación</h3>
+        <ul>
+          <li class="nav-item"><a href="#"><i class="fas fa-file-invoice"></i><span>Boleta y Factura Electrónica</span></a></li>
+          <li class="nav-item"><a href="{% url 'calculos_estadisticas' %}"><i class="fas fa-calculator"></i><span>Cálculos y Estadísticas</span></a></li>
+          <li class="nav-item"><a href="{% url 'cotizaciones' %}"><i class="fas fa-file-alt"></i><span>Cotizaciones</span></a></li>
+          <li class="nav-item active"><a href="{% url 'control_inventario' %}"><i class="fas fa-boxes"></i><span>Control de Inventario</span></a></li>
+        </ul>
+      </div>
+      <div class="nav-section">
+        <h3>Reportes</h3>
+        <ul>
+          <li class="nav-item"><a href="#"><i class="fas fa-chart-bar"></i><span>Reportes Gráficos</span></a></li>
+          <li class="nav-item"><a href="#"><i class="fas fa-history"></i><span>Historia de Ventas</span></a></li>
+          <li class="nav-item"><a href="#"><i class="fas fa-user-cog"></i><span>Cuenta</span></a></li>
+          <li class="nav-item"><a href="#"><i class="fas fa-cogs"></i><span>Configuración</span></a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+        <div class="user-details"><strong>Administrador</strong><span>{{ user.username }}</span></div>
+      </div>
+      <form method="post" action="{% url 'logout' %}" class="logout-form">
+        {% csrf_token %}
+        <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i>Cerrar Sesión</button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main inv-page">
+    <header class="admin-header">
+      <div class="header-left">
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <h1>Control de <span class="accent">Inventario</span></h1>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-primary" onclick="window.location.href='/'">
+          <i class="fas fa-eye"></i> VER SITIO WEB
+        </button>
+        <div class="notification-bell"><i class="fas fa-bell"></i><span class="notification-count">3</span></div>
+      </div>
+    </header>
+
+    <div class="admin-content inv-container">
+      <!-- Filtros y acciones -->
+      <section class="inv-toolbar card">
+        <input id="buscar" type="text" class="input search" placeholder="Buscar por SKU o nombre…">
+        <select id="filtroCategoria" class="input">
+          <option value="">Todas las categorías</option>
+          <option>Kits</option><option>Paneles</option><option>Inversores</option>
+          <option>Baterías</option><option>Accesorios</option>
+        </select>
+        <select id="filtroEstado" class="input">
+          <option value="">Todos</option>
+          <option value="ok">OK</option>
+          <option value="bajo">Bajo</option>
+        </select>
+
+        <div class="toolbar-actions">
+          <button id="btnNuevo" class="btn btn-solid"><i class="fas fa-plus"></i> Nuevo producto</button>
+          <button id="btnExport" class="btn btn-outline"><i class="fas fa-download"></i> Exportar CSV</button>
+        </div>
+      </section>
+
+      <!-- Tabla -->
+      <section class="card inv-table-wrap">
+        <table class="inv-table" id="tablaInventario">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th class="num">Stock</th>
+              <th class="num">Mínimo</th>
+              <th>Estado</th>
+              <th class="num">Precio ($)</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyInventario">
+            {% for p in productos %}
+            <tr data-sku="{{ p.sku }}" data-categoria="{{ p.categoria }}">
+              <td>{{ p.sku }}</td>
+              <td>{{ p.nombre }}</td>
+              <td>{{ p.categoria }}</td>
+              <td class="num">{{ p.stock }}</td>
+              <td class="num">{{ p.minimo }}</td>
+              <td>
+                {% if p.stock|default:0 <= p.minimo|default:0 %}
+                  <span class="badge danger">Bajo</span>
+                {% else %}
+                  <span class="badge ok">OK</span>
+                {% endif %}
+              </td>
+              <td class="num">{{ p.precio|default:0|floatformat:0 }}</td>
+              <td class="actions">
+                <button class="btn-icon in" title="Entrada"><i class="fas fa-arrow-down"></i></button>
+                <button class="btn-icon out" title="Salida"><i class="fas fa-arrow-up"></i></button>
+                <button class="btn-icon edit" title="Editar"><i class="fas fa-pen"></i></button>
+                <button class="btn-icon delete" title="Eliminar"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="empty">No hay productos cargados.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <!-- Paginación (placeholders) -->
+        <div class="pager">
+          <button class="btn btn-outline" id="prevPage">Anterior</button>
+          <button class="btn btn-outline" id="nextPage">Siguiente</button>
+        </div>
+      </section>
+
+      <!-- Modal Nuevo/Editar -->
+      <div class="modal" id="modalForm" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-header">
+            <h3 id="modalTitle">Nuevo producto</h3>
+            <button class="close" id="closeModal"><i class="fas fa-times"></i></button>
+          </div>
+          <form id="formProducto" class="modal-body">
+            <div class="grid">
+              <label>SKU<input type="text" id="sku" required></label>
+              <label>Producto<input type="text" id="nombre" required></label>
+              <label>Categoría
+                <select id="categoria" required>
+                  <option value="Kits">Kits</option>
+                  <option value="Paneles">Paneles</option>
+                  <option value="Inversores">Inversores</option>
+                  <option value="Baterías">Baterías</option>
+                  <option value="Accesorios">Accesorios</option>
+                </select>
+              </label>
+              <label>Stock<input type="number" id="stock" value="0" min="0" required></label>
+              <label>Mínimo<input type="number" id="minimo" value="0" min="0" required></label>
+              <label>Precio ($)<input type="number" id="precio" value="0" min="0" required></label>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn btn-outline" id="cancelar">Cancelar</button>
+              <button type="submit" class="btn btn-solid" id="guardar">Guardar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="{% static 'js/inventario.js' %}"></script>
+</body>
+</html>

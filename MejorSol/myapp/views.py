@@ -347,3 +347,17 @@ def eliminar_cotizacion(request, cot_id):
         COTIZACIONES.remove(cot)
         return redirect("cotizaciones")
     return render(request, "admin/eliminar_cotizacion.html", {"cot": cot})
+
+def calculos_estadisticas_view(request):
+    # Si más adelante quieres pasar datos de Excel, aquí los cargas y envías al template.
+    return render(request, 'calculos_estadisticas.html')
+
+import pandas as pd
+from django.shortcuts import render
+
+def calculos_estadisticas_view(request):
+    return render(request, 'admin/calculos_estadisticas.html')
+
+def control_inventario_view(request):
+    # Más adelante podrás pasar aquí datos reales desde la BD.
+    return render(request, 'admin/control_inventario.html')

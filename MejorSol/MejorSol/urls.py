@@ -37,4 +37,9 @@ urlpatterns = [
     path("cotizaciones/<int:cot_id>/", views.ver_cotizacion, name="ver_cotizacion"),
     path("cotizaciones/<int:cot_id>/editar/", views.editar_cotizacion, name="editar_cotizacion"),
     path("cotizaciones/<int:cot_id>/eliminar/", views.eliminar_cotizacion, name="eliminar_cotizacion"),
+    path('calculos/', views.calculos_estadisticas_view, name='calculos_estadisticas'),
+    path('inventario/', views.control_inventario_view, name='control_inventario'),
+
+
+
 ]

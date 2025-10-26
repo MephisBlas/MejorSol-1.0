@@ -58,8 +58,12 @@ ROOT_URLCONF = 'MejorSol.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'myapp/templates')],  # Agregar esta línea
-        'APP_DIRS': True,
+        # Puedes usar una o ambas rutas según tu estructura
+        'DIRS': [
+            BASE_DIR / 'templates',          # Carpeta global (por ejemplo: MejorSol/templates)
+            BASE_DIR / 'myapp' / 'templates' # Carpeta dentro de tu app
+        ],
+        'APP_DIRS': True,  # imprescindible para /app/templates
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -70,6 +74,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'MejorSol.wsgi.application'
 
