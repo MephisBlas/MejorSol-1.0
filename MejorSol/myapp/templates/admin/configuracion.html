@@ -1,0 +1,149 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Configuración - SIEER Chile</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
+  <style>
+    .config-card{background:#121417;border:1px solid #222831;border-radius:1rem;padding:1rem 1.2rem;margin-bottom:1rem}
+    .config-section{margin-bottom:1rem}
+    label{display:block;margin-bottom:.3rem;color:#8ef3c5}
+    input[type="text"],input[type="email"],input[type="tel"],select{width:100%;background:#14161a;color:#e7f5ef;border:1px solid #2a2f36;border-radius:.6rem;padding:.55rem .7rem}
+    .switch{display:flex;align-items:center;gap:.6rem;margin-top:.5rem}
+    .switch input{width:auto}
+    .actions{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem}
+  </style>
+</head>
+
+<body>
+<div class="admin-container">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <div class="admin-logo">
+        <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo">
+        <div class="logo-text"><h2>SIEER Chile</h2><span>Panel Administrativo</span></div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <h3>Facturación</h3>
+        <ul>
+          <li class="nav-item"><a href="{% url 'admin_panel' %}"><i class="fas fa-file-invoice"></i><span>Boleta y Factura Electrónica</span></a></li>
+          <li class="nav-item"><a href="{% url 'calculos_estadisticas' %}"><i class="fas fa-calculator"></i><span>Cálculos y Estadísticas</span></a></li>
+          <li class="nav-item"><a href="{% url 'cotizaciones' %}"><i class="fas fa-file-alt"></i><span>Cotizaciones</span></a></li>
+          <li class="nav-item"><a href="{% url 'control_inventario' %}"><i class="fas fa-boxes"></i><span>Control de Inventario</span></a></li>
+        </ul>
+      </div>
+
+      <div class="nav-section">
+        <h3>Reportes</h3>
+        <ul>
+          <li class="nav-item"><a href="{% url 'reportes_graficos' %}"><i class="fas fa-chart-bar"></i><span>Reportes Gráficos</span></a></li>
+          <li class="nav-item"><a href="{% url 'historial_ventas' %}"><i class="fas fa-history"></i><span>Historia de Ventas</span></a></li>
+          <li class="nav-item"><a href="{% url 'cuenta' %}"><i class="fas fa-user-cog"></i><span>Cuenta</span></a></li>
+          <li class="nav-item active"><a href="{% url 'configuracion' %}"><i class="fas fa-cogs"></i><span>Configuración</span></a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+        <div class="user-details"><strong>Administrador</strong><span>{{ user.username }}</span></div>
+      </div>
+      <form method="post" action="{% url 'logout' %}" class="logout-form">
+        {% csrf_token %}
+        <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+    <header class="admin-header">
+      <div class="header-left">
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <h1>Configuración</h1>
+      </div>
+      <div class="header-right">
+        <a class="btn btn-primary" href="{% url 'admin_panel' %}">
+          <i class="fas fa-arrow-left"></i> Volver al Panel
+        </a>
+      </div>
+    </header>
+
+    <div class="admin-content">
+
+      <div class="config-card">
+        <h2>Información del Sistema</h2>
+        <form method="post">
+          {% csrf_token %}
+          <div class="config-section">
+            <label>Nombre del sistema</label>
+            <input type="text" name="system_name" value="{{ config.system_name|default:'SIEER Chile' }}">
+          </div>
+          <div class="config-section">
+            <label>Correo de contacto</label>
+            <input type="email" name="email" value="{{ config.email|default:'contacto@sieer.cl' }}">
+          </div>
+          <div class="config-section">
+            <label>Teléfono</label>
+            <input type="tel" name="telefono" value="{{ config.telefono|default:'+56 9 8152 0994' }}">
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" type="submit">
+              <i class="fas fa-save"></i> Guardar cambios
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="config-card">
+        <h2>Preferencias del sistema</h2>
+        <form method="post">
+          {% csrf_token %}
+          <div class="switch">
+            <input type="checkbox" name="notificaciones" {% if config.notificaciones %}checked{% endif %}>
+            <label>Activar notificaciones del sistema</label>
+          </div>
+          <div class="switch">
+            <input type="checkbox" name="modo_oscuro" {% if config.modo_oscuro %}checked{% endif %}>
+            <label>Usar modo oscuro (interfaz)</label>
+          </div>
+          <div class="actions">
+            <button class="btn btn-outline" type="submit">
+              <i class="fas fa-check"></i> Aplicar configuración
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="config-card">
+        <h2>Restablecer sistema</h2>
+        <p>Esta acción eliminará configuraciones personalizadas y restablecerá los valores predeterminados. Úsala con precaución.</p>
+        <div class="actions">
+          <button class="btn btn-outline" style="border-color:#ff4444;color:#ff8888;">
+            <i class="fas fa-undo"></i> Restablecer valores
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="{% static 'js/admin_panel.js' %}"></script>
+</body>
+</html>

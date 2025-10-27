@@ -1,19 +1,25 @@
-# myapp/views.py
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, authenticate
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.views import LoginView
-from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-
+# -*- coding: utf-8 -*-
+from datetime import datetime
 import json
 import uuid
 import random
 
-from .forms import RegistroForm
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, update_session_auth_hash
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.forms import PasswordChangeForm
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required, user_passes_test
+
+from .forms import RegistroForm, ProfileForm   # <-- tus formularios deben estar en myapp/forms.py
 from .models import ChatConversation, ChatMessage
+# from .models import Venta  # si más adelante usas el modelo real
 
 # ===========================
 #        PÚBLICO / AUTH
@@ -188,13 +194,11 @@ def get_conversation_history(request, session_id):
 #     COTIZACIONES (DEMO)
 # ===========================
 
-# Datos demo en memoria (puedes reemplazar por tu modelo después)
 COTIZACIONES = [
     {"id": 1, "cliente": "Juan Pérez", "fecha": "2025-10-20", "total": 250000, "estado": "Pendiente"},
     {"id": 2, "cliente": "Empresa SolarTech", "fecha": "2025-10-21", "total": 480000, "estado": "Aprobada"},
 ]
 
-# Catálogo demo de kits (usado tanto en CREAR como en EDITAR)
 KITS_DICT = {
     "ongrid": [
         {"id": 1, "nombre": "Kit On-Grid 1 kW", "precio": 1500000, "potencia": 1.0},
@@ -220,10 +224,7 @@ KWH_TABLE = [
 
 @login_required
 @user_passes_test(is_admin)
-
-@login_required
 def cotizaciones_view(request):
-    # Campos opcionales que la plantilla puede intentar leer
     optional_fields = [
         "rut", "contacto",
         "kit_nombre", "tipo_sistema",
@@ -235,35 +236,23 @@ def cotizaciones_view(request):
 
     cotzs = []
     for c in COTIZACIONES:
-        d = dict(c)  # copia
-        # asegura presencia de todas las claves opcionales
+        d = dict(c)
         for f in optional_fields:
             d.setdefault(f, None)
-
-        # si no hay objeto 'kit', crea uno mínimo para que 'cot.kit.nombre' y 'cot.kit.potencia' funcionen
         if "kit" not in d or d["kit"] is None:
-            d["kit"] = {
-                "nombre": d.get("kit_nombre"),
-                "potencia": d.get("potencia_aprox"),
-            }
-
-        # si no tienes 'subtotal/iva/total' calculados, puedes derivarlos (opcional)
+            d["kit"] = {"nombre": d.get("kit_nombre"), "potencia": d.get("potencia_aprox")}
         if d.get("subtotal") is None and d.get("precio_unitario") and d.get("cantidad"):
             try:
-                pu = int(d["precio_unitario"])
-                qty = int(d.get("cantidad") or 1)
+                pu = int(d["precio_unitario"]); qty = int(d.get("cantidad") or 1)
                 d["subtotal"] = pu * qty
             except Exception:
                 pass
-
         if d.get("iva") is None and d.get("subtotal") and d.get("iva_porcentaje"):
             try:
                 iva_pct = int(d["iva_porcentaje"])
                 d["iva"] = d["subtotal"] * iva_pct // 100
             except Exception:
                 pass
-
-        # si no hay 'total' en el dict original, re-calcular
         if d.get("total") is None and d.get("subtotal"):
             total = d["subtotal"] + (d.get("iva") or 0)
             if d.get("descuento"):
@@ -272,11 +261,9 @@ def cotizaciones_view(request):
                 except Exception:
                     pass
             d["total"] = total
-
         cotzs.append(d)
 
     return render(request, "admin/cotizaciones.html", {"cotizaciones": cotzs})
-
 
 @login_required
 @user_passes_test(is_admin)
@@ -288,7 +275,6 @@ def crear_cotizacion(request):
             "fecha": request.POST.get("fecha", ""),
             "total": request.POST.get("total", "0"),
             "estado": request.POST.get("estado", "Pendiente"),
-            # opcionalmente podrías guardar "tipo_sistema" y "kit_id"
             "tipo_sistema": request.POST.get("tipo_sistema"),
             "kit_id": request.POST.get("kit_id"),
         }
@@ -312,10 +298,6 @@ def ver_cotizacion(request, cot_id):
 @login_required
 @user_passes_test(is_admin)
 def editar_cotizacion(request, cot_id):
-    """
-    IMPORTANTE: enviamos 'kits_json' y 'kwh_json' IGUAL que en CREAR,
-    para que el template de editar rellene el <select> de kits.
-    """
     cot = next((c for c in COTIZACIONES if c["id"] == int(cot_id)), None)
     if not cot:
         return HttpResponse("Cotización no encontrada.", status=404)
@@ -325,7 +307,6 @@ def editar_cotizacion(request, cot_id):
         cot["fecha"] = request.POST.get("fecha", "")
         cot["total"] = request.POST.get("total", "0")
         cot["estado"] = request.POST.get("estado", cot.get("estado", "Pendiente"))
-        # también puedes actualizar tipo_sistema / kit_id si tu form los envía:
         cot["tipo_sistema"] = request.POST.get("tipo_sistema", cot.get("tipo_sistema"))
         cot["kit_id"] = request.POST.get("kit_id", cot.get("kit_id"))
         return redirect("cotizaciones")
@@ -348,16 +329,152 @@ def eliminar_cotizacion(request, cot_id):
         return redirect("cotizaciones")
     return render(request, "admin/eliminar_cotizacion.html", {"cot": cot})
 
-def calculos_estadisticas_view(request):
-    # Si más adelante quieres pasar datos de Excel, aquí los cargas y envías al template.
-    return render(request, 'calculos_estadisticas.html')
-
-import pandas as pd
-from django.shortcuts import render
+# ===========================
+#     OTRAS SECCIONES
+# ===========================
 
 def calculos_estadisticas_view(request):
     return render(request, 'admin/calculos_estadisticas.html')
 
 def control_inventario_view(request):
-    # Más adelante podrás pasar aquí datos reales desde la BD.
     return render(request, 'admin/control_inventario.html')
+
+def reportes_graficos_view(request):
+    ventas_mensuales = [245680, 320000, 275400, 310200, 295000, 350000]
+    meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio"]
+    productos_stock = {"Transformadores": 30, "Paneles Solares": 55, "Baterías": 22, "Inversores": 18}
+
+    context = {
+        "meses": meses,
+        "ventas": ventas_mensuales,
+        "productos": list(productos_stock.keys()),
+        "stock": list(productos_stock.values())
+    }
+    return render(request, "admin/reportes_graficos.html", context)
+
+def _parse_date(s):
+    if not s: return None
+    for fmt in ("%Y-%m-%d", "%d-%m-%Y", "%d/%m/%Y"):
+        try:
+            return datetime.strptime(s, fmt).date()
+        except ValueError:
+            pass
+    return None
+
+def historial_ventas_view(request):
+    DEMO = False
+    ventas_demo = []
+    if not 'Venta' in [m.__name__ for m in getattr(__import__('myapp.models', fromlist=['*']), 'models').__dict__.values() if hasattr(m, '__name__')]:
+        DEMO = True
+        ventas_demo = [
+            {"fecha": datetime(2025, 10, 1).date(), "numero": "F-00125", "cliente": "ElectroSur", "total": 245680, "estado": "Pagada", "metodo_pago": "Transferencia"},
+            {"fecha": datetime(2025, 9, 28).date(), "numero": "B-00987", "cliente": "EnerPlus",   "total":  35680, "estado": "Pendiente", "metodo_pago": "Efectivo"},
+            {"fecha": datetime(2025, 9, 21).date(), "numero": "F-00124", "cliente": "TecnoVolt",  "total": 125900, "estado": "Anulada", "metodo_pago": "Tarjeta"},
+        ]
+
+    q = request.GET.get("q", "").strip()
+    estado = request.GET.get("estado", "").strip()
+    f_desde = _parse_date(request.GET.get("desde"))
+    f_hasta = _parse_date(request.GET.get("hasta"))
+
+    if not DEMO:
+        from myapp.models import Venta
+        qs = Venta.objects.all()
+        if q:       qs = qs.filter(Q(numero__icontains=q) | Q(cliente__icontains=q))
+        if estado:  qs = qs.filter(estado__iexact=estado)
+        if f_desde: qs = qs.filter(fecha__date__gte=f_desde) if hasattr(Venta, 'fecha') else qs.filter(fecha__gte=f_desde)
+        if f_hasta: qs = qs.filter(fecha__date__lte=f_hasta) if hasattr(Venta, 'fecha') else qs.filter(fecha__lte=f_hasta)
+        qs = qs.order_by("-fecha")
+
+        if request.GET.get("export") == "csv":
+            resp = HttpResponse(content_type="text/csv; charset=utf-8")
+            resp['Content-Disposition'] = 'attachment; filename="historial_ventas.csv"'
+            resp.write("Fecha,Número,Cliente,Total,Estado,Método de Pago\n")
+            for v in qs:
+                fecha_str = v.fecha.strftime("%Y-%m-%d") if hasattr(v.fecha, "strftime") else str(v.fecha)
+                resp.write(f'{fecha_str},{v.numero},{v.cliente},{v.total},{v.estado},{getattr(v,"metodo_pago","")}\n')
+            return resp
+
+        paginator = Paginator(qs, 20)
+        page_obj = paginator.get_page(request.GET.get("page"))
+        ventas = page_obj.object_list
+    else:
+        ventas = ventas_demo
+        if q:       ventas = [v for v in ventas if q.lower() in v["numero"].lower() or q.lower() in v["cliente"].lower()]
+        if estado:  ventas = [v for v in ventas if v["estado"].lower() == estado.lower()]
+        if f_desde: ventas = [v for v in ventas if v["fecha"] >= f_desde]
+        if f_hasta: ventas = [v for v in ventas if v["fecha"] <= f_hasta]
+        ventas.sort(key=lambda x: x["fecha"], reverse=True)
+        page_obj = None
+
+        if request.GET.get("export") == "csv":
+            resp = HttpResponse(content_type="text/csv; charset=utf-8")
+            resp['Content-Disposition'] = 'attachment; filename="historial_ventas.csv"'
+            resp.write("Fecha,Número,Cliente,Total,Estado,Método de Pago\n")
+            for v in ventas:
+                resp.write(f'{v["fecha"]},{v["numero"]},{v["cliente"]},{v["total"]},{v["estado"]},{v["metodo_pago"]}\n')
+            return resp
+
+    return render(request, "admin/historial_ventas.html", {
+        "ventas": ventas,
+        "page_obj": page_obj,
+        "q": q,
+        "estado": estado,
+        "desde": request.GET.get("desde", ""),
+        "hasta": request.GET.get("hasta", ""),
+        "demo": DEMO,
+    })
+
+# ===========================
+#           CUENTA
+# ===========================
+
+
+def is_admin(user):
+    return user.is_staff or user.is_superuser
+
+@login_required
+@user_passes_test(is_admin)   # <-- agrega esto
+# --- VISTA DE CUENTA ---
+ # asegúrate de tener esta importación arriba
+
+
+@login_required
+def cuenta_view(request):
+    user = request.user
+
+    # Formularios iniciales
+    perfil_form = ProfileForm(instance=user)
+    pass_form   = PasswordChangeForm(user=user)
+
+    if request.method == "POST":
+        # Actualizar perfil
+        if "update_profile" in request.POST:
+            perfil_form = ProfileForm(request.POST, instance=user)
+            if perfil_form.is_valid():
+                perfil_form.save()
+                messages.success(request, "Tu perfil se actualizó correctamente.")
+                return redirect("cuenta")
+            else:
+                messages.error(request, "Revisa los errores del formulario de perfil.")
+
+        # Cambiar contraseña
+        elif "change_password" in request.POST:
+            pass_form = PasswordChangeForm(user=user, data=request.POST)
+            if pass_form.is_valid():
+                user = pass_form.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, "Tu contraseña se cambió correctamente.")
+                return redirect("cuenta")
+            else:
+                messages.error(request, "No se pudo cambiar la contraseña. Revisa los datos ingresados.")
+
+    # Renderizar siempre
+    return render(request, "admin/cuenta.html", {
+        "perfil_form": perfil_form,
+        "pass_form": pass_form,
+    })
+    
+@login_required
+def configuracion(request):
+    return render(request, 'admin/configuracion.html')

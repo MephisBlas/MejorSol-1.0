@@ -1,0 +1,192 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reportes Gráficos - SIEER Chile</title>
+
+  <!-- Estilos e íconos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <div class="admin-container">
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-header">
+        <div class="admin-logo">
+          <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo">
+          <div class="logo-text">
+            <h2>SIEER Chile</h2>
+            <span>Panel Administrativo</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <h3>Facturación</h3>
+          <ul>
+            <li class="nav-item">
+              <a href="{% url 'admin_panel' %}">
+                <i class="fas fa-file-invoice"></i>
+                <span>Boleta y Factura Electrónica</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'calculos_estadisticas' %}">
+                <i class="fas fa-calculator"></i>
+                <span>Cálculos y Estadísticas</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'cotizaciones' %}">
+                <i class="fas fa-file-alt"></i>
+                <span>Cotizaciones</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'control_inventario' %}">
+                <i class="fas fa-boxes"></i>
+                <span>Control de Inventario</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
+          <h3>Reportes</h3>
+          <ul>
+            <li class="nav-item active">
+              <a href="{% url 'reportes_graficos' %}">
+                <i class="fas fa-chart-bar"></i>
+                <span>Reportes Gráficos</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#">
+                <i class="fas fa-history"></i>
+                <span>Historia de Ventas</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#">
+                <i class="fas fa-user-cog"></i>
+                <span>Cuenta</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'admin_panel' %}">
+                <i class="fas fa-cogs"></i>
+                <span>Configuración</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar">
+            <i class="fas fa-user-shield"></i>
+          </div>
+          <div class="user-details">
+            <strong>Administrador</strong>
+            <span>{{ user.username }}</span>
+          </div>
+        </div>
+        <form method="post" action="{% url 'logout' %}" class="logout-form">
+          {% csrf_token %}
+          <button type="submit" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <div class="header-left">
+          <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1>Reportes Gráficos</h1>
+        </div>
+        <div class="header-right">
+          <a href="{% url 'admin_panel' %}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Volver al Panel
+          </a>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <div class="chart-section">
+          <h2>Ventas Mensuales</h2>
+          <canvas id="ventasChart"></canvas>
+        </div>
+
+        <div class="chart-section">
+          <h2>Stock de Productos</h2>
+          <canvas id="stockChart"></canvas>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Datos en JSON -->
+  <script id="data-meses" type="application/json">{{ meses|safe }}</script>
+  <script id="data-ventas" type="application/json">{{ ventas|safe }}</script>
+  <script id="data-productos" type="application/json">{{ productos|safe }}</script>
+  <script id="data-stock" type="application/json">{{ stock|safe }}</script>
+
+  <script>
+    // Cargar datos de Django
+    const meses = JSON.parse(document.getElementById('data-meses').textContent);
+    const ventas = JSON.parse(document.getElementById('data-ventas').textContent);
+    const productos = JSON.parse(document.getElementById('data-productos').textContent);
+    const stock = JSON.parse(document.getElementById('data-stock').textContent);
+
+    // Gráfico de Ventas
+    new Chart(document.getElementById('ventasChart'), {
+      type: 'line',
+      data: {
+        labels: meses,
+        datasets: [{
+          label: 'Ventas ($)',
+          data: ventas,
+          borderColor: '#00ff88',
+          backgroundColor: 'rgba(0,255,136,0.1)',
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Gráfico de Stock
+    new Chart(document.getElementById('stockChart'), {
+      type: 'bar',
+      data: {
+        labels: productos,
+        datasets: [{
+          label: 'Stock Disponible',
+          data: stock,
+          backgroundColor: ['#00ff88', '#00ccff', '#ffaa00', '#ff4477']
+        }]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+  </script>
+</body>
+</html>

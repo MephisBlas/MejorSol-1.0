@@ -1,0 +1,203 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cuenta - SIEER Chile</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
+
+  <style>
+    .form-card{background:#121417;border:1px solid #222831;border-radius:1rem;padding:1rem 1.2rem;margin-bottom:1rem}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .form-row .full{grid-column:1 / -1}
+    label{display:block;color:#8ef3c5;margin-bottom:.35rem}
+    input{width:100%;background:#14161a;color:#e7f5ef;border:1px solid #2a2f36;border-radius:.6rem;padding:.55rem .7rem}
+    .actions{display:flex;gap:.6rem;justify-content:flex-end;margin-top:.8rem}
+    .messages{margin-bottom:1rem}
+    .messages .msg{padding:.6rem .8rem;border-radius:.6rem;margin-bottom:.4rem}
+    .msg.ok{background:#0f3b2c;color:#afffd4}
+    .msg.err{background:#3b1010;color:#ffb3b3}
+    /* Badges */
+    .role-badge{display:inline-block;padding:.25rem .5rem;border-radius:.4rem;font-size:.85rem;margin-left:.5rem}
+    .badge-super{background:#3b2b0f;color:#ffd27a}
+    .badge-staff{background:#0f2b3b;color:#7ad2ff}
+  </style>
+</head>
+
+<body>
+<div class="admin-container">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-header">
+      <div class="admin-logo">
+        <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo">
+        <div class="logo-text"><h2>SIEER Chile</h2><span>Panel Administrativo</span></div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <h3>Facturación</h3>
+        <ul>
+          <li class="nav-item"><a href="{% url 'admin_panel' %}"><i class="fas fa-file-invoice"></i><span>Boleta y Factura Electrónica</span></a></li>
+          <li class="nav-item"><a href="{% url 'calculos_estadisticas' %}"><i class="fas fa-calculator"></i><span>Cálculos y Estadísticas</span></a></li>
+          <li class="nav-item"><a href="{% url 'cotizaciones' %}"><i class="fas fa-file-alt"></i><span>Cotizaciones</span></a></li>
+          <li class="nav-item"><a href="{% url 'control_inventario' %}"><i class="fas fa-boxes"></i><span>Control de Inventario</span></a></li>
+        </ul>
+      </div>
+
+      <div class="nav-section">
+        <h3>Reportes</h3>
+        <ul>
+          <li class="nav-item"><a href="{% url 'reportes_graficos' %}"><i class="fas fa-chart-bar"></i><span>Reportes Gráficos</span></a></li>
+          <li class="nav-item"><a href="{% url 'historial_ventas' %}"><i class="fas fa-history"></i><span>Historia de Ventas</span></a></li>
+          <li class="nav-item active"><a href="{% url 'cuenta' %}"><i class="fas fa-user-cog"></i><span>Cuenta</span></a></li>
+          <li class="nav-item"><a href="{% url 'admin_panel' %}"><i class="fas fa-cogs"></i><span>Configuración</span></a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+        <div class="user-details"><strong>Administrador</strong><span>{{ user.username }}</span></div>
+      </div>
+      <form method="post" action="{% url 'logout' %}" class="logout-form">
+        {% csrf_token %}
+        <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="admin-main">
+    <header class="admin-header">
+      <div class="header-left">
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <h1>
+          Cuenta
+          {% if user.is_superuser %}
+            <span class="role-badge badge-super">Superusuario</span>
+          {% elif user.is_staff %}
+            <span class="role-badge badge-staff">Staff</span>
+          {% endif %}
+        </h1>
+      </div>
+      <div class="header-right">
+        <a class="btn btn-primary" href="{% url 'admin_panel' %}">
+          <i class="fas fa-arrow-left"></i> Volver al Panel
+        </a>
+        {% if user.is_superuser %}
+        <a class="btn btn-outline" href="/admin/" style="margin-left:.5rem;">
+          <i class="fas fa-shield-alt"></i> Django Admin
+        </a>
+        {% endif %}
+      </div>
+    </header>
+
+    <div class="admin-content">
+
+      <!-- Mensajes -->
+      <div class="messages">
+        {% for m in messages %}
+          <div class="msg {% if m.tags == 'success' %}ok{% else %}err{% endif %}">{{ m }}</div>
+        {% endfor %}
+      </div>
+
+      <!-- Perfil -->
+      <div class="form-card">
+        <h2>Perfil</h2>
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-row">
+            <div>
+              <label for="id_first_name">Nombre</label>
+              {{ perfil_form.first_name }}
+              {% for e in perfil_form.first_name.errors %}<small class="msg err">{{ e }}</small>{% endfor %}
+            </div>
+            <div>
+              <label for="id_last_name">Apellido</label>
+              {{ perfil_form.last_name }}
+              {% for e in perfil_form.last_name.errors %}<small class="msg err">{{ e }}</small>{% endfor %}
+            </div>
+            <div class="full">
+              <label for="id_email">Correo</label>
+              {{ perfil_form.email }}
+              {% for e in perfil_form.email.errors %}<small class="msg err">{{ e }}</small>{% endfor %}
+            </div>
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn btn-primary" name="update_profile">
+              <i class="fas fa-save"></i> Guardar cambios
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Contraseña -->
+      <div class="form-card">
+        <h2>Cambiar contraseña</h2>
+        <form method="post">
+          {% csrf_token %}
+          <div class="form-row">
+            <div class="full">
+              <label for="{{ pass_form.old_password.id_for_label }}">Contraseña actual</label>
+              {{ pass_form.old_password }}
+              {% for e in pass_form.old_password.errors %}<small class="msg err">{{ e }}</small>{% endfor %}
+            </div>
+            <div>
+              <label for="{{ pass_form.new_password1.id_for_label }}">Nueva contraseña</label>
+              {{ pass_form.new_password1 }}
+              {% for e in pass_form.new_password1.errors %}<small class="msg err">{{ e }}</small>{% endfor %}
+            </div>
+            <div>
+              <label for="{{ pass_form.new_password2.id_for_label }}">Repite la nueva contraseña</label>
+              {{ pass_form.new_password2 }}
+              {% for e in pass_form.new_password2.errors %}<small class="msg err">{{ e }}</small>{% endfor %}
+            </div>
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn btn-outline" name="change_password">
+              <i class="fas fa-key"></i> Cambiar contraseña
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {% if user.is_superuser %}
+      <!-- Herramientas de administración -->
+      <div class="form-card">
+        <h2>Herramientas de administración (Superusuario)</h2>
+        <p>Puedes gestionar usuarios, permisos y datos desde el administrador de Django.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="/admin/">
+            <i class="fas fa-user-shield"></i> Ir al Django Admin
+          </a>
+        </div>
+        <div style="margin-top:.6rem;font-size:.9rem;color:#9fb3a7">
+          <div>Usuario: <strong>{{ user.username }}</strong></div>
+          <div>Correo: {{ user.email|default:"—" }}</div>
+          <div>is_staff: {{ user.is_staff }}</div>
+          <div>is_superuser: {{ user.is_superuser }}</div>
+          <div>Último acceso: {{ user.last_login|date:"Y-m-d H:i" }}</div>
+          <div>Fecha de alta: {{ user.date_joined|date:"Y-m-d H:i" }}</div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </main>
+</div>
+
+<script src="{% static 'js/admin_panel.js' %}"></script>
+</body>
+</html>
