@@ -1,0 +1,88 @@
+<!-- templates/admin/producto_detail.html -->
+<div class="product-detail">
+    <div class="detail-row">
+        <div class="detail-group">
+            <label>ID:</label>
+            <span>#{{ producto.id }}</span>
+        </div>
+        <div class="detail-group">
+            <label>SKU:</label>
+            <span class="sku-code">{{ producto.sku|default:"N/A" }}</span>
+        </div>
+    </div>
+
+    <div class="detail-row">
+        <div class="detail-group">
+            <label>Estado:</label>
+            <span class="status-badge {% if producto.activo %}status-active{% else %}status-inactive{% endif %}">
+                {% if producto.activo %}Activo{% else %}Inactivo{% endif %}
+            </span>
+        </div>
+        <div class="detail-group">
+            <label>Categoría:</label>
+            <span>{{ producto.categoria }}</span>
+        </div>
+    </div>
+    
+    <div class="detail-group">
+        <label>Nombre:</label>
+        <span class="product-name">{{ producto.nombre }}</span>
+    </div>
+    
+    <div class="detail-group">
+        <label>Descripción:</label>
+        <span class="product-description">{{ producto.descripcion|default:"Sin descripción" }}</span>
+    </div>
+    
+    <div class="detail-row">
+        <div class="detail-group">
+            <label>Precio:</label>
+            <span class="price">$ {{ producto.precio }}</span>
+        </div>
+        <div class="detail-group">
+            <label>Stock Mínimo:</label>
+            <span>{{ producto.stock_minimo }} unidades</span>
+        </div>
+    </div>
+    
+    <div class="detail-row">
+        <div class="detail-group">
+            <label>Stock Actual:</label>
+            <span class="stock-badge {% if producto.stock <= producto.stock_minimo %}stock-low{% elif producto.stock == 0 %}stock-out{% else %}stock-normal{% endif %}">
+                {{ producto.stock }} unidades
+                {% if producto.stock <= producto.stock_minimo and producto.stock > 0 %}
+                <i class="fas fa-exclamation-triangle" title="Stock bajo"></i>
+                {% elif producto.stock == 0 %}
+                <i class="fas fa-times-circle" title="Stock agotado"></i>
+                {% endif %}
+            </span>
+        </div>
+        <div class="detail-group">
+            <label>Nivel Stock:</label>
+            <span class="stock-level">
+                {% if producto.stock == 0 %}
+                    <i class="fas fa-times-circle"></i> Agotado
+                {% elif producto.stock <= producto.stock_minimo %}
+                    <i class="fas fa-exclamation-triangle"></i> Bajo
+                {% else %}
+                    <i class="fas fa-check-circle"></i> Normal
+                {% endif %}
+            </span>
+        </div>
+    </div>
+    
+    {% if producto.fecha_creacion %}
+    <div class="detail-row">
+        <div class="detail-group">
+            <label>Fecha Creación:</label>
+            <span>{{ producto.fecha_creacion|date:"d/m/Y H:i" }}</span>
+        </div>
+        {% if producto.fecha_actualizacion %}
+        <div class="detail-group">
+            <label>Última Actualización:</label>
+            <span>{{ producto.fecha_actualizacion|date:"d/m/Y H:i" }}</span>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>

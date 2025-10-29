@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Perfil
+from .models import Perfil, Producto
 
 
 class RegistroForm(UserCreationForm):
@@ -60,3 +60,65 @@ class ProfileForm(forms.ModelForm):
             if qs.exists():
                 raise forms.ValidationError("Este correo ya está en uso.")
         return email
+
+    #productos
+
+
+class ProductoForm(forms.ModelForm):
+    class Meta:
+        model = Producto
+        fields = [
+            'nombre', 
+            'descripcion', 
+            'precio', 
+            'stock', 
+            'stock_minimo', 
+            'sku', 
+            'categoria', 
+            'activo'  # Cambiado 'estado' por 'activo'
+        ]
+        widgets = {
+            'nombre': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nombre del producto'
+            }),
+            'descripcion': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Descripción del producto'
+            }),
+            'precio': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'stock': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0'
+            }),
+            'stock_minimo': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0'
+            }),
+            'sku': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Código SKU único'
+            }),
+            'categoria': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Categoría del producto'
+            }),
+            'activo': forms.CheckboxInput(attrs={  # Cambiado para campo booleano
+                'class': 'form-check-input'
+            }),
+        }
+    
+    def clean_sku(self):
+        sku = self.cleaned_data.get('sku')
+        if self.instance.pk:  # Si es una edición
+            if Producto.objects.filter(sku=sku).exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError("Este SKU ya existe.")
+        else:  # Si es creación
+            if Producto.objects.filter(sku=sku).exists():
+                raise forms.ValidationError("Este SKU ya existe.")
+        return sku

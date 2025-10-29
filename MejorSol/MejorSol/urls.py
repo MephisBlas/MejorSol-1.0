@@ -27,6 +27,11 @@ urlpatterns = [
     path('historial/', views.historial_ventas_view, name='historial_ventas'),
     path('cuenta/', views.cuenta_view, name='cuenta'),
     path('configuracion/', views.configuracion, name='configuracion'),
+    path('productos-list/', views.productos_list, name='productos_list'),
+    path('productos/nuevo/', views.producto_create, name='producto_create'),
+    path('productos/editar/<int:pk>/', views.producto_edit, name='producto_edit'),
+    path('productos/eliminar/<int:pk>/', views.producto_delete, name='producto_delete'),
+    path('productos/detalle/<int:producto_id>/', views.producto_detail, name='producto_detail'),
 
 
 
