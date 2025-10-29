@@ -35,26 +35,63 @@
       <div class="nav-section">
         <h3>Facturación</h3>
         <ul>
-          <li class="nav-item">
-            <a href="#"><i class="fas fa-file-invoice"></i><span>Boleta y Factura Electrónica</span></a>
-          </li>
-          <li class="nav-item active">
-            <a href="{% url 'calculos_estadisticas' %}">
-              <i class="fas fa-calculator"></i><span>Cálculos y Estadísticas</span>
+          <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
+            <a href="{% url 'admin_panel' %}">
+              <i class="fas fa-file-invoice"></i>
+              <span>Boleta y Factura Electrónica</span>
             </a>
           </li>
-          <li class="nav-item"><a href="{% url 'cotizaciones' %}"><i class="fas fa-file-alt"></i><span>Cotizaciones</span></a></li>
-          <li class="nav-item"><a href="#"><i class="fas fa-boxes"></i><span>Control de Inventario</span></a></li>
+
+          <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}">
+            <a href="{% url 'calculos_estadisticas' %}">
+              <i class="fas fa-calculator"></i>
+              <span>Cálculos y Estadísticas</span>
+            </a>
+          </li>
+
+          <li class="nav-item {% if request.resolver_match.url_name == 'cotizaciones' %}active{% endif %}">
+            <a href="{% url 'cotizaciones' %}">
+              <i class="fas fa-file-alt"></i>
+              <span>Cotizaciones</span>
+            </a>
+          </li>
+
+          <li class="nav-item {% if request.resolver_match.url_name == 'control_inventario' %}active{% endif %}">
+            <a href="{% url 'control_inventario' %}">
+              <i class="fas fa-boxes"></i>
+              <span>Control de Inventario</span>
+            </a>
+          </li>
         </ul>
       </div>
 
       <div class="nav-section">
         <h3>Reportes</h3>
         <ul>
-          <li class="nav-item"><a href="#"><i class="fas fa-chart-bar"></i><span>Reportes Gráficos</span></a></li>
-          <li class="nav-item"><a href="#"><i class="fas fa-history"></i><span>Historia de Ventas</span></a></li>
-          <li class="nav-item"><a href="#"><i class="fas fa-user-cog"></i><span>Cuenta</span></a></li>
-          <li class="nav-item"><a href="#"><i class="fas fa-cogs"></i><span>Configuración</span></a></li>
+          <li class="nav-item {% if request.resolver_match.url_name == 'reportes_graficos' %}active{% endif %}">
+            <a href="{% url 'reportes_graficos' %}">
+              <i class="fas fa-chart-bar"></i>
+              <span>Reportes Gráficos</span>
+            </a>
+          </li>
+          <li class="nav-item {% if request.resolver_match.url_name == 'historial_ventas' %}active{% endif %}">
+            <a href="{% url 'historial_ventas' %}">
+              <i class="fas fa-history"></i>
+              <span>Historia de Ventas</span>
+            </a>
+          </li>
+          <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}">
+            <a href="{% url 'cuenta' %}">
+              <i class="fas fa-user-cog"></i>
+              <span>Cuenta</span>
+            </a>
+          </li>
+          <li class="nav-item {% if request.resolver_match.url_name == 'configuracion' %}active{% endif %}">
+            <a href="{% url 'configuracion' %}">
+              <i class="fas fa-cogs"></i>
+              <span>Configuración</span>
+            </a>
+          </li>
         </ul>
       </div>
     </nav>
@@ -66,7 +103,9 @@
       </div>
       <form method="post" action="{% url 'logout' %}" class="logout-form">
         {% csrf_token %}
-        <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i>Cerrar Sesión</button>
+        <button type="submit" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+        </button>
       </form>
     </div>
   </aside>
