@@ -3,7 +3,6 @@ from datetime import datetime
 import json
 import uuid
 import random
-
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -14,12 +13,14 @@ from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.contrib.auth.decorators import login_required, user_passes_test
-
-from .forms import RegistroForm, ProfileForm   # <-- tus formularios deben estar en myapp/forms.py
-from .models import ChatConversation, ChatMessage
+from .forms import RegistroForm, ProfileForm, ProductoForm   # <-- tus formularios deben estar en myapp/forms.py
+from .models import ChatConversation, ChatMessage, Producto
 # from .models import Venta  # si más adelante usas el modelo real
+from django.urls import reverse_lazy
+
+
 
 # ===========================
 #        PÚBLICO / AUTH
@@ -75,6 +76,101 @@ def custom_login(request):
             return redirect('admin_panel' if (user.is_staff or user.is_superuser) else 'client_dashboard')
         messages.error(request, 'Usuario o contraseña incorrectos.')
     return render(request, 'registration/login.html')
+
+# ===========================
+#         PRODUCTOS
+# ===========================
+
+@login_required
+@user_passes_test(is_admin)
+def productos_list(request):
+    """Lista todos los productos"""
+    productos = Producto.objects.all()
+    
+    # Filtros
+    categoria = request.GET.get('categoria')
+    estado = request.GET.get('estado')
+    
+    if categoria:
+        productos = productos.filter(categoria__icontains=categoria)
+    if estado:
+        if estado == 'activo':
+            productos = productos.filter(activo=True)
+        elif estado == 'inactivo':
+            productos = productos.filter(activo=False)
+    
+    categorias = Producto.objects.values_list('categoria', flat=True).distinct()
+    
+    context = {
+        'productos': productos,
+        'categorias': categorias,
+        'filtro_categoria': categoria,
+        'filtro_estado': estado,
+    }
+    return render(request, 'admin/productos/productos_list.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def producto_create(request):
+    """Crear nuevo producto"""
+    if request.method == 'POST':
+        form = ProductoForm(request.POST)
+        if form.is_valid():
+            producto = form.save()
+            messages.success(request, f'Producto "{producto.nombre}" creado exitosamente.')
+            return redirect('productos_list')
+    else:
+        form = ProductoForm()
+    
+    context = {'form': form, 'titulo': 'Nuevo Producto'}
+    return render(request, 'admin/productos/producto_form.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def producto_edit(request, pk):
+    """Editar producto existente"""
+    producto = get_object_or_404(Producto, pk=pk)
+    
+    if request.method == 'POST':
+        form = ProductoForm(request.POST, instance=producto)
+        if form.is_valid():
+            producto = form.save()
+            messages.success(request, f'Producto "{producto.nombre}" actualizado exitosamente.')
+            return redirect('productos_list')
+    else:
+        form = ProductoForm(instance=producto)
+    
+    context = {'form': form, 'titulo': 'Editar Producto', 'producto': producto}
+    return render(request, 'admin/productos/producto_form.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+@require_http_methods(["POST"])
+def producto_delete(request, pk):
+    """Eliminar producto"""
+    producto = get_object_or_404(Producto, pk=pk)
+    nombre_producto = producto.nombre
+    producto.delete()
+    messages.success(request, f'Producto "{nombre_producto}" eliminado exitosamente.')
+    return redirect('productos_list')
+
+@login_required
+@user_passes_test(is_admin)
+def producto_detail(request, pk):
+    """Detalle del producto (para modal)"""
+    producto = get_object_or_404(Producto, pk=pk)
+    return render(request, 'admin/partials/producto_detail.html', {'producto': producto})
+
+def producto_detalle_modal(request, producto_id):
+    """Vista para mostrar detalles del producto en modal"""
+    producto = get_object_or_404(Producto, id=producto_id)
+    
+    # Si es una petición AJAX, retornar solo el template del detalle
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'admin/productos/producto_detail.html', {'producto': producto})
+    
+    # Si no es AJAX, retornar página completa (fallback)
+    return render(request, 'admin/productos/producto_detail.html', {'producto': producto})
 
 # ===========================
 #          CHATBOT

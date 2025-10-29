@@ -9,7 +9,6 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('registro/', views.registro, name='registro'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('productos/', views.productos, name='productos'),
     path('admin-panel/', views.admin_panel, name='admin_panel'),
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('client-dashboard/', views.client_dashboard, name='client_dashboard'),
@@ -27,6 +26,11 @@ urlpatterns = [
     path('historial/', views.historial_ventas_view, name='historial_ventas'),
     path('cuenta/', views.cuenta_view, name='cuenta'),
     path('configuracion/', views.configuracion, name='configuracion'),
+    path('productos-list/', views.productos_list, name='productos_list'),
+    path('productos/nuevo/', views.producto_create, name='producto_create'),
+    path('productos/editar/<int:pk>/', views.producto_edit, name='producto_edit'),
+    path('productos/eliminar/<int:pk>/', views.producto_delete, name='producto_delete'),
+    path('productos/detalle/<int:producto_id>/', views.producto_detail, name='producto_detail'),
 
 
 
