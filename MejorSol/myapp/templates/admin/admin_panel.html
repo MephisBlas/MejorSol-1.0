@@ -33,7 +33,7 @@
                 <div class="nav-section">
                     <h3>Facturación</h3>
                     <ul>
-                        <li class="nav-item active">
+                        <li class="nav-item">
                             <a href="#">
                                 <i class="fas fa-file-invoice"></i>
                                 <span>Boleta y Factura Electrónica</span>
@@ -51,10 +51,28 @@
                                 <span>Cotizaciones</span>
                             </a>
                         </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Inventario</h3>
+                    <ul>
+                        <li class="nav-item active">
+                            <a href="{% url 'productos_list' %}">
+                                <i class="fas fa-boxes"></i>
+                                <span>Gestión de Productos</span>
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a href="#">
-                                <i class="fas fa-boxes"></i>
-                                <span>Control de Inventario</span>
+                                <i class="fas fa-tags"></i>
+                                <span>Categorías</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#">
+                                <i class="fas fa-warehouse"></i>
+                                <span>Control de Stock</span>
                             </a>
                         </li>
                     </ul>
@@ -73,6 +91,18 @@
                             <a href="#">
                                 <i class="fas fa-history"></i>
                                 <span>Historia de Ventas</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="nav-section">
+                    <h3>Sistema</h3>
+                    <ul>
+                        <li class="nav-item">
+                            <a href="#">
+                                <i class="fas fa-users"></i>
+                                <span>Usuarios</span>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -184,7 +214,7 @@
                             <i class="fas fa-box-open"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>45</h3>
+                            <h3>{{ total_productos|default:"0" }}</h3>
                             <p>Productos en Stock</p>
                         </div>
                         <div class="stat-trend up">
@@ -220,9 +250,9 @@
                             <div class="action-icon">
                                 <i class="fas fa-box"></i>
                             </div>
-                            <h4>Gestionar Inventario</h4>
-                            <p>Actualizar stock de productos</p>
-                            <button class="btn btn-outline">Gestionar</button>
+                            <h4>Gestionar Productos</h4>
+                            <p>Administrar inventario de productos</p>
+                            <a href="{% url 'productos_list' %}" class="btn btn-outline">Gestionar</a>
                         </div>
 
                         <div class="action-card">
@@ -240,47 +270,58 @@
                 <div class="recent-activity">
                     <h2>Actividad Reciente</h2>
                     <div class="activity-list">
+                        {% for actividad in actividades_recientes %}
                         <div class="activity-item">
-                            <div class="activity-icon success">
-                                <i class="fas fa-check-circle"></i>
+                            <div class="activity-icon {{ actividad.tipo }}">
+                                <i class="fas fa-{{ actividad.icono }}"></i>
                             </div>
                             <div class="activity-content">
-                                <p><strong>Factura #00125</strong> generada exitosamente</p>
-                                <span>Hace 2 minutos</span>
+                                <p><strong>{{ actividad.titulo }}</strong> {{ actividad.descripcion }}</p>
+                                <span>{{ actividad.tiempo }}</span>
                             </div>
                         </div>
-
-                        <div class="activity-item">
-                            <div class="activity-icon warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
-                            <div class="activity-content">
-                                <p><strong>Stock bajo</strong> en Transformadores 50KVA</p>
-                                <span>Hace 15 minutos</span>
-                            </div>
-                        </div>
-
+                        {% empty %}
                         <div class="activity-item">
                             <div class="activity-icon info">
                                 <i class="fas fa-info-circle"></i>
                             </div>
                             <div class="activity-content">
-                                <p><strong>Nuevo cliente</strong> registrado: ElectroSur</p>
-                                <span>Hace 1 hora</span>
+                                <p><strong>Sin actividad reciente</strong></p>
+                                <span>No hay actividades para mostrar</span>
                             </div>
                         </div>
-
-                        <div class="activity-item">
-                            <div class="activity-icon success">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <div class="activity-content">
-                                <p><strong>Cotización #0456</strong> aprobada</p>
-                                <span>Hace 3 horas</span>
-                            </div>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
+
+                <!-- Productos con Stock Bajo -->
+                {% if productos_stock_bajo %}
+                <div class="stock-alert">
+                    <h2>
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Alertas de Stock Bajo
+                    </h2>
+                    <div class="alert-list">
+                        {% for producto in productos_stock_bajo %}
+                        <div class="alert-item">
+                            <div class="alert-icon warning">
+                                <i class="fas fa-exclamation"></i>
+                            </div>
+                            <div class="alert-content">
+                                <p><strong>{{ producto.nombre }}</strong> - Stock: {{ producto.stock }} (Mínimo: {{ producto.stock_minimo }})</p>
+                                <span>SKU: {{ producto.sku }}</span>
+                            </div>
+                            <div class="alert-actions">
+                                <a href="{% url 'producto_edit' producto.id %}" class="btn btn-sm btn-outline">
+                                    <i class="fas fa-edit"></i>
+                                    Actualizar
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </main>
     </div>

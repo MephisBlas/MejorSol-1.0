@@ -1,19 +1,63 @@
 # views.py - CÓDIGO COMPLETO CORREGIDO
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
-from .forms import RegistroForm
+from .forms import RegistroForm, ProductoForm
 import json
 import uuid
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.shortcuts import render
-from .models import ChatConversation, ChatMessage
+from .models import ChatConversation, ChatMessage, Producto
 import random
+from django.views.decorators.http import require_http_methods
+
+from . import models
+
+@login_required
+def admin_dashboard(request):
+    """Vista principal del panel administrativo"""
+    # Obtener estadísticas
+    total_productos = Producto.objects.count()
+    productos_activos = Producto.objects.filter(activo=True).count()
+    productos_stock_bajo = Producto.objects.filter(stock__lte=models.F('stock_minimo'))[:5]
+    
+    # Actividades recientes (puedes personalizar esto)
+    actividades_recientes = [
+        {
+            'tipo': 'success',
+            'icono': 'check-circle',
+            'titulo': 'Factura #00125',
+            'descripcion': 'generada exitosamente',
+            'tiempo': 'Hace 2 minutos'
+        },
+        {
+            'tipo': 'warning',
+            'icono': 'exclamation-triangle',
+            'titulo': 'Stock bajo',
+            'descripcion': f'en {productos_stock_bajo.count()} productos',
+            'tiempo': 'Revisar ahora'
+        },
+        {
+            'tipo': 'info',
+            'icono': 'info-circle',
+            'titulo': 'Sistema',
+            'descripcion': 'Todo funciona correctamente',
+            'tiempo': 'Hace 1 hora'
+        }
+    ]
+    
+    context = {
+        'total_productos': total_productos,
+        'productos_activos': productos_activos,
+        'productos_stock_bajo': productos_stock_bajo,
+        'actividades_recientes': actividades_recientes,
+    }
+    
+    return render(request, 'admin_panel.html', context)
 
 def index(request):
     return render(request, 'index.html')
@@ -50,15 +94,12 @@ def is_admin(user):
 class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
     
-    def form_valid(self, form):
-        # Llamar al método padre para hacer el login
-        response = super().form_valid(form)
-        
+    def get_success_url(self):
         # Verificar el tipo de usuario después del login
         if self.request.user.is_staff or self.request.user.is_superuser:
-            return redirect('admin_panel')
+            return reverse_lazy('admin_panel')
         else:
-            return redirect('client_dashboard')
+            return reverse_lazy('client_dashboard')
 
 @login_required
 @user_passes_test(is_admin)
@@ -99,6 +140,99 @@ def custom_login(request):
 def chatbot_demo(request):
     """Vista para demostrar el chatbot"""
     return render(request, 'chatbot/chatbot_demo.html')
+
+# Productos
+
+@login_required
+@user_passes_test(is_admin)
+def productos_list(request):
+    """Lista todos los productos"""
+    productos = Producto.objects.all()
+    
+    # Filtros
+    categoria = request.GET.get('categoria')
+    estado = request.GET.get('estado')
+    
+    if categoria:
+        productos = productos.filter(categoria__icontains=categoria)
+    if estado:
+        if estado == 'activo':
+            productos = productos.filter(activo=True)
+        elif estado == 'inactivo':
+            productos = productos.filter(activo=False)
+    
+    categorias = Producto.objects.values_list('categoria', flat=True).distinct()
+    
+    context = {
+        'productos': productos,
+        'categorias': categorias,
+        'filtro_categoria': categoria,
+        'filtro_estado': estado,
+    }
+    return render(request, 'admin/productos/productos_list.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def producto_create(request):
+    """Crear nuevo producto"""
+    if request.method == 'POST':
+        form = ProductoForm(request.POST)
+        if form.is_valid():
+            producto = form.save()
+            messages.success(request, f'Producto "{producto.nombre}" creado exitosamente.')
+            return redirect('productos_list')
+    else:
+        form = ProductoForm()
+    
+    context = {'form': form, 'titulo': 'Nuevo Producto'}
+    return render(request, 'admin/productos/producto_form.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def producto_edit(request, pk):
+    """Editar producto existente"""
+    producto = get_object_or_404(Producto, pk=pk)
+    
+    if request.method == 'POST':
+        form = ProductoForm(request.POST, instance=producto)
+        if form.is_valid():
+            producto = form.save()
+            messages.success(request, f'Producto "{producto.nombre}" actualizado exitosamente.')
+            return redirect('productos_list')
+    else:
+        form = ProductoForm(instance=producto)
+    
+    context = {'form': form, 'titulo': 'Editar Producto', 'producto': producto}
+    return render(request, 'admin/productos/producto_form.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+@require_http_methods(["POST"])
+def producto_delete(request, pk):
+    """Eliminar producto"""
+    producto = get_object_or_404(Producto, pk=pk)
+    nombre_producto = producto.nombre
+    producto.delete()
+    messages.success(request, f'Producto "{nombre_producto}" eliminado exitosamente.')
+    return redirect('productos_list')
+
+@login_required
+@user_passes_test(is_admin)
+def producto_detail(request, pk):
+    """Detalle del producto (para modal)"""
+    producto = get_object_or_404(Producto, pk=pk)
+    return render(request, 'admin/partials/producto_detail.html', {'producto': producto})
+
+def producto_detalle_modal(request, producto_id):
+    """Vista para mostrar detalles del producto en modal"""
+    producto = get_object_or_404(Producto, id=producto_id)
+    
+    # Si es una petición AJAX, retornar solo el template del detalle
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'admin/productos/producto_detail.html', {'producto': producto})
+    
+    # Si no es AJAX, retornar página completa (fallback)
+    return render(request, 'admin/productos/producto_detail.html', {'producto': producto})
 
 # Servicio de Chatbot Gratuito
 class FreeChatBotService:
@@ -375,7 +509,7 @@ class FreeChatBotService:
         ]
         return random.choice(default_responses)
 
-# VISTA DEL CHATBOT - ESTA ES LA QUE FALTABA
+# VISTA DEL CHATBOT
 @csrf_exempt
 @require_POST
 def send_message(request):

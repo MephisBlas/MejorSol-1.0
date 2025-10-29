@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core.validators import MinValueValidator
 
 class Perfil(models.Model):
     TIPO_USUARIO_CHOICES = [
@@ -63,3 +64,38 @@ class ChatMessage(models.Model):
 
     class Meta:
         ordering = ['timestamp']    
+        
+#productos 
+
+class Producto(models.Model):
+    nombre = models.CharField(max_length=200, verbose_name="Nombre del Producto")
+    descripcion = models.TextField(blank=True, verbose_name="Descripción")
+    precio = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        validators=[MinValueValidator(0)],
+        verbose_name="Precio"
+    )
+    stock = models.IntegerField(
+        validators=[MinValueValidator(0)],
+        verbose_name="Stock Disponible"
+    )
+    stock_minimo = models.IntegerField(
+        default=5,
+        validators=[MinValueValidator(0)],
+        verbose_name="Stock Mínimo"
+    )
+    sku = models.CharField(max_length=50, unique=True, verbose_name="SKU")
+    categoria = models.CharField(max_length=100, verbose_name="Categoría")
+    activo = models.BooleanField(default=True, verbose_name="Activo")  # Campo booleano
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'productos'
+        verbose_name = 'Producto'
+        verbose_name_plural = 'Productos'
+        ordering = ['-fecha_creacion']
+    
+    def __str__(self):
+        return f"{self.nombre} - {self.sku}"

@@ -2,6 +2,10 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from .models import Perfil, Categoria, Producto
+from django.contrib import admin
+from django.urls import path
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
 
 # Registrar el modelo User con personalización
 class CustomUserAdmin(UserAdmin):
@@ -11,8 +15,8 @@ class CustomUserAdmin(UserAdmin):
     readonly_fields = ['date_joined', 'last_login']
 
 # Re-registrar el modelo User con nuestra personalización
-admin.site.unregister(User)  # Desregistrar el default
-admin.site.register(User, CustomUserAdmin)  # Registrar con nuestra clase
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)
 
 @admin.register(Perfil)
 class PerfilAdmin(admin.ModelAdmin):
@@ -21,7 +25,6 @@ class PerfilAdmin(admin.ModelAdmin):
     search_fields = ['usuario__username', 'usuario__email', 'telefono']
     readonly_fields = ['fecha_creacion']
     
-    # Para mostrar más información del usuario en el detalle
     fieldsets = (
         ('Información del Usuario', {
             'fields': ('usuario', 'tipo_usuario')
@@ -40,22 +43,49 @@ class CategoriaAdmin(admin.ModelAdmin):
     search_fields = ['nombre']
     list_per_page = 20
 
+
+
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
     list_display = ['nombre', 'categoria', 'precio', 'stock', 'activo', 'fecha_creacion']
     list_filter = ['categoria', 'activo', 'fecha_creacion']
     search_fields = ['nombre', 'descripcion']
     list_editable = ['precio', 'stock', 'activo']
-    readonly_fields = ['fecha_creacion']
+    readonly_fields = ['fecha_creacion', 'fecha_actualizacion']
     list_per_page = 25
     
-    # Para mostrar imagen en el admin (si usas ImageField)
-    # readonly_fields = ['imagen_preview']
-    # 
-    # def imagen_preview(self, obj):
-    #     if obj.imagen:
-    #         return mark_safe(f'<img src="{obj.imagen.url}" width="100" />')
-    #     return "No image"
-    # imagen_preview.short_description = 'Vista Previa'
+    fieldsets = (
+        ('Información Básica', {
+            'fields': ('nombre', 'descripcion', 'sku', 'categoria')
+        }),
+        ('Precio y Stock', {
+            'fields': ('precio', 'stock', 'stock_minimo')
+        }),
+        ('Estado', {
+            'fields': ('activo',)
+        }),
+        ('Fechas', {
+            'fields': ('fecha_creacion', 'fecha_actualizacion'),
+            'classes': ('collapse',)
+        }),
+    )
     
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('detalle/<int:producto_id>/', 
+                 self.admin_site.admin_view(self.producto_detalle_view),
+                 name='myapp_producto_detalle'),
+        ]
+        return custom_urls + urls
     
+    def producto_detalle_view(self, request, producto_id):
+        """Vista para mostrar detalles del producto en modal"""
+        producto = get_object_or_404(Producto, id=producto_id)
+        
+        # Si es una petición AJAX, retornar solo el template del detalle
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return render(request, 'admin/producto_detail.html', {'producto': producto})
+        
+        # Para peticiones normales, también funciona
+        return render(request, 'admin/producto_detail.html', {'producto': producto})
