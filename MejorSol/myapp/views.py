@@ -102,7 +102,10 @@ def producto_create(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST)
         if form.is_valid():
-            producto = form.save()
+            producto = form.save(commit=False)  # No guardar inmediatamente
+            # ASIGNAR EL USUARIO ACTUAL AL CAMPO usuario_creacion
+            producto.usuario_creacion = request.user
+            producto.save()  # Ahora guardar con el usuario asignado
             messages.success(request, f'Producto "{producto.nombre}" creado exitosamente.')
             return redirect('productos_list')
     else:
@@ -120,7 +123,11 @@ def producto_edit(request, pk):
     if request.method == 'POST':
         form = ProductoForm(request.POST, instance=producto)
         if form.is_valid():
-            producto = form.save()
+            producto = form.save(commit=False)  # No guardar inmediatamente
+            # Si el producto no tiene usuario_creacion, asignar el actual
+            if not producto.usuario_creacion:
+                producto.usuario_creacion = request.user
+            producto.save()  # Ahora guardar
             messages.success(request, f'Producto "{producto.nombre}" actualizado exitosamente.')
             return redirect('productos_list')
     else:
