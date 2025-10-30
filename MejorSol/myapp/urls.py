@@ -1,6 +1,7 @@
 from django.urls import include, path
 from django.contrib.auth import views as auth_views
 from . import views
+from .views import CustomLoginView
 
 urlpatterns = [
     # ===========================
@@ -13,7 +14,7 @@ urlpatterns = [
     # URLS DE AUTENTICACIÓN
     # ===========================
     path('registro/', views.registro, name='registro'),
-    path('login/', views.CustomLoginView.as_view(), name='login'),
+    path('accounts/login/', CustomLoginView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('accounts/', include('django.contrib.auth.urls')),
     

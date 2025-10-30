@@ -12,6 +12,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from .forms import RegistroForm, ProfileForm, ProductoForm  # ← SOLO ESTOS
@@ -50,10 +51,13 @@ def registro(request):
 
 class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
-    def form_valid(self, form):
-        super().form_valid(form)
-        return redirect('admin_panel' if (self.request.user.is_staff or self.request.user.is_superuser) else 'client_dashboard')
-
+    
+    def get_success_url(self):
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            return reverse('admin_panel')
+        else:
+            return reverse('client_dashboard')
+        
 @login_required
 @user_passes_test(is_admin)
 def admin_panel(request):

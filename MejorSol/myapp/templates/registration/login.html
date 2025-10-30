@@ -35,17 +35,16 @@
         </div>
         {% endif %}
         
-        <form method="post">
+        <!-- FORMULARIO CORREGIDO: Agregar action y usar el formulario de Django -->
+        <form method="post" action="{% url 'login' %}">
             {% csrf_token %}
             
+            <!-- Usar el formulario de Django directamente o campos manuales -->
             <div class="form-group">
                 <label for="id_username">Usuario:</label>
                 <div class="form-input-wrapper">
                     <i class="fas fa-user input-icon"></i>
-                    <input type="text" name="username" id="id_username" 
-                           class="form-input"
-                           placeholder="Ingresa tu usuario"
-                           required autofocus>
+                    {{ form.username }}  <!-- Usar el campo del formulario Django -->
                 </div>
             </div>
             
@@ -53,12 +52,11 @@
                 <label for="id_password">Contraseña:</label>
                 <div class="form-input-wrapper">
                     <i class="fas fa-lock input-icon"></i>
-                    <input type="password" name="password" id="id_password" 
-                           class="form-input"
-                           placeholder="Ingresa tu contraseña"
-                           required>
+                    {{ form.password }}  <!-- Usar el campo del formulario Django -->
                 </div>
             </div>
+            
+            <input type="hidden" name="next" value="{{ next }}">  <!-- IMPORTANTE: Campo next -->
             
             <button type="submit" class="btn-full">
                 <i class="fas fa-sign-in-alt"></i> INICIAR SESIÓN
@@ -70,19 +68,6 @@
         </div>
     </div>
 </div>
-<div class="floating-particles">
-  <div class="particle" style="width:8px; height:8px; top:10%; left:20%;"></div>
-  <div class="particle" style="width:12px; height:12px; top:30%; left:70%;"></div>
-  <div class="particle" style="width:6px; height:6px; top:80%; left:50%;"></div>
-  <div class="particle" style="width:10px; height:10px; top:60%; left:40%;"></div>
-  <div class="particle" style="width:14px; height:14px; top:25%; left:10%;"></div>
-  <div class="particle" style="width:7px; height:7px; top:50%; left:90%;"></div>
-  <div class="particle" style="width:9px; height:9px; top:75%; left:65%;"></div>
-  <div class="particle" style="width:11px; height:11px; top:15%; left:55%;"></div>
-  <div class="particle" style="width:10px; height:10px; top:45%; left:30%;"></div>
-  <div class="particle" style="width:13px; height:13px; top:70%; left:15%;"></div>
-</div>
-
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -111,7 +96,7 @@
         }
 
         // Focus effects
-        const inputs = document.querySelectorAll('.form-input');
+        const inputs = document.querySelectorAll('.form-input, input[type="text"], input[type="password"]');
         inputs.forEach(input => {
             input.addEventListener('focus', function() {
                 this.parentElement.classList.add('focused');
@@ -120,6 +105,12 @@
             input.addEventListener('blur', function() {
                 this.parentElement.classList.remove('focused');
             });
+        });
+
+        // Agregar clases a los inputs del formulario Django
+        document.querySelectorAll('#id_username, #id_password').forEach(input => {
+            input.classList.add('form-input');
+            input.setAttribute('placeholder', input.type === 'text' ? 'Ingresa tu usuario' : 'Ingresa tu contraseña');
         });
     });
 </script>
