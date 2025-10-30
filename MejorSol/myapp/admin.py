@@ -1,27 +1,46 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404, render
-from django.urls import path
-from .models import Perfil, Producto
+from .models import Perfil, Producto, Categoria, ChatConversation, ChatMessage
 
-# Registrar el modelo User con personalización
+# ===========================
+# ADMIN PERSONALIZADO DE USUARIO
+# ===========================
+
+class PerfilInline(admin.StackedInline):
+    """Inline para el perfil en el admin de User"""
+    model = Perfil
+    can_delete = False
+    verbose_name_plural = 'Perfil'
+    fk_name = 'usuario'
+
 class CustomUserAdmin(UserAdmin):
-    list_display = ['username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined']
-    list_filter = ['is_staff', 'is_superuser', 'is_active', 'date_joined']
-    search_fields = ['username', 'email', 'first_name', 'last_name']
+    """Admin personalizado para User con Perfil"""
+    inlines = (PerfilInline,)
+    list_display = ['username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined', 'tipo_usuario']
+    list_filter = ['is_staff', 'is_superuser', 'is_active', 'date_joined', 'perfil__tipo_usuario']
+    search_fields = ['username', 'email', 'first_name', 'last_name', 'perfil__telefono']
     readonly_fields = ['date_joined', 'last_login']
+    
+    def tipo_usuario(self, obj):
+        return obj.perfil.get_tipo_usuario_display() if hasattr(obj, 'perfil') else 'Sin perfil'
+    tipo_usuario.short_description = 'Tipo de Usuario'
 
-# Re-registrar el modelo User con nuestra personalización
+# Re-registrar User con admin personalizado
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
+
+# ===========================
+# ADMIN DE PERFILES
+# ===========================
 
 @admin.register(Perfil)
 class PerfilAdmin(admin.ModelAdmin):
     list_display = ['usuario', 'tipo_usuario', 'telefono', 'fecha_creacion']
     list_filter = ['tipo_usuario', 'fecha_creacion']
-    search_fields = ['usuario__username', 'usuario__email', 'telefono']
+    search_fields = ['usuario__username', 'usuario__email', 'telefono', 'direccion']
     readonly_fields = ['fecha_creacion']
+    autocomplete_fields = ['usuario']
     
     fieldsets = (
         ('Información del Usuario', {
@@ -31,39 +50,91 @@ class PerfilAdmin(admin.ModelAdmin):
             'fields': ('telefono', 'direccion')
         }),
         ('Información del Sistema', {
-            'fields': ('fecha_creacion',)
+            'fields': ('fecha_creacion',),
+            'classes': ('collapse',)
         }),
     )
 
+# ===========================
+# ADMIN DE CATEGORÍAS
+# ===========================
+
+@admin.register(Categoria)
+class CategoriaAdmin(admin.ModelAdmin):
+    list_display = ['nombre', 'activo', 'fecha_creacion', 'productos_count']
+    list_filter = ['activo', 'fecha_creacion']
+    search_fields = ['nombre', 'descripcion']
+    list_editable = ['activo']
+    readonly_fields = ['fecha_creacion']
+    
+    def productos_count(self, obj):
+        return obj.producto_set.count()
+    productos_count.short_description = 'Productos'
+
+# ===========================
+# ADMIN DE PRODUCTOS
+# ===========================
+
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
-    list_display = ['nombre', 'categoria', 'precio', 'stock', 'activo', 'fecha_creacion']
+    list_display = [
+        'nombre', 'categoria', 'precio', 'stock', 
+        'stock_minimo', 'necesita_reposicion', 'activo', 
+        'fecha_creacion'
+    ]
     list_filter = ['categoria', 'activo', 'fecha_creacion']
     search_fields = ['nombre', 'descripcion', 'sku']
-    list_editable = ['precio', 'stock', 'activo']
+    list_editable = ['precio', 'stock', 'stock_minimo', 'activo']
     readonly_fields = ['fecha_creacion', 'fecha_actualizacion']
-    list_per_page = 25
+    autocomplete_fields = ['categoria']
     
     fieldsets = (
         ('Información Básica', {
             'fields': ('nombre', 'descripcion', 'sku', 'categoria')
         }),
-        ('Precio y Stock', {
+        ('Precios y Stock', {
             'fields': ('precio', 'stock', 'stock_minimo')
         }),
-        ('Estado', {
+        ('Estado del Producto', {
             'fields': ('activo',)
         }),
-        ('Fechas', {
+        ('Auditoría', {
             'fields': ('fecha_creacion', 'fecha_actualizacion'),
             'classes': ('collapse',)
         }),
     )
     
-    # Eliminamos la función get_urls problemática por ahora
-    # Puedes agregarla más tarde cuando necesites vistas personalizadas
+    def necesita_reposicion(self, obj):
+        return obj.stock <= obj.stock_minimo
+    necesita_reposicion.boolean = True
+    necesita_reposicion.short_description = 'Stock Bajo'
+
+# ===========================
+# ADMIN DE CHATBOT
+# ===========================
+
+@admin.register(ChatConversation)
+class ChatConversationAdmin(admin.ModelAdmin):
+    list_display = ['user', 'session_id', 'created_at', 'updated_at']
+    list_filter = ['created_at']
+    search_fields = ['user__username', 'session_id']
+    readonly_fields = ['created_at', 'updated_at']
+
+@admin.register(ChatMessage)
+class ChatMessageAdmin(admin.ModelAdmin):
+    list_display = ['conversation', 'message_preview', 'is_bot', 'timestamp']
+    list_filter = ['is_bot', 'timestamp']
+    search_fields = ['conversation__session_id', 'message']
+    readonly_fields = ['timestamp']
     
-    def producto_detalle_view(self, request, producto_id):
-        """Vista para mostrar detalles del producto"""
-        producto = get_object_or_404(Producto, id=producto_id)
-        return render(request, 'admin/producto_detail.html', {'producto': producto})
+    def message_preview(self, obj):
+        return obj.message[:50] + '...' if len(obj.message) > 50 else obj.message
+    message_preview.short_description = 'Mensaje'
+
+# ===========================
+# CONFIGURACIÓN GLOBAL DEL ADMIN
+# ===========================
+
+admin.site.site_header = 'SIEER Chile - Administración'
+admin.site.site_title = 'SIEER Chile Admin'
+admin.site.index_title = 'Panel de Administración'

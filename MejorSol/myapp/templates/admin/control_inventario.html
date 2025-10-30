@@ -66,7 +66,7 @@
           </li>
           <li class="nav-item {% if request.resolver_match.url_name == 'historial_ventas' %}active{% endif %}">
             <a href="{% url 'historial_ventas' %}">
-              <i class="fas fa-history"></i><span>Historia de Ventas</span>
+              <i class="fas fa-history"></i><span>Historial de Ventas</span>
             </a>
           </li>
           <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}">
@@ -111,24 +111,48 @@
     </header>
 
     <div class="admin-content inv-container">
+      <!-- Mensajes de Django -->
+      {% if messages %}
+      <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
       <!-- Filtros y acciones -->
       <section class="inv-toolbar card">
-        <input id="buscar" type="text" class="input search" placeholder="Buscar por SKU o nombre…">
-        <select id="filtroCategoria" class="input">
-          <option value="">Todas las categorías</option>
-          <option>Kits</option><option>Paneles</option><option>Inversores</option>
-          <option>Baterías</option><option>Accesorios</option>
-        </select>
-        <select id="filtroEstado" class="input">
-          <option value="">Todos</option>
-          <option value="ok">OK</option>
-          <option value="bajo">Bajo</option>
-        </select>
+        <form method="GET" class="filter-form">
+          <input type="text" name="q" value="{{ request.GET.q }}" class="input search" placeholder="Buscar por SKU o nombre…">
+          <select name="categoria" class="input">
+            <option value="">Todas las categorías</option>
+            {% for categoria in categorias %}
+            <option value="{{ categoria.id }}" {% if request.GET.categoria == categoria.id|stringformat:"i" %}selected{% endif %}>
+              {{ categoria.nombre }}
+            </option>
+            {% endfor %}
+          </select>
+          <select name="estado" class="input">
+            <option value="">Todos los estados</option>
+            <option value="activo" {% if request.GET.estado == 'activo' %}selected{% endif %}>Activos</option>
+            <option value="inactivo" {% if request.GET.estado == 'inactivo' %}selected{% endif %}>Inactivos</option>
+            <option value="bajo" {% if request.GET.estado == 'bajo' %}selected{% endif %}>Stock Bajo</option>
+          </select>
 
-        <div class="toolbar-actions">
-          <button id="btnNuevo" class="btn btn-solid"><i class="fas fa-plus"></i> Nuevo producto</button>
-          <button id="btnExport" class="btn btn-outline"><i class="fas fa-download"></i> Exportar CSV</button>
-        </div>
+          <div class="toolbar-actions">
+            <button type="submit" class="btn btn-outline">
+              <i class="fas fa-search"></i> Buscar
+            </button>
+            <a href="{% url 'producto_create' %}" class="btn btn-solid">
+              <i class="fas fa-plus"></i> Nuevo producto
+            </a>
+            <a href="{% url 'control_inventario' %}?export=csv" class="btn btn-outline">
+              <i class="fas fa-download"></i> Exportar CSV
+            </a>
+          </div>
+        </form>
       </section>
 
       <!-- Tabla -->
@@ -147,76 +171,283 @@
             </tr>
           </thead>
           <tbody id="tbodyInventario">
-            {% for p in productos %}
-            <tr data-sku="{{ p.sku }}" data-categoria="{{ p.categoria }}">
-              <td>{{ p.sku }}</td>
-              <td>{{ p.nombre }}</td>
-              <td>{{ p.categoria }}</td>
-              <td class="num">{{ p.stock }}</td>
-              <td class="num">{{ p.minimo }}</td>
+            {% for producto in productos %}
+            <tr data-sku="{{ producto.sku }}" data-categoria="{{ producto.categoria.nombre }}">
+              <td>{{ producto.sku }}</td>
               <td>
-                {% if p.stock|default:0 <= p.minimo|default:0 %}
-                  <span class="badge danger">Bajo</span>
+                <div class="producto-info">
+                  {% if producto.imagen_principal %}
+                  <img src="{{ producto.imagen_principal.imagen.url }}" alt="{{ producto.nombre }}" class="producto-thumb">
+                  {% else %}
+                  <div class="producto-thumb no-image">
+                    <i class="fas fa-image"></i>
+                  </div>
+                  {% endif %}
+                  <span>{{ producto.nombre }}</span>
+                </div>
+              </td>
+              <td>{{ producto.categoria.nombre }}</td>
+              <td class="num">{{ producto.stock }}</td>
+              <td class="num">{{ producto.stock_minimo }}</td>
+              <td>
+                {% if producto.stock <= producto.stock_minimo %}
+                  <span class="badge danger">Bajo Stock</span>
+                {% elif not producto.activo %}
+                  <span class="badge warning">Inactivo</span>
                 {% else %}
                   <span class="badge ok">OK</span>
                 {% endif %}
               </td>
-              <td class="num">{{ p.precio|default:0|floatformat:0 }}</td>
+              <td class="num">${{ producto.precio|floatformat:0 }}</td>
               <td class="actions">
-                <button class="btn-icon in" title="Entrada"><i class="fas fa-arrow-down"></i></button>
-                <button class="btn-icon out" title="Salida"><i class="fas fa-arrow-up"></i></button>
-                <button class="btn-icon edit" title="Editar"><i class="fas fa-pen"></i></button>
-                <button class="btn-icon delete" title="Eliminar"><i class="fas fa-trash"></i></button>
+                <a href="{% url 'movimiento_inventario_create' producto.id %}" class="btn-icon in" title="Entrada de stock">
+                  <i class="fas fa-arrow-down"></i>
+                </a>
+                <a href="{% url 'movimiento_inventario_create' producto.id %}" class="btn-icon out" title="Salida de stock">
+                  <i class="fas fa-arrow-up"></i>
+                </a>
+                <a href="{% url 'producto_edit' producto.id %}" class="btn-icon edit" title="Editar">
+                  <i class="fas fa-pen"></i>
+                </a>
+                <form method="post" action="{% url 'producto_delete' producto.id %}" class="delete-form" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-icon delete" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar {{ producto.nombre }}?')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </form>
               </td>
             </tr>
             {% empty %}
-            <tr><td colspan="8" class="empty">No hay productos cargados.</td></tr>
+            <tr>
+              <td colspan="8" class="empty">
+                {% if request.GET.q or request.GET.categoria or request.GET.estado %}
+                No se encontraron productos con los filtros aplicados.
+                {% else %}
+                No hay productos cargados. <a href="{% url 'producto_create' %}">Crear primer producto</a>
+                {% endif %}
+              </td>
+            </tr>
             {% endfor %}
           </tbody>
         </table>
 
-        <!-- Paginación (placeholders) -->
+        <!-- Paginación -->
+        {% if productos.has_other_pages %}
         <div class="pager">
-          <button class="btn btn-outline" id="prevPage">Anterior</button>
-          <button class="btn btn-outline" id="nextPage">Siguiente</button>
-        </div>
-      </section>
+          {% if productos.has_previous %}
+          <a href="?page={{ productos.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}" class="btn btn-outline">
+            Anterior
+          </a>
+          {% endif %}
 
-      <!-- Modal Nuevo/Editar -->
-      <div class="modal" id="modalForm" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-header">
-            <h3 id="modalTitle">Nuevo producto</h3>
-            <button class="close" id="closeModal"><i class="fas fa-times"></i></button>
-          </div>
-          <form id="formProducto" class="modal-body">
-            <div class="grid">
-              <label>SKU<input type="text" id="sku" required></label>
-              <label>Producto<input type="text" id="nombre" required></label>
-              <label>Categoría
-                <select id="categoria" required>
-                  <option value="Kits">Kits</option>
-                  <option value="Paneles">Paneles</option>
-                  <option value="Inversores">Inversores</option>
-                  <option value="Baterías">Baterías</option>
-                  <option value="Accesorios">Accesorios</option>
-                </select>
-              </label>
-              <label>Stock<input type="number" id="stock" value="0" min="0" required></label>
-              <label>Mínimo<input type="number" id="minimo" value="0" min="0" required></label>
-              <label>Precio ($)<input type="number" id="precio" value="0" min="0" required></label>
-            </div>
-            <div class="modal-actions">
-              <button type="button" class="btn btn-outline" id="cancelar">Cancelar</button>
-              <button type="submit" class="btn btn-solid" id="guardar">Guardar</button>
-            </div>
-          </form>
+          <span class="page-info">
+            Página {{ productos.number }} de {{ productos.paginator.num_pages }}
+          </span>
+
+          {% if productos.has_next %}
+          <a href="?page={{ productos.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}" class="btn btn-outline">
+            Siguiente
+          </a>
+          {% endif %}
         </div>
-      </div>
+        {% endif %}
+      </section>
     </div>
   </main>
 </div>
 
+<!-- Modal para movimientos rápidos -->
+<div class="modal" id="modalMovimiento" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 id="modalMovimientoTitle">Movimiento de Inventario</h3>
+      <button class="close" id="closeMovimientoModal"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="post" action="" class="modal-body" id="formMovimiento">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="tipo_movimiento">Tipo de Movimiento:</label>
+        <select name="tipo_movimiento" id="tipo_movimiento" class="input" required>
+          <option value="ENTRADA">Entrada</option>
+          <option value="SALIDA">Salida</option>
+          <option value="AJUSTE">Ajuste</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="cantidad">Cantidad:</label>
+        <input type="number" name="cantidad" id="cantidad" class="input" min="1" required>
+      </div>
+      <div class="form-group">
+        <label for="observaciones">Observaciones:</label>
+        <textarea name="observaciones" id="observaciones" class="input" rows="3" placeholder="Motivo del movimiento..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="cancelarMovimiento">Cancelar</button>
+        <button type="submit" class="btn btn-solid">Guardar Movimiento</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script src="{% static 'js/inventario.js' %}"></script>
+<script>
+// JavaScript mejorado para el control de inventario
+document.addEventListener('DOMContentLoaded', function() {
+  // Filtros en tiempo real
+  const buscarInput = document.querySelector('input[name="q"]');
+  const categoriaSelect = document.querySelector('select[name="categoria"]');
+  const estadoSelect = document.querySelector('select[name="estado"]');
+  
+  function aplicarFiltros() {
+    document.querySelector('.filter-form').submit();
+  }
+  
+  // Buscar con delay
+  let searchTimeout;
+  buscarInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(aplicarFiltros, 500);
+  });
+  
+  categoriaSelect.addEventListener('change', aplicarFiltros);
+  estadoSelect.addEventListener('change', aplicarFiltros);
+
+  // Modal de movimientos
+  const movimientoModal = document.getElementById('modalMovimiento');
+  const movimientoForm = document.getElementById('formMovimiento');
+  let currentProductId = null;
+
+  // Abrir modal para movimiento
+  document.querySelectorAll('.btn-icon.in, .btn-icon.out').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const productRow = this.closest('tr');
+      currentProductId = this.getAttribute('href').split('/').filter(Boolean).pop();
+      
+      // Configurar el formulario
+      movimientoForm.action = `/inventario/movimiento/${currentProductId}/`;
+      document.getElementById('modalMovimientoTitle').textContent = 
+        `Movimiento - ${productRow.querySelector('td:nth-child(2) span').textContent}`;
+      
+      // Pre-configurar tipo de movimiento
+      if (this.classList.contains('in')) {
+        document.getElementById('tipo_movimiento').value = 'ENTRADA';
+      } else {
+        document.getElementById('tipo_movimiento').value = 'SALIDA';
+      }
+      
+      movimientoModal.style.display = 'flex';
+    });
+  });
+
+  // Cerrar modal
+  document.getElementById('closeMovimientoModal').addEventListener('click', function() {
+    movimientoModal.style.display = 'none';
+  });
+
+  document.getElementById('cancelarMovimiento').addEventListener('click', function() {
+    movimientoModal.style.display = 'none';
+  });
+
+  // Cerrar modal al hacer clic fuera
+  movimientoModal.addEventListener('click', function(e) {
+    if (e.target === movimientoModal) {
+      movimientoModal.style.display = 'none';
+    }
+  });
+
+  // Confirmación para eliminación
+  document.querySelectorAll('.delete-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+      if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+        e.preventDefault();
+      }
+    });
+  });
+
+  // Mostrar/ocultar mensajes
+  const messages = document.querySelector('.messages-container');
+  if (messages) {
+    setTimeout(() => {
+      messages.style.opacity = '0';
+      setTimeout(() => messages.remove(), 300);
+    }, 5000);
+  }
+});
+</script>
+
+<style>
+/* Estilos adicionales */
+.messages-container {
+  margin-bottom: 20px;
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.alert-error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  color: #856404;
+}
+
+.producto-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.producto-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+}
+
+.producto-thumb.no-image {
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+.filter-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.badge.warning {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.delete-form {
+  display: inline;
+}
+
+.page-info {
+  padding: 8px 16px;
+  color: #666;
+}
+</style>
 </body>
 </html>
