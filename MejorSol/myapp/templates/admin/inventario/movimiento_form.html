@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }} - SIEER Chile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Incluir el sidebar -->
+        {% include 'admin/partials/sidebar.html' %}
+        
+        <main class="admin-main">
+            <header class="admin-header">
+                <div class="header-left">
+                    <h1>{{ titulo }}</h1>
+                </div>
+                <div class="header-right">
+                    <a href="{% url 'control_inventario' %}" class="btn btn-outline">
+                        <i class="fas fa-arrow-left"></i> Volver al Inventario
+                    </a>
+                </div>
+            </header>
+
+            <div class="admin-content">
+                <div class="card">
+                    <div class="producto-info">
+                        <h3>Producto: {{ producto.nombre }}</h3>
+                        <p>SKU: {{ producto.sku }} | Stock Actual: {{ producto.stock }}</p>
+                    </div>
+                    
+                    <form method="post" class="movimiento-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="tipo_movimiento">Tipo de Movimiento:</label>
+                            <select name="tipo_movimiento" id="tipo_movimiento" class="input" required>
+                                <option value="ENTRADA">Entrada de Stock</option>
+                                <option value="SALIDA">Salida de Stock</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cantidad">Cantidad:</label>
+                            <input type="number" name="cantidad" id="cantidad" class="input" min="1" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="observaciones">Observaciones:</label>
+                            <textarea name="observaciones" id="observaciones" class="input" rows="3" placeholder="Motivo del movimiento..."></textarea>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar Movimiento
+                            </button>
+                            <a href="{% url 'control_inventario' %}" class="btn btn-outline">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

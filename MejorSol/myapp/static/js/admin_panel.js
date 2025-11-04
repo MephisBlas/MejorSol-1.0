@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.querySelector('.admin-sidebar');
     
-    if (menuToggle) {
+    if (menuToggle && sidebar) {
         menuToggle.addEventListener('click', function() {
             sidebar.classList.toggle('active');
         });
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const navLinks = document.querySelectorAll('.nav-item a');
     navLinks.forEach(link => {
         link.addEventListener('click', function() {
-            if (window.innerWidth <= 768) {
+            if (window.innerWidth <= 768 && sidebar) {
                 sidebar.classList.remove('active');
             }
         });
@@ -34,10 +34,12 @@ document.addEventListener('DOMContentLoaded', function() {
     actionButtons.forEach(button => {
         button.addEventListener('click', function() {
             const card = this.closest('.action-card');
-            const actionName = card.querySelector('h4').textContent;
-            
-            // Simular acción
-            showNotification(`Iniciando: ${actionName}`, 'success');
+            if (card) {
+                const actionName = card.querySelector('h4').textContent;
+                
+                // Simular acción
+                showNotification(`Iniciando: ${actionName}`, 'success');
+            }
         });
     });
     
@@ -89,8 +91,8 @@ document.addEventListener('DOMContentLoaded', function() {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: var(--card-bg);
-            border: var(--border-glow);
+            background: var(--card-bg, #fff);
+            border: 1px solid var(--border-color, #ddd);
             border-radius: 8px;
             padding: 1rem;
             display: flex;
@@ -100,10 +102,11 @@ document.addEventListener('DOMContentLoaded', function() {
             transform: translateX(100%);
             transition: transform 0.3s ease;
             max-width: 350px;
-            backdrop-filter: blur(10px);
-            ${type === 'success' ? 'border-color: var(--primary-green);' : ''}
-            ${type === 'error' ? 'border-color: #ff4757;' : ''}
-            ${type === 'warning' ? 'border-color: #ffa500;' : ''}
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            ${type === 'success' ? 'border-left: 4px solid #28a745;' : ''}
+            ${type === 'error' ? 'border-left: 4px solid #dc3545;' : ''}
+            ${type === 'warning' ? 'border-left: 4px solid #ffc107;' : ''}
+            ${type === 'info' ? 'border-left: 4px solid #17a2b8;' : ''}
         `;
         
         document.body.appendChild(notification);
@@ -118,19 +121,19 @@ document.addEventListener('DOMContentLoaded', function() {
         closeBtn.addEventListener('click', () => {
             notification.style.transform = 'translateX(100%)';
             setTimeout(() => {
-                if (document.body.contains(notification)) {
-                    document.body.removeChild(notification);
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
                 }
             }, 300);
         });
         
         // Auto-remover después de 5 segundos
         setTimeout(() => {
-            if (document.body.contains(notification)) {
+            if (notification.parentNode) {
                 notification.style.transform = 'translateX(100%)';
                 setTimeout(() => {
-                    if (document.body.contains(notification)) {
-                        document.body.removeChild(notification);
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
                     }
                 }, 300);
             }
@@ -159,5 +162,68 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100 + (index * 100));
     });
     
+    // ===== MANEJO DE FORMULARIOS MODALES =====
+    function initModalFunctions() {
+        // Función para abrir modal de producto
+        if (typeof openProductModal === 'undefined') {
+            window.openProductModal = function() {
+                const modal = document.getElementById('productModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                }
+            };
+        }
+        
+        // Función para cerrar modal de producto
+        if (typeof closeProductModal === 'undefined') {
+            window.closeProductModal = function() {
+                const modal = document.getElementById('productModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            };
+        }
+        
+        // Cerrar modal al hacer click fuera
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.addEventListener('click', function(event) {
+                if (event.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+        });
+    }
+    
+    initModalFunctions();
+    
+    // ===== SCROLL TO INVENTARIO =====
+    if (typeof scrollToInventario === 'undefined') {
+        window.scrollToInventario = function() {
+            const inventarioSection = document.getElementById('inventario-section');
+            if (inventarioSection) {
+                inventarioSection.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+        };
+    }
+    
     console.log('Panel administrativo de SIEER Chile inicializado');
 });
+
+// ===== FUNCIONES GLOBALES PARA LOS MODALES =====
+// Estas funciones estarán disponibles globalmente para los templates
+
+// Función para abrir modal de edición
+function openEditModal(productId) {
+    console.log('Abriendo modal para editar producto:', productId);
+    // Esta función será sobrescrita por el código del template si es necesario
+}
+
+// Función para manejar envío de formularios
+function handleFormSubmit(event) {
+    event.preventDefault();
+    console.log('Formulario enviado');
+    // Esta función será sobrescrita por el código del template si es necesario
+}

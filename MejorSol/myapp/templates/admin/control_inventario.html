@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Control de Inventario - SIEER Chile</title>
 
-  <!-- mismas dependencias del panel -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
@@ -15,6 +14,286 @@
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
   <link rel="stylesheet" href="{% static 'css/inventario.css' %}">
+  <style>
+    /* Estilos integrados para formularios y detalles */
+    .form-container {
+      background: var(--ms-panel);
+      border-radius: 16px;
+      padding: 2rem;
+      border: 1px solid var(--ms-border);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--ms-border);
+    }
+
+    .form-header h2 {
+      color: var(--ms-text);
+      margin: 0;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      color: var(--ms-text);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 0.75rem;
+      border: 1px solid var(--ms-border);
+      border-radius: 12px;
+      background: #121a26;
+      color: var(--ms-text);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--ms-accent);
+      box-shadow: 0 0 0 2px rgba(41, 255, 154, 0.18);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--ms-border);
+    }
+
+    /* Estilos para detalles de producto */
+    .detail-container {
+      background: var(--ms-panel);
+      border-radius: 16px;
+      padding: 2rem;
+      border: 1px solid var(--ms-border);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--ms-border);
+    }
+
+    .detail-header h2 {
+      color: var(--ms-text);
+      margin: 0;
+    }
+
+    .detail-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .detail-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .detail-group label {
+      color: var(--ms-muted);
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+
+    .detail-group span {
+      color: var(--ms-text);
+      font-size: 1rem;
+    }
+
+    .product-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--ms-text);
+      margin-bottom: 1rem;
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: inline-block;
+    }
+
+    .status-active {
+      background: rgba(41, 255, 154, 0.2);
+      color: var(--ms-accent);
+      border: 1px solid var(--ms-accent);
+    }
+
+    .status-inactive {
+      background: rgba(255, 68, 68, 0.2);
+      color: #ff4444;
+      border: 1px solid #ff4444;
+    }
+
+    .stock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .stock-normal {
+      background: rgba(41, 255, 154, 0.2);
+      color: var(--ms-accent);
+      border: 1px solid var(--ms-accent);
+    }
+
+    .stock-low {
+      background: rgba(255, 170, 0, 0.2);
+      color: #ffaa00;
+      border: 1px solid #ffaa00;
+    }
+
+    .stock-out {
+      background: rgba(255, 68, 68, 0.2);
+      color: #ff4444;
+      border: 1px solid #ff4444;
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .alert-success {
+      background: rgba(41, 255, 154, 0.2);
+      border: 1px solid var(--ms-accent);
+      color: var(--ms-accent);
+    }
+
+    .alert-error {
+      background: rgba(255, 68, 68, 0.2);
+      border: 1px solid #ff4444;
+      color: #ff4444;
+    }
+
+    .alert-warning {
+      background: rgba(255, 170, 0, 0.2);
+      border: 1px solid #ffaa00;
+      color: #ffaa00;
+    }
+
+    .error-text {
+      color: #ff4444;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.8rem;
+      background: #121a26;
+      border-radius: 12px;
+      border: 1px solid var(--ms-border);
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      display: none;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      cursor: pointer;
+      color: var(--ms-text);
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .checkbox-label i {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--ms-muted);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: transparent;
+      transition: all 0.3s ease;
+    }
+
+    .checkbox-group input[type="checkbox"]:checked + .checkbox-label i {
+      background: var(--ms-accent);
+      border-color: var(--ms-accent);
+      color: #031019;
+    }
+
+    .checkbox-group input[type="checkbox"]:checked + .checkbox-label {
+      color: var(--ms-accent);
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: transparent;
+      color: var(--ms-text);
+      border: 1px solid var(--ms-border);
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+      border-color: var(--ms-accent);
+      color: var(--ms-accent);
+    }
+  </style>
 </head>
 <body>
 <div class="admin-container">
@@ -116,12 +395,266 @@
       <div class="messages-container">
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }}">
+          <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
           {{ message }}
         </div>
         {% endfor %}
       </div>
       {% endif %}
 
+      <!-- FORMULARIO DE PRODUCTO -->
+      {% if mostrar_formulario %}
+      <div class="form-container">
+        <div class="form-header">
+          <h2>{{ titulo }}</h2>
+          <a href="{% url 'control_inventario' %}" class="back-button">
+            <i class="fas fa-arrow-left"></i> Volver al Inventario
+          </a>
+        </div>
+
+        <form method="post" class="product-form">
+          {% csrf_token %}
+          
+          {% if form.errors %}
+          <div class="alert alert-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            Por favor, corrige los errores en el formulario.
+          </div>
+          {% endif %}
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }}</label>
+              {{ form.nombre }}
+              {% if form.nombre.errors %}
+              <div class="error-text">{{ form.nombre.errors }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="form-group">
+              <label for="{{ form.sku.id_for_label }}">{{ form.sku.label }}</label>
+              {{ form.sku }}
+              {% if form.sku.errors %}
+              <div class="error-text">{{ form.sku.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="{{ form.categoria.id_for_label }}">{{ form.categoria.label }}</label>
+              {{ form.categoria }}
+              {% if form.categoria.errors %}
+              <div class="error-text">{{ form.categoria.errors }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="form-group">
+              <label for="{{ form.precio.id_for_label }}">{{ form.precio.label }}</label>
+              {{ form.precio }}
+              {% if form.precio.errors %}
+              <div class="error-text">{{ form.precio.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="form-group full-width">
+            <label for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}</label>
+            {{ form.descripcion }}
+            {% if form.descripcion.errors %}
+            <div class="error-text">{{ form.descripcion.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="{{ form.stock.id_for_label }}">{{ form.stock.label }}</label>
+              {{ form.stock }}
+              {% if form.stock.errors %}
+              <div class="error-text">{{ form.stock.errors }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="form-group">
+              <label for="{{ form.stock_minimo.id_for_label }}">{{ form.stock_minimo.label }}</label>
+              {{ form.stock_minimo }}
+              {% if form.stock_minimo.errors %}
+              <div class="error-text">{{ form.stock_minimo.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <div class="checkbox-group">
+                {{ form.activo }}
+                <label for="{{ form.activo.id_for_label }}" class="checkbox-label">
+                  <i class="fas fa-check"></i>
+                  {{ form.activo.label }}
+                </label>
+              </div>
+              {% if form.activo.errors %}
+              <div class="error-text">{{ form.activo.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button type="submit" class="btn btn-solid">
+              <i class="fas fa-save"></i>
+              Guardar Producto
+            </button>
+            <a href="{% url 'control_inventario' %}" class="btn btn-outline">
+              <i class="fas fa-times"></i>
+              Cancelar
+            </a>
+          </div>
+        </form>
+      </div>
+
+      <!-- DETALLES DE PRODUCTO -->
+      {% elif mostrar_detalles %}
+      <div class="detail-container">
+        <div class="detail-header">
+          <h2>Detalles del Producto</h2>
+          <a href="{% url 'control_inventario' %}" class="back-button">
+            <i class="fas fa-arrow-left"></i> Volver al Inventario
+          </a>
+        </div>
+
+        <div class="product-detail">
+          <div class="detail-row">
+            <div class="detail-group">
+              <label>ID:</label>
+              <span>#{{ producto.id }}</span>
+            </div>
+            <div class="detail-group">
+              <label>SKU:</label>
+              <span class="sku-code">{{ producto.sku|default:"N/A" }}</span>
+            </div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-group">
+              <label>Estado:</label>
+              <span class="status-badge {% if producto.activo %}status-active{% else %}status-inactive{% endif %}">
+                {% if producto.activo %}Activo{% else %}Inactivo{% endif %}
+              </span>
+            </div>
+            <div class="detail-group">
+              <label>Categoría:</label>
+              <span>{{ producto.categoria }}</span>
+            </div>
+          </div>
+          
+          <div class="detail-group full-width">
+            <label>Nombre:</label>
+            <span class="product-name">{{ producto.nombre }}</span>
+          </div>
+          
+          <div class="detail-group full-width">
+            <label>Descripción:</label>
+            <span class="product-description">{{ producto.descripcion|default:"Sin descripción" }}</span>
+          </div>
+          
+          <div class="detail-row">
+            <div class="detail-group">
+              <label>Precio:</label>
+              <span class="price">$ {{ producto.precio }}</span>
+            </div>
+            <div class="detail-group">
+              <label>Stock Mínimo:</label>
+              <span>{{ producto.stock_minimo }} unidades</span>
+            </div>
+          </div>
+          
+          <div class="detail-row">
+            <div class="detail-group">
+              <label>Stock Actual:</label>
+              <span class="stock-badge {% if producto.stock <= producto.stock_minimo %}stock-low{% elif producto.stock == 0 %}stock-out{% else %}stock-normal{% endif %}">
+                {{ producto.stock }} unidades
+                {% if producto.stock <= producto.stock_minimo and producto.stock > 0 %}
+                <i class="fas fa-exclamation-triangle" title="Stock bajo"></i>
+                {% elif producto.stock == 0 %}
+                <i class="fas fa-times-circle" title="Stock agotado"></i>
+                {% endif %}
+              </span>
+            </div>
+            <div class="detail-group">
+              <label>Nivel Stock:</label>
+              <span class="stock-level">
+                {% if producto.stock == 0 %}
+                    <i class="fas fa-times-circle"></i> Agotado
+                {% elif producto.stock <= producto.stock_minimo %}
+                    <i class="fas fa-exclamation-triangle"></i> Bajo
+                {% else %}
+                    <i class="fas fa-check-circle"></i> Normal
+                {% endif %}
+              </span>
+            </div>
+          </div>
+          
+          {% if producto.fecha_creacion %}
+          <div class="detail-row">
+            <div class="detail-group">
+              <label>Fecha Creación:</label>
+              <span>{{ producto.fecha_creacion|date:"d/m/Y H:i" }}</span>
+            </div>
+            {% if producto.fecha_actualizacion %}
+            <div class="detail-group">
+              <label>Última Actualización:</label>
+              <span>{{ producto.fecha_actualizacion|date:"d/m/Y H:i" }}</span>
+            </div>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- MOVIMIENTO DE INVENTARIO -->
+      {% elif mostrar_movimiento %}
+      <div class="form-container">
+        <div class="form-header">
+          <h2>Movimiento de Inventario - {{ producto.nombre }}</h2>
+          <a href="{% url 'control_inventario' %}" class="back-button">
+            <i class="fas fa-arrow-left"></i> Volver al Inventario
+          </a>
+        </div>
+
+        <form method="post" class="movimiento-form">
+          {% csrf_token %}
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tipo_movimiento">Tipo de Movimiento:</label>
+              <select name="tipo_movimiento" id="tipo_movimiento" class="input" required>
+                <option value="ENTRADA">Entrada</option>
+                <option value="SALIDA">Salida</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cantidad">Cantidad:</label>
+              <input type="number" name="cantidad" id="cantidad" class="input" min="1" required>
+            </div>
+          </div>
+          <div class="form-group full-width">
+            <label for="observaciones">Observaciones:</label>
+            <textarea name="observaciones" id="observaciones" class="input" rows="3" placeholder="Motivo del movimiento..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-solid">
+              <i class="fas fa-save"></i>
+              Guardar Movimiento
+            </button>
+            <a href="{% url 'control_inventario' %}" class="btn btn-outline">
+              <i class="fas fa-times"></i>
+              Cancelar
+            </a>
+          </div>
+        </form>
+      </div>
+
+      <!-- LISTA DE PRODUCTOS (MODO NORMAL) -->
+      {% else %}
       <!-- Filtros y acciones -->
       <section class="inv-toolbar card">
         <form method="GET" class="filter-form">
@@ -145,7 +678,7 @@
             <button type="submit" class="btn btn-outline">
               <i class="fas fa-search"></i> Buscar
             </button>
-            <a href="{% url 'producto_create' %}" class="btn btn-solid">
+            <a href="{% url 'control_inventario' %}?action=crear" class="btn btn-solid">
               <i class="fas fa-plus"></i> Nuevo producto
             </a>
             <a href="{% url 'control_inventario' %}?export=csv" class="btn btn-outline">
@@ -200,13 +733,16 @@
               </td>
               <td class="num">${{ producto.precio|floatformat:0 }}</td>
               <td class="actions">
-                <a href="{% url 'movimiento_inventario_create' producto.id %}" class="btn-icon in" title="Entrada de stock">
+                <a href="{% url 'control_inventario' %}?action=movimiento&producto_id={{ producto.id }}" class="btn-icon in" title="Entrada de stock">
                   <i class="fas fa-arrow-down"></i>
                 </a>
-                <a href="{% url 'movimiento_inventario_create' producto.id %}" class="btn-icon out" title="Salida de stock">
+                <a href="{% url 'control_inventario' %}?action=movimiento&producto_id={{ producto.id }}" class="btn-icon out" title="Salida de stock">
                   <i class="fas fa-arrow-up"></i>
                 </a>
-                <a href="{% url 'producto_edit' producto.id %}" class="btn-icon edit" title="Editar">
+                <a href="{% url 'control_inventario' %}?action=detalle&producto_id={{ producto.id }}" class="btn-icon view" title="Ver detalles">
+                  <i class="fas fa-eye"></i>
+                </a>
+                <a href="{% url 'control_inventario' %}?action=editar&producto_id={{ producto.id }}" class="btn-icon edit" title="Editar">
                   <i class="fas fa-pen"></i>
                 </a>
                 <form method="post" action="{% url 'producto_delete' producto.id %}" class="delete-form" style="display: inline;">
@@ -223,7 +759,7 @@
                 {% if request.GET.q or request.GET.categoria or request.GET.estado %}
                 No se encontraron productos con los filtros aplicados.
                 {% else %}
-                No hay productos cargados. <a href="{% url 'producto_create' %}">Crear primer producto</a>
+                No hay productos cargados. <a href="{% url 'control_inventario' %}?action=crear">Crear primer producto</a>
                 {% endif %}
               </td>
             </tr>
@@ -252,46 +788,12 @@
         </div>
         {% endif %}
       </section>
+      {% endif %}
     </div>
   </main>
 </div>
 
-<!-- Modal para movimientos rápidos -->
-<div class="modal" id="modalMovimiento" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-header">
-      <h3 id="modalMovimientoTitle">Movimiento de Inventario</h3>
-      <button class="close" id="closeMovimientoModal"><i class="fas fa-times"></i></button>
-    </div>
-    <form method="post" action="" class="modal-body" id="formMovimiento">
-      {% csrf_token %}
-      <div class="form-group">
-        <label for="tipo_movimiento">Tipo de Movimiento:</label>
-        <select name="tipo_movimiento" id="tipo_movimiento" class="input" required>
-          <option value="ENTRADA">Entrada</option>
-          <option value="SALIDA">Salida</option>
-          <option value="AJUSTE">Ajuste</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="cantidad">Cantidad:</label>
-        <input type="number" name="cantidad" id="cantidad" class="input" min="1" required>
-      </div>
-      <div class="form-group">
-        <label for="observaciones">Observaciones:</label>
-        <textarea name="observaciones" id="observaciones" class="input" rows="3" placeholder="Motivo del movimiento..."></textarea>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-outline" id="cancelarMovimiento">Cancelar</button>
-        <button type="submit" class="btn btn-solid">Guardar Movimiento</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<script src="{% static 'js/inventario.js' %}"></script>
 <script>
-// JavaScript mejorado para el control de inventario
 document.addEventListener('DOMContentLoaded', function() {
   // Filtros en tiempo real
   const buscarInput = document.querySelector('input[name="q"]');
@@ -304,57 +806,20 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Buscar con delay
   let searchTimeout;
-  buscarInput.addEventListener('input', function() {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(aplicarFiltros, 500);
-  });
-  
-  categoriaSelect.addEventListener('change', aplicarFiltros);
-  estadoSelect.addEventListener('change', aplicarFiltros);
-
-  // Modal de movimientos
-  const movimientoModal = document.getElementById('modalMovimiento');
-  const movimientoForm = document.getElementById('formMovimiento');
-  let currentProductId = null;
-
-  // Abrir modal para movimiento
-  document.querySelectorAll('.btn-icon.in, .btn-icon.out').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-      e.preventDefault();
-      const productRow = this.closest('tr');
-      currentProductId = this.getAttribute('href').split('/').filter(Boolean).pop();
-      
-      // Configurar el formulario
-      movimientoForm.action = `/inventario/movimiento/${currentProductId}/`;
-      document.getElementById('modalMovimientoTitle').textContent = 
-        `Movimiento - ${productRow.querySelector('td:nth-child(2) span').textContent}`;
-      
-      // Pre-configurar tipo de movimiento
-      if (this.classList.contains('in')) {
-        document.getElementById('tipo_movimiento').value = 'ENTRADA';
-      } else {
-        document.getElementById('tipo_movimiento').value = 'SALIDA';
-      }
-      
-      movimientoModal.style.display = 'flex';
+  if (buscarInput) {
+    buscarInput.addEventListener('input', function() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(aplicarFiltros, 500);
     });
-  });
-
-  // Cerrar modal
-  document.getElementById('closeMovimientoModal').addEventListener('click', function() {
-    movimientoModal.style.display = 'none';
-  });
-
-  document.getElementById('cancelarMovimiento').addEventListener('click', function() {
-    movimientoModal.style.display = 'none';
-  });
-
-  // Cerrar modal al hacer clic fuera
-  movimientoModal.addEventListener('click', function(e) {
-    if (e.target === movimientoModal) {
-      movimientoModal.style.display = 'none';
-    }
-  });
+  }
+  
+  if (categoriaSelect) {
+    categoriaSelect.addEventListener('change', aplicarFiltros);
+  }
+  
+  if (estadoSelect) {
+    estadoSelect.addEventListener('change', aplicarFiltros);
+  }
 
   // Confirmación para eliminación
   document.querySelectorAll('.delete-form').forEach(form => {
@@ -382,30 +847,6 @@ document.addEventListener('DOMContentLoaded', function() {
   margin-bottom: 20px;
 }
 
-.alert {
-  padding: 12px 16px;
-  border-radius: 4px;
-  margin-bottom: 10px;
-}
-
-.alert-success {
-  background-color: #d4edda;
-  border: 1px solid #c3e6cb;
-  color: #155724;
-}
-
-.alert-error {
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  color: #721c24;
-}
-
-.alert-warning {
-  background-color: #fff3cd;
-  border: 1px solid #ffeaa7;
-  color: #856404;
-}
-
 .producto-info {
   display: flex;
   align-items: center;
@@ -417,15 +858,15 @@ document.addEventListener('DOMContentLoaded', function() {
   height: 40px;
   border-radius: 4px;
   object-fit: cover;
-  border: 1px solid #ddd;
+  border: 1px solid var(--ms-border);
 }
 
 .producto-thumb.no-image {
-  background: #f5f5f5;
+  background: #121a26;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #999;
+  color: var(--ms-muted);
 }
 
 .filter-form {
@@ -436,8 +877,9 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .badge.warning {
-  background-color: #ffc107;
-  color: #000;
+  background: rgba(255, 170, 0, 0.2);
+  color: #ffaa00;
+  border: 1px solid #ffaa00;
 }
 
 .delete-form {
@@ -446,7 +888,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .page-info {
   padding: 8px 16px;
-  color: #666;
+  color: var(--ms-muted);
+}
+
+.actions .btn-icon {
+  background: var(--ms-soft);
+  border: 1px solid var(--ms-border);
+  color: #cfe3ff;
+  padding: .4rem .5rem;
+  border-radius: .5rem;
+  margin-right: .25rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actions .btn-icon:hover {
+  filter: brightness(1.1);
+}
+
+.actions .btn-icon.view {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.actions .btn-icon.edit {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.actions .btn-icon.delete {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
 }
 </style>
 </body>

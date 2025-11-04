@@ -1,0 +1,115 @@
+<div class="admin-content">
+    <div class="content-header">
+        <div class="header-left">
+            <h1>{{ titulo }}</h1>
+            <p>Completa la información del producto</p>
+        </div>
+        <div class="header-right">
+            <a href="{% url 'control_inventario' %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i>
+                Volver al Inventario
+            </a>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <form method="post" class="product-form" id="productForm">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                Por favor, corrige los errores en el formulario.
+            </div>
+            {% endif %}
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }}</label>
+                    {{ form.nombre }}
+                    {% if form.nombre.errors %}
+                    <div class="error-text">{{ form.nombre.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.sku.id_for_label }}">{{ form.sku.label }}</label>
+                    {{ form.sku }}
+                    {% if form.sku.errors %}
+                    <div class="error-text">{{ form.sku.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.categoria.id_for_label }}">{{ form.categoria.label }}</label>
+                    {{ form.categoria }}
+                    {% if form.categoria.errors %}
+                    <div class="error-text">{{ form.categoria.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.precio.id_for_label }}">{{ form.precio.label }}</label>
+                    {{ form.precio }}
+                    {% if form.precio.errors %}
+                    <div class="error-text">{{ form.precio.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}</label>
+                {{ form.descripcion }}
+                {% if form.descripcion.errors %}
+                <div class="error-text">{{ form.descripcion.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.stock.id_for_label }}">{{ form.stock.label }}</label>
+                    {{ form.stock }}
+                    {% if form.stock.errors %}
+                    <div class="error-text">{{ form.stock.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.stock_minimo.id_for_label }}">{{ form.stock_minimo.label }}</label>
+                    {{ form.stock_minimo }}
+                    {% if form.stock_minimo.errors %}
+                    <div class="error-text">{{ form.stock_minimo.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group checkbox-group">
+                    <div class="checkbox-wrapper">
+                        {{ form.activo }}
+                        <label for="{{ form.activo.id_for_label }}" class="checkbox-label">
+                            <i class="fas fa-check"></i>
+                            {{ form.activo.label }}
+                        </label>
+                    </div>
+                    {% if form.activo.errors %}
+                    <div class="error-text">{{ form.activo.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Guardar Producto
+                </button>
+                <a href="{% url 'control_inventario' %}" class="btn btn-outline">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

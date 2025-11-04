@@ -25,18 +25,10 @@ urlpatterns = [
     path('client-dashboard/', views.client_dashboard, name='client_dashboard'),
     
     # ===========================
-    # URLS DE PRODUCTOS
-    # ===========================
-    path('productos-list/', views.productos_list, name='productos_list'),
-    path('productos/nuevo/', views.producto_create, name='producto_create'),
-    path('productos/editar/<int:pk>/', views.producto_edit, name='producto_edit'),
-    path('productos/eliminar/<int:pk>/', views.producto_delete, name='producto_delete'),
-    path('productos/detalle/<int:producto_id>/', views.producto_detail, name='producto_detail'),
-    
-    # ===========================
-    # URLS DE INVENTARIO
+    # URLS DE INVENTARIO (TODO INTEGRADO)
     # ===========================
     path('inventario/', views.control_inventario_view, name='control_inventario'),
+    path('productos/eliminar/<int:pk>/', views.producto_delete, name='producto_delete'),
     
     # ===========================
     # URLS DE COTIZACIONES

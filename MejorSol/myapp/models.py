@@ -127,6 +127,12 @@ class Producto(models.Model):
     estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='activo')
     activo = models.BooleanField(default=True, verbose_name="Activo en Sistema")
     
+    # Especificaciones técnicas (NUEVOS CAMPOS)
+    potencia = models.CharField(max_length=50, blank=True, verbose_name="Potencia")
+    voltaje = models.CharField(max_length=50, blank=True, verbose_name="Voltaje")
+    dimensiones = models.CharField(max_length=100, blank=True, verbose_name="Dimensiones")
+    icono = models.CharField(max_length=50, default='box', verbose_name="Icono FontAwesome")
+    
     # Auditoría
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
@@ -288,3 +294,55 @@ class ItemCotizacion(models.Model):
     @property
     def total(self):
         return self.subtotal - self.descuento_monto
+
+# ===========================
+# MODELO DE PRODUCTOS ADQUIRIDOS POR CLIENTES (NUEVO)
+# ===========================
+
+class ProductoAdquirido(models.Model):
+    """Modelo para relacionar productos adquiridos por clientes"""
+    cliente = models.ForeignKey(User, on_delete=models.CASCADE, related_name='productos_adquiridos')
+    producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
+    cantidad = models.IntegerField(default=1, validators=[MinValueValidator(1)])
+    precio_adquisicion = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Precio de Adquisición")
+    fecha_compra = models.DateField(default=timezone.now, verbose_name="Fecha de Compra")
+    fecha_instalacion = models.DateField(null=True, blank=True, verbose_name="Fecha de Instalación")
+    garantia_meses = models.IntegerField(default=12, verbose_name="Meses de Garantía")
+    estado_garantia = models.CharField(
+        max_length=20,
+        choices=[
+            ('activa', 'Garantía Activa'),
+            ('expirada', 'Garantía Expirada'),
+            ('usada', 'Garantía Usada')
+        ],
+        default='activa'
+    )
+    observaciones = models.TextField(blank=True, verbose_name="Observaciones")
+    
+    class Meta:
+        verbose_name = 'Producto Adquirido'
+        verbose_name_plural = 'Productos Adquiridos'
+        db_table = 'productos_adquiridos'
+        ordering = ['-fecha_compra']
+        unique_together = ['cliente', 'producto', 'fecha_compra']
+    
+    def __str__(self):
+        return f"{self.cliente.username} - {self.producto.nombre}"
+    
+    @property
+    def garantia_expira(self):
+        """Calcula la fecha de expiración de la garantía"""
+        if self.fecha_compra:
+            return self.fecha_compra + timezone.timedelta(days=self.garantia_meses * 30)
+        return None
+    
+    @property
+    def garantia_activa(self):
+        """Verifica si la garantía está activa"""
+        if self.estado_garantia == 'expirada':
+            return False
+        if self.garantia_expira and self.garantia_expira < timezone.now().date():
+            self.estado_garantia = 'expirada'
+            self.save()
+            return False
+        return self.estado_garantia == 'activa'
