@@ -3,21 +3,27 @@ from datetime import datetime
 import json
 import uuid
 import random
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import LoginView
 from django.core.paginator import Paginator
-from django.db.models import Q, F
+from django.db.models import Q, F, Sum, Count
+from django.db.models.functions import TruncMonth
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 
-from .forms import RegistroForm, ProfileForm, ProductoForm
-from .models import ChatConversation, ChatMessage, Producto, Categoria, ProductoAdquirido
+# Importa tus formularios
+from .forms import RegistroForm, ProfileForm, ProductoForm, ProductoAdquiridoForm
+# Importa tus modelos
+from .models import ChatConversation, ChatMessage, Producto, Categoria, ProductoAdquirido, ProductoImagen
+# Importa el servicio de IA (¡Asegúrate de crear este archivo!)
+from .services import ChatBotService 
 
 
 # ===========================
@@ -104,10 +110,8 @@ def admin_panel(request):
     }
     return render(request, 'admin/admin_panel.html', context)
 
-@login_required
-def client_dashboard(request):
-    return render(request, 'cliente/client_dashboard.html', {'user': request.user})
-
+# ¡HE ELIMINADO LA VISTA client_dashboard SIMPLE QUE ESTABA AQUÍ!
+# La versión correcta está al final del archivo.
 
 # ===========================
 # VISTA PRINCIPAL DE CONTROL INVENTARIO - TODO INTEGRADO
@@ -350,21 +354,41 @@ def eliminar_cotizacion(request, cot_id):
 
 
 # ===========================
-# VISTAS DE REPORTES
+# VISTAS DE REPORTES (¡REEMPLAZADAS CON DATOS REALES!)
 # ===========================
 
 @login_required
 @user_passes_test(is_admin)
 def calculos_estadisticas_view(request):
-    return render(request, 'admin/calculos_estadisticas.html')
+    # Puedes agregar lógica de cálculo aquí si lo deseas
+    total_ventas = ProductoAdquirido.objects.aggregate(total=Sum('precio_adquisicion'))['total'] or 0
+    total_clientes = ProductoAdquirido.objects.values('cliente').distinct().count()
+    total_productos = Producto.objects.filter(activo=True).count()
+    
+    context = {
+        'total_ventas': total_ventas,
+        'total_clientes': total_clientes,
+        'total_productos': total_productos,
+    }
+    return render(request, 'admin/calculos_estadisticas.html', context)
 
 
 @login_required
 @user_passes_test(is_admin)
 def reportes_graficos_view(request):
-    ventas_mensuales = [245680, 320000, 275400, 310200, 295000, 350000]
-    meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio"]
-    productos_stock = {"Transformadores": 30, "Paneles Solares": 55, "Baterías": 22, "Inversores": 18}
+    # Gráfico 1: Ventas Mensuales (usando ProductoAdquirido)
+    ventas_data = ProductoAdquirido.objects.annotate(
+        mes=TruncMonth('fecha_compra')
+    ).values('mes').annotate(
+        total_ventas=Sum('precio_adquisicion')
+    ).order_by('mes')
+
+    meses = [v['mes'].strftime('%B %Y') for v in ventas_data]
+    ventas_mensuales = [float(v['total_ventas']) for v in ventas_data] # float para JSON
+    
+    # Gráfico 2: Stock de Productos (Top 10 más stock)
+    productos_stock_data = Producto.objects.filter(activo=True).order_by('-stock')[:10]
+    productos_stock = {p.nombre: p.stock for p in productos_stock_data}
 
     context = {
         "meses": meses,
@@ -378,14 +402,16 @@ def reportes_graficos_view(request):
 @login_required
 @user_passes_test(is_admin)
 def historial_ventas_view(request):
-    ventas_demo = [
-        {"fecha": "2025-10-01", "numero": "F-00125", "cliente": "ElectroSur", "total": 245680, "estado": "Pagada"},
-        {"fecha": "2025-09-28", "numero": "B-00987", "cliente": "EnerPlus", "total": 35680, "estado": "Pendiente"},
-    ]
+    # Usamos el modelo ProductoAdquirido que ya tienes
+    ventas_reales = ProductoAdquirido.objects.select_related('cliente', 'producto').all().order_by('-fecha_compra')
+
+    paginator = Paginator(ventas_reales, 25) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     
     context = {
-        "ventas": ventas_demo,
-        "demo": True,
+        "ventas": page_obj, # Enviamos los objetos reales
+        "demo": False, # Ya no es demo
     }
     return render(request, "admin/historial_ventas.html", context)
 
@@ -428,7 +454,7 @@ def configuracion(request):
 
 
 # ===========================
-# VISTAS DE CHATBOT
+# VISTAS DE CHATBOT (¡REEMPLAZADA CON IA REAL!)
 # ===========================
 
 def chatbot_demo(request):
@@ -442,9 +468,40 @@ def send_message(request):
         data = json.loads(request.body)
         user_message = data.get('message', '')
         session_id = data.get('session_id') or str(uuid.uuid4())
+
+        # 1. Obtener o crear conversación
+        conversation, _ = ChatConversation.objects.get_or_create(
+            session_id=session_id
+        )
+        if request.user.is_authenticated:
+            conversation.user = request.user
+            conversation.save()
         
-        bot_response = "Hola! Soy SIEERBot. Esta funcionalidad está en desarrollo."
+        # 2. Guardar mensaje del usuario
+        ChatMessage.objects.create(
+            conversation=conversation,
+            message=user_message,
+            is_bot=False
+        )
+
+        # 3. Obtener historial (últimos 6 mensajes)
+        history_messages = conversation.messages.order_by('-timestamp')[:6]
+        history = [
+            {'message': msg.message, 'is_bot': msg.is_bot} 
+            for msg in reversed(history_messages)
+        ]
+
+        # 4. LLAMAR A LA IA
+        chatbot = ChatBotService()
+        bot_response = chatbot.get_ai_response(user_message, history)
         
+        # 5. Guardar respuesta del bot
+        ChatMessage.objects.create(
+            conversation=conversation,
+            message=bot_response,
+            is_bot=True
+        )
+
         return JsonResponse({
             'status': 'success',
             'response': bot_response,
@@ -461,7 +518,7 @@ def send_message(request):
 def get_conversation_history(request, session_id):
     try:
         conv = ChatConversation.objects.get(session_id=session_id)
-        msgs = ChatMessage.objects.filter(conversation=conv)
+        msgs = ChatMessage.objects.filter(conversation=conv).order_by('timestamp')
         history = [{'message': m.message, 'is_bot': m.is_bot, 'timestamp': m.timestamp.isoformat()} for m in msgs]
         return JsonResponse({'history': history})
     except ChatConversation.DoesNotExist:
@@ -479,11 +536,31 @@ def handler_404(request, exception):
 def handler_500(request):
     return render(request, 'errors/500.html', status=500)
 
+# ===========================
+# VISTA DE CLIENTE (CORRECTA Y ÚNICA)
+# ===========================
+
+@login_required
 def client_dashboard(request):
-    productos_adquiridos = ProductoAdquirido.objects.filter(cliente=request.user).select_related('producto')
+    
+    # 1. TUS PRODUCTOS (Los que el cliente ya compró)
+    productos_adquiridos = ProductoAdquirido.objects.filter(
+        cliente=request.user
+    ).select_related('producto')
+    
+    # 2. PRODUCTOS DISPONIBLES (Catálogo de la tienda)
+    productos_disponibles = Producto.objects.filter(
+        activo=True,
+        estado='activo'
+    ).select_related('categoria').prefetch_related('imagenes')
     
     context = {
         'user': request.user,
         'productos_adquiridos': productos_adquiridos,
+        'productos_disponibles': productos_disponibles, # ¡Aquí está la nueva lista!
     }
     return render(request, 'cliente/client_dashboard.html', context)
+
+#
+# ¡TODO EL CÓDIGO DE ADMIN QUE ESTABA AQUÍ HA SIDO ELIMINADO!
+#

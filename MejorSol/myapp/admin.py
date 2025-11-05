@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from .models import Perfil, Producto, Categoria, ChatConversation, ChatMessage
+# 1. ¡ASEGÚRATE DE IMPORTAR ProductoImagen AQUÍ!
+from .models import Perfil, Producto, Categoria, ChatConversation, ChatMessage, ProductoAdquirido, ProductoImagen
+from .forms import ProductoAdquiridoForm
 
 # ===========================
 # ADMIN PERSONALIZADO DE USUARIO
@@ -72,6 +74,17 @@ class CategoriaAdmin(admin.ModelAdmin):
     productos_count.short_description = 'Productos'
 
 # ===========================
+# 2. ¡PEGA LA CLASE INLINE AQUÍ!
+# ===========================
+class ProductoImagenInline(admin.TabularInline):
+    model = ProductoImagen
+    extra = 1  # Cuántos formularios de imagen mostrar
+    verbose_name = "Imagen del producto"
+    verbose_name_plural = "Imágenes del producto"
+    fields = ('imagen', 'orden', 'es_principal')
+
+
+# ===========================
 # ADMIN DE PRODUCTOS
 # ===========================
 
@@ -103,6 +116,9 @@ class ProductoAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+    
+    # 3. ¡AGREGA LA LÍNEA 'inlines' AQUÍ!
+    inlines = [ProductoImagenInline]
     
     def necesita_reposicion(self, obj):
         return obj.stock <= obj.stock_minimo
@@ -138,3 +154,10 @@ class ChatMessageAdmin(admin.ModelAdmin):
 admin.site.site_header = 'SIEER Chile - Administración'
 admin.site.site_title = 'SIEER Chile Admin'
 admin.site.index_title = 'Panel de Administración'
+
+@admin.register(ProductoAdquirido)
+class ProductoAdquiridoAdmin(admin.ModelAdmin):
+    form = ProductoAdquiridoForm
+    list_display = ['cliente', 'producto', 'precio_adquisicion', 'fecha_compra', 'garantia_activa']
+    list_filter = ['fecha_compra', 'estado_garantia']
+    search_fields = ['cliente__username', 'producto__nombre']

@@ -127,16 +127,22 @@ class Producto(models.Model):
     estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='activo')
     activo = models.BooleanField(default=True, verbose_name="Activo en Sistema")
     
-    # Especificaciones técnicas (NUEVOS CAMPOS)
+    # Especificaciones técnicas
     potencia = models.CharField(max_length=50, blank=True, verbose_name="Potencia")
     voltaje = models.CharField(max_length=50, blank=True, verbose_name="Voltaje")
     dimensiones = models.CharField(max_length=100, blank=True, verbose_name="Dimensiones")
     icono = models.CharField(max_length=50, default='box', verbose_name="Icono FontAwesome")
     
-    # Auditoría
+    # Auditoría (usuario_creacion ahora es opcional)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
-    usuario_creacion = models.ForeignKey(User, on_delete=models.PROTECT, related_name='productos_creados')
+    usuario_creacion = models.ForeignKey(
+        User, 
+        on_delete=models.PROTECT, 
+        related_name='productos_creados',
+        null=True,  # Hacerlo opcional
+        blank=True  # Permitir blanco en formularios
+    )
     
     class Meta:
         db_table = 'productos'
@@ -152,6 +158,12 @@ class Producto(models.Model):
     
     def __str__(self):
         return f"{self.nombre} - {self.sku}"
+    
+    def save(self, *args, **kwargs):
+        # Si no hay usuario_creacion y estamos en un request, asignar el usuario actual
+        if not self.usuario_creacion and hasattr(self, '_current_user'):
+            self.usuario_creacion = self._current_user
+        super().save(*args, **kwargs)
     
     @property
     def necesita_reposicion(self):
@@ -296,7 +308,7 @@ class ItemCotizacion(models.Model):
         return self.subtotal - self.descuento_monto
 
 # ===========================
-# MODELO DE PRODUCTOS ADQUIRIDOS POR CLIENTES (NUEVO)
+# MODELO DE PRODUCTOS ADQUIRIDOS POR CLIENTES
 # ===========================
 
 class ProductoAdquirido(models.Model):

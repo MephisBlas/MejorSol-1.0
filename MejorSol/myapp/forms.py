@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from .models import Perfil, Producto, Categoria
+from .models import Perfil, Producto, Categoria, ProductoAdquirido
 
 # ===========================
 # FORMULARIOS DE USUARIO Y AUTENTICACIÓN
@@ -143,7 +143,7 @@ class ProfileForm(forms.ModelForm):
         return user
 
 # ===========================
-# FORMULARIOS DE PRODUCTOS (SIMPLIFICADOS)
+# FORMULARIOS DE PRODUCTOS (ACTUALIZADOS)
 # ===========================
 
 class CategoriaForm(forms.ModelForm):
@@ -180,9 +180,14 @@ class ProductoForm(forms.ModelForm):
             'descripcion', 
             'sku',
             'categoria',
-            'precio', 
+            'precio',
+            'costo',
             'stock', 
-            'stock_minimo', 
+            'stock_minimo',
+            'potencia',
+            'voltaje',
+            'dimensiones',
+            'icono',
             'activo'
         ]
         widgets = {
@@ -205,6 +210,12 @@ class ProductoForm(forms.ModelForm):
                 'min': '0',
                 'placeholder': '0.00'
             }),
+            'costo': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0',
+                'placeholder': '0.00'
+            }),
             'stock': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'min': '0',
@@ -215,6 +226,22 @@ class ProductoForm(forms.ModelForm):
                 'min': '0',
                 'placeholder': '5'
             }),
+            'potencia': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: 50 KVA, 3.0 KW'
+            }),
+            'voltaje': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: 13.2KV, 220V'
+            }),
+            'dimensiones': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: 500m, 100x50x30cm'
+            }),
+            'icono': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nombre de icono FontAwesome (ej: bolt, solar-panel)'
+            }),
             'activo': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
             }),
@@ -222,6 +249,7 @@ class ProductoForm(forms.ModelForm):
         help_texts = {
             'sku': 'Código único de identificación del producto',
             'stock_minimo': 'Stock mínimo antes de generar alerta',
+            'icono': 'Nombre del icono de FontAwesome sin el prefijo "fa-"',
         }
     
     def clean_sku(self):
@@ -246,6 +274,108 @@ class ProductoForm(forms.ModelForm):
             raise forms.ValidationError("El stock mínimo no puede ser negativo.")
         return stock_minimo
 
+    def clean_precio(self):
+        precio = self.cleaned_data.get('precio')
+        if precio and precio < 0:
+            raise forms.ValidationError("El precio no puede ser negativo.")
+        return precio
+
+    def clean_costo(self):
+        costo = self.cleaned_data.get('costo')
+        if costo and costo < 0:
+            raise forms.ValidationError("El costo no puede ser negativo.")
+        return costo
+
+# ===========================
+# FORMULARIOS DE PRODUCTOS ADQUIRIDOS
+# ===========================
+
+class ProductoAdquiridoForm(forms.ModelForm):
+    producto = forms.ModelChoiceField(
+        queryset=Producto.objects.filter(activo=True, estado='activo'),
+        empty_label="Seleccione un producto",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    cliente = forms.ModelChoiceField(
+        queryset=User.objects.filter(perfil__tipo_usuario='cliente'),
+        empty_label="Seleccione un cliente",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    class Meta:
+        model = ProductoAdquirido
+        fields = [
+            'cliente',
+            'producto',
+            'cantidad',
+            'precio_adquisicion',
+            'fecha_compra',
+            'fecha_instalacion',
+            'garantia_meses',
+            'observaciones'
+        ]
+        widgets = {
+            'cantidad': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'placeholder': '1'
+            }),
+            'precio_adquisicion': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0',
+                'placeholder': '0.00'
+            }),
+            'fecha_compra': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'fecha_instalacion': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+            'garantia_meses': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'placeholder': '12'
+            }),
+            'observaciones': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Observaciones adicionales...'
+            }),
+        }
+        help_texts = {
+            'precio_adquisicion': 'Precio al que se adquirió el producto (puede ser diferente al precio actual)',
+            'garantia_meses': 'Meses de garantía del producto',
+        }
+
+    def clean_precio_adquisicion(self):
+        precio = self.cleaned_data.get('precio_adquisicion')
+        if precio and precio < 0:
+            raise forms.ValidationError("El precio de adquisición no puede ser negativo.")
+        return precio
+
+    def clean_cantidad(self):
+        cantidad = self.cleaned_data.get('cantidad')
+        if cantidad and cantidad < 1:
+            raise forms.ValidationError("La cantidad debe ser al menos 1.")
+        return cantidad
+
+    def clean(self):
+        cleaned_data = super().clean()
+        fecha_compra = cleaned_data.get('fecha_compra')
+        fecha_instalacion = cleaned_data.get('fecha_instalacion')
+        
+        if fecha_instalacion and fecha_compra:
+            if fecha_instalacion < fecha_compra:
+                raise forms.ValidationError({
+                    'fecha_instalacion': 'La fecha de instalación no puede ser anterior a la fecha de compra.'
+                })
+        
+        return cleaned_data
+
 # ===========================
 # FORMULARIOS DE BÚSQUEDA
 # ===========================
@@ -268,5 +398,26 @@ class ProductoSearchForm(forms.Form):
     con_stock_bajo = forms.BooleanField(
         required=False,
         label='Solo stock bajo',
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
+class ProductoAdquiridoSearchForm(forms.Form):
+    q = forms.CharField(
+        required=False,
+        label='Buscar',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Buscar por cliente o producto...'
+        })
+    )
+    cliente = forms.ModelChoiceField(
+        required=False,
+        queryset=User.objects.filter(perfil__tipo_usuario='cliente'),
+        empty_label='Todos los clientes',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    garantia_activa = forms.BooleanField(
+        required=False,
+        label='Solo garantías activas',
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )

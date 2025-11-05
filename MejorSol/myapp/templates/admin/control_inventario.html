@@ -21,7 +21,7 @@
       border-radius: 16px;
       padding: 2rem;
       border: 1px solid var(--ms-border);
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
     }
 
@@ -293,6 +293,12 @@
       border-color: var(--ms-accent);
       color: var(--ms-accent);
     }
+
+    .help-text {
+      font-size: 0.75rem;
+      color: var(--ms-muted);
+      margin-top: 0.25rem;
+    }
   </style>
 </head>
 <body>
@@ -412,7 +418,7 @@
           </a>
         </div>
 
-        <form method="post" class="product-form">
+        <form method="post" class="product-form" enctype="multipart/form-data">
           {% csrf_token %}
           
           {% if form.errors %}
@@ -422,6 +428,7 @@
           </div>
           {% endif %}
           
+          <!-- Información Básica -->
           <div class="form-row">
             <div class="form-group">
               <label for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }}</label>
@@ -436,6 +443,9 @@
               {{ form.sku }}
               {% if form.sku.errors %}
               <div class="error-text">{{ form.sku.errors }}</div>
+              {% endif %}
+              {% if form.sku.help_text %}
+              <div class="help-text">{{ form.sku.help_text }}</div>
               {% endif %}
             </div>
           </div>
@@ -457,7 +467,80 @@
               {% endif %}
             </div>
           </div>
+
+          <!-- Costo y Stock -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="{{ form.costo.id_for_label }}">{{ form.costo.label }}</label>
+              {{ form.costo }}
+              {% if form.costo.errors %}
+              <div class="error-text">{{ form.costo.errors }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="form-group">
+              <label for="{{ form.stock.id_for_label }}">{{ form.stock.label }}</label>
+              {{ form.stock }}
+              {% if form.stock.errors %}
+              <div class="error-text">{{ form.stock.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="{{ form.stock_minimo.id_for_label }}">{{ form.stock_minimo.label }}</label>
+              {{ form.stock_minimo }}
+              {% if form.stock_minimo.errors %}
+              <div class="error-text">{{ form.stock_minimo.errors }}</div>
+              {% endif %}
+              {% if form.stock_minimo.help_text %}
+              <div class="help-text">{{ form.stock_minimo.help_text }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="form-group">
+              <label for="{{ form.icono.id_for_label }}">{{ form.icono.label }}</label>
+              {{ form.icono }}
+              {% if form.icono.errors %}
+              <div class="error-text">{{ form.icono.errors }}</div>
+              {% endif %}
+              {% if form.icono.help_text %}
+              <div class="help-text">{{ form.icono.help_text }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Especificaciones Técnicas -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="{{ form.potencia.id_for_label }}">{{ form.potencia.label }}</label>
+              {{ form.potencia }}
+              {% if form.potencia.errors %}
+              <div class="error-text">{{ form.potencia.errors }}</div>
+              {% endif %}
+            </div>
+            
+            <div class="form-group">
+              <label for="{{ form.voltaje.id_for_label }}">{{ form.voltaje.label }}</label>
+              {{ form.voltaje }}
+              {% if form.voltaje.errors %}
+              <div class="error-text">{{ form.voltaje.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="{{ form.dimensiones.id_for_label }}">{{ form.dimensiones.label }}</label>
+              {{ form.dimensiones }}
+              {% if form.dimensiones.errors %}
+              <div class="error-text">{{ form.dimensiones.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
           
+          <!-- Descripción -->
           <div class="form-group full-width">
             <label for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}</label>
             {{ form.descripcion }}
@@ -466,24 +549,7 @@
             {% endif %}
           </div>
           
-          <div class="form-row">
-            <div class="form-group">
-              <label for="{{ form.stock.id_for_label }}">{{ form.stock.label }}</label>
-              {{ form.stock }}
-              {% if form.stock.errors %}
-              <div class="error-text">{{ form.stock.errors }}</div>
-              {% endif %}
-            </div>
-            
-            <div class="form-group">
-              <label for="{{ form.stock_minimo.id_for_label }}">{{ form.stock_minimo.label }}</label>
-              {{ form.stock_minimo }}
-              {% if form.stock_minimo.errors %}
-              <div class="error-text">{{ form.stock_minimo.errors }}</div>
-              {% endif %}
-            </div>
-          </div>
-
+          <!-- Estado -->
           <div class="form-row">
             <div class="form-group full-width">
               <div class="checkbox-group">
@@ -557,17 +623,19 @@
             <span class="product-description">{{ producto.descripcion|default:"Sin descripción" }}</span>
           </div>
           
+          <!-- Precios -->
           <div class="detail-row">
             <div class="detail-group">
-              <label>Precio:</label>
+              <label>Precio Venta:</label>
               <span class="price">$ {{ producto.precio }}</span>
             </div>
             <div class="detail-group">
-              <label>Stock Mínimo:</label>
-              <span>{{ producto.stock_minimo }} unidades</span>
+              <label>Costo:</label>
+              <span>$ {{ producto.costo|default:"0" }}</span>
             </div>
           </div>
-          
+
+          <!-- Stock -->
           <div class="detail-row">
             <div class="detail-group">
               <label>Stock Actual:</label>
@@ -581,19 +649,48 @@
               </span>
             </div>
             <div class="detail-group">
-              <label>Nivel Stock:</label>
-              <span class="stock-level">
-                {% if producto.stock == 0 %}
-                    <i class="fas fa-times-circle"></i> Agotado
-                {% elif producto.stock <= producto.stock_minimo %}
-                    <i class="fas fa-exclamation-triangle"></i> Bajo
-                {% else %}
-                    <i class="fas fa-check-circle"></i> Normal
-                {% endif %}
-              </span>
+              <label>Stock Mínimo:</label>
+              <span>{{ producto.stock_minimo }} unidades</span>
             </div>
           </div>
+
+          <!-- Especificaciones Técnicas -->
+          {% if producto.potencia or producto.voltaje or producto.dimensiones %}
+          <div class="detail-row">
+            {% if producto.potencia %}
+            <div class="detail-group">
+              <label>Potencia:</label>
+              <span>{{ producto.potencia }}</span>
+            </div>
+            {% endif %}
+            {% if producto.voltaje %}
+            <div class="detail-group">
+              <label>Voltaje:</label>
+              <span>{{ producto.voltaje }}</span>
+            </div>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {% if producto.dimensiones %}
+          <div class="detail-row">
+            <div class="detail-group full-width">
+              <label>Dimensiones:</label>
+              <span>{{ producto.dimensiones }}</span>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if producto.icono %}
+          <div class="detail-row">
+            <div class="detail-group">
+              <label>Icono:</label>
+              <span><i class="fas fa-{{ producto.icono }}"></i> {{ producto.icono }}</span>
+            </div>
+          </div>
+          {% endif %}
           
+          <!-- Fechas -->
           {% if producto.fecha_creacion %}
           <div class="detail-row">
             <div class="detail-group">
@@ -608,6 +705,18 @@
             {% endif %}
           </div>
           {% endif %}
+
+          <!-- Margen de Ganancia -->
+          <div class="detail-row">
+            <div class="detail-group">
+              <label>Margen Ganancia:</label>
+              <span>{{ producto.margen_ganancia|floatformat:2 }}%</span>
+            </div>
+            <div class="detail-group">
+              <label>¿Necesita Reposición?</label>
+              <span>{% if producto.necesita_reposicion %}Sí{% else %}No{% endif %}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -709,11 +818,11 @@
               <td>{{ producto.sku }}</td>
               <td>
                 <div class="producto-info">
-                  {% if producto.imagen_principal %}
-                  <img src="{{ producto.imagen_principal.imagen.url }}" alt="{{ producto.nombre }}" class="producto-thumb">
+                  {% if producto.imagenes.first %}
+                  <img src="{{ producto.imagenes.first.imagen.url }}" alt="{{ producto.nombre }}" class="producto-thumb">
                   {% else %}
                   <div class="producto-thumb no-image">
-                    <i class="fas fa-image"></i>
+                    <i class="fas fa-{{ producto.icono|default:'box' }}"></i>
                   </div>
                   {% endif %}
                   <span>{{ producto.nombre }}</span>
@@ -867,6 +976,7 @@ document.addEventListener('DOMContentLoaded', function() {
   align-items: center;
   justify-content: center;
   color: var(--ms-muted);
+  font-size: 1.2rem;
 }
 
 .filter-form {
@@ -919,6 +1029,16 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .actions .btn-icon.delete {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.actions .btn-icon.in {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.actions .btn-icon.out {
   background: rgba(239, 68, 68, 0.2);
   color: #ef4444;
 }

@@ -13,10 +13,253 @@
     
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/client_dashboard.css' %}">
+    <style>
+        /* Estilos adicionales para productos */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .product-card {
+            background: var(--ms-panel);
+            border: 1px solid var(--ms-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: var(--ms-accent);
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a2a3a, #2a3a4a);
+            border-radius: 12px;
+            flex-shrink: 0;
+            font-size: 2rem;
+            color: var(--ms-accent);
+            border: 2px solid var(--ms-border);
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .product-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .product-info h3 {
+            color: var(--ms-text);
+            margin: 0 0 0.5rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .product-info p {
+            color: var(--ms-muted);
+            margin: 0 0 1rem 0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-specs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .product-specs span {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(41, 255, 154, 0.1);
+            color: var(--ms-accent);
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid rgba(41, 255, 154, 0.2);
+        }
+
+        .product-specs i {
+            font-size: 0.7rem;
+        }
+
+        .product-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-end;
+            min-width: 120px;
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--ms-accent);
+            text-align: right;
+        }
+
+        .purchase-date {
+            font-size: 0.8rem;
+            color: var(--ms-muted);
+            text-align: right;
+        }
+
+        .warranty-status {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .warranty-status.active {
+            background: rgba(41, 255, 154, 0.2);
+            color: var(--ms-accent);
+            border: 1px solid rgba(41, 255, 154, 0.3);
+        }
+
+        .warranty-status.expired {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+            border: 1px solid rgba(255, 68, 68, 0.3);
+        }
+
+        .no-products {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--ms-panel);
+            border: 2px dashed var(--ms-border);
+            border-radius: 16px;
+            color: var(--ms-muted);
+        }
+
+        .no-products-icon {
+            font-size: 4rem;
+            color: var(--ms-border);
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+
+        .no-products h3 {
+            color: var(--ms-text);
+            margin: 0 0 1rem 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .no-products p {
+            color: var(--ms-muted);
+            margin: 0;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        /* Estados de producto */
+        .product-status {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-new {
+            background: rgba(41, 255, 154, 0.2);
+            color: var(--ms-accent);
+            border: 1px solid rgba(41, 255, 154, 0.3);
+        }
+
+        .status-warranty {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .product-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .product-image {
+                align-self: center;
+            }
+
+            .product-meta {
+                align-items: center;
+            }
+
+            .product-specs {
+                justify-content: center;
+            }
+        }
+
+        /* Animación de carga */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .product-card {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .product-card:nth-child(odd) {
+            animation-delay: 0.1s;
+        }
+
+        .product-card:nth-child(even) {
+            animation-delay: 0.2s;
+        }
+    </style>
 </head>
 <body>
     <div class="client-container">
-        <!-- Header -->
         <header class="client-header">
             <div class="header-content">
                 <div class="logo-section">
@@ -50,7 +293,6 @@
             </div>
         </header>
 
-        <!-- Mobile Menu -->
         <div class="mobile-nav-overlay" id="mobileNavOverlay">
             <div class="mobile-nav-content">
                 <div class="mobile-nav-header">
@@ -99,9 +341,7 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <main class="client-main">
-            <!-- Navigation Tabs -->
             <nav class="client-nav">
                 <div class="nav-tabs">
                     <button class="nav-tab active" data-tab="servicios">
@@ -123,9 +363,7 @@
                 </div>
             </nav>
 
-            <!-- Content Area -->
             <div class="client-content">
-                <!-- Servicios Tab -->
                 <div class="tab-content active" id="servicios-tab">
                     <div class="tab-header">
                         <h2>Mis Servicios</h2>
@@ -138,94 +376,130 @@
                     </div>
                     
                     <div class="services-grid">
-                        <div class="service-card">
-                            <div class="service-icon">
-                                <i class="fas fa-bolt"></i>
-                            </div>
-                            <div class="service-info">
-                                <h3>Instalación Eléctrica</h3>
-                                <p>Sistema completo de instalación residencial</p>
-                                <div class="service-status active">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>Activo</span>
-                                </div>
-                            </div>
-                            <div class="service-actions">
-                                <button class="btn btn-outline">
-                                    <i class="fas fa-eye"></i>
-                                    <span class="btn-text">Ver Detalles</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="service-card">
-                            <div class="service-icon">
-                                <i class="fas fa-solar-panel"></i>
-                            </div>
-                            <div class="service-info">
-                                <h3>Energía Solar</h3>
-                                <p>Instalación de paneles solares 5KW</p>
-                                <div class="service-status pending">
-                                    <i class="fas fa-clock"></i>
-                                    <span>En Proceso</span>
-                                </div>
-                            </div>
-                            <div class="service-actions">
-                                <button class="btn btn-outline">
-                                    <i class="fas fa-truck"></i>
-                                    <span class="btn-text">Seguimiento</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="service-card">
-                            <div class="service-icon">
+                         <div class="no-products">
+                            <div class="no-products-icon">
                                 <i class="fas fa-tools"></i>
                             </div>
-                            <div class="service-info">
-                                <h3>Mantenimiento</h3>
-                                <p>Mantenimiento preventivo trimestral</p>
-                                <div class="service-status active">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>Activo</span>
-                                </div>
-                            </div>
-                            <div class="service-actions">
-                                <button class="btn btn-outline">
-                                    <i class="fas fa-calendar"></i>
-                                    <span class="btn-text">Programar</span>
-                                </button>
-                            </div>
+                            <h3>Aún no tienes servicios</h3>
+                            <p>Los servicios de mantención o instalación aparecerán aquí.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Productos Tab -->
                 <div class="tab-content" id="productos-tab">
+
                     <div class="tab-header">
-                        <h2>Productos Adquiridos</h2>
+                        <h2>Catálogo de Productos</h2>
                         <div class="tab-actions">
-                            <button class="btn btn-outline sm">
-                                <i class="fas fa-download"></i>
-                                <span>Exportar</span>
-                            </button>
+                            <a href="#catalogo" class="btn btn-solid sm">
+                                <i class="fas fa-store"></i>
+                                <span>Ver Catálogo</span>
+                            </a>
                         </div>
                     </div>
+
+                    <div class="products-grid" id="catalogo">
+                        {% if productos_disponibles %}
+                            {% for producto in productos_disponibles %}
+                            <div class="product-card">
+                                
+                                <div class="product-image">
+                                    {% if producto.imagenes.first %}
+                                        <img src="{{ producto.imagenes.first.imagen.url }}" 
+                                             alt="{{ producto.nombre }}"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center;">
+                                            <i class="fas fa-{{ producto.icono|default:'box' }}"></i>
+                                        </div>
+                                    {% else %}
+                                        <i class="fas fa-{{ producto.icono|default:'box' }}"></i>
+                                    {% endif %}
+                                </div>
+
+                                <div class="product-info">
+                                    <h3>{{ producto.nombre }}</h3>
+                                    <p>{{ producto.descripcion|truncatewords:20 }}</p>
+                                    
+                                    <div class="product-specs">
+                                        {% if producto.potencia %}
+                                        <span><i class="fas fa-bolt"></i> {{ producto.potencia }}</span>
+                                        {% endif %}
+                                        {% if producto.voltaje %}
+                                        <span><i class="fas fa-plug"></i> {{ producto.voltaje }}</span>
+                                        {% endif %}
+                                        {% if producto.stock <= producto.stock_minimo and producto.stock > 0 %}
+                                        <span style="background: rgba(255, 193, 7, 0.2); color: #ffc107; border-color: rgba(255, 193, 7, 0.3);">
+                                            <i class="fas fa-exclamation-triangle"></i> ¡Poco Stock!
+                                        </span>
+                                        {% elif producto.stock == 0 %}
+                                         <span style="background: rgba(255, 68, 68, 0.2); color: #ff4444; border-color: rgba(255, 68, 68, 0.3);">
+                                            <i class="fas fa-times-circle"></i> Agotado
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="product-meta">
+                                    <div class="product-price">${{ producto.precio|floatformat:0 }}</div>
+                                    <div class="purchase-date" style="color: var(--ms-accent);">
+                                        Stock: {{ producto.stock }}
+                                    </div>
+                                    
+                                    <a href="#" class="btn btn-outline sm" style="margin-top: 10px; width: 100%; text-decoration: none;">
+                                        <i class="fas fa-shopping-cart"></i>
+                                        Ver producto
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="no-products">
+                                <div class="no-products-icon">
+                                    <i class="fas fa-store-slash"></i>
+                                </div>
+                                <h3>No hay productos en el catálogo</h3>
+                                <p>Vuelve a visitarnos pronto, estamos actualizando nuestro inventario.</p>
+                            </div>
+                        {% endif %}
+                    </div>
                     
-                    <div class="products-grid">
-                        {% if productos_adquiridos %}
+                    {% if productos_adquiridos %}
+                        <div class="tab-header" style="margin-top: 2.5rem; border-top: 1px solid var(--ms-border); padding-top: 1.5rem;">
+                            <h2>Productos Adquiridos</h2>
+                            <div class="tab-actions">
+                                <button class="btn btn-outline sm">
+                                    <i class="fas fa-download"></i>
+                                    <span>Exportar</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="products-grid">
                             {% for producto_adquirido in productos_adquiridos %}
                             <div class="product-card">
+                                {% if producto_adquirido.garantia_activa %}
+                                <div class="product-status status-warranty">
+                                    <i class="fas fa-shield-alt"></i> Garantía
+                                </div>
+                                {% endif %}
+
                                 <div class="product-image">
                                     {% if producto_adquirido.producto.imagenes.first %}
-                                        <img src="{{ producto_adquirido.producto.imagenes.first.imagen.url }}" alt="{{ producto_adquirido.producto.nombre }}">
+                                        <img src="{{ producto_adquirido.producto.imagenes.first.imagen.url }}" 
+                                             alt="{{ producto_adquirido.producto.nombre }}"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center;">
+                                            <i class="fas fa-{{ producto_adquirido.producto.icono|default:'box' }}"></i>
+                                        </div>
                                     {% else %}
                                         <i class="fas fa-{{ producto_adquirido.producto.icono|default:'box' }}"></i>
                                     {% endif %}
                                 </div>
+
                                 <div class="product-info">
                                     <h3>{{ producto_adquirido.producto.nombre }}</h3>
-                                    <p>{{ producto_adquirido.producto.descripcion }}</p>
+                                    <p>{{ producto_adquirido.producto.descripcion|truncatewords:20 }}</p>
+                                    
                                     <div class="product-specs">
                                         {% if producto_adquirido.producto.potencia %}
                                         <span><i class="fas fa-bolt"></i> {{ producto_adquirido.producto.potencia }}</span>
@@ -236,463 +510,137 @@
                                         {% if producto_adquirido.producto.dimensiones %}
                                         <span><i class="fas fa-ruler"></i> {{ producto_adquirido.producto.dimensiones }}</span>
                                         {% endif %}
+                                        {% if producto_adquirido.cantidad > 1 %}
+                                        <span><i class="fas fa-layer-group"></i> x{{ producto_adquirido.cantidad }}</span>
+                                        {% endif %}
                                     </div>
                                 </div>
+
                                 <div class="product-meta">
                                     <div class="product-price">${{ producto_adquirido.precio_adquisicion|floatformat:0 }}</div>
-                                    <div class="purchase-date">Comprado: {{ producto_adquirido.fecha_compra|date:"d/m/Y" }}</div>
+                                    <div class="purchase-date">
+                                        <i class="fas fa-calendar"></i>
+                                        {{ producto_adquirido.fecha_compra|date:"d/m/Y" }}
+                                    </div>
+                                    
                                     {% if producto_adquirido.garantia_activa %}
                                     <div class="warranty-status active">
                                         <i class="fas fa-shield-alt"></i>
-                                        <span>Garantía Activa</span>
+                                        <span>Garantía</span>
+                                    </div>
+                                    {% else %}
+                                    <div class="warranty-status expired">
+                                        <i class="fas fa-shield-alt"></i>
+                                        <span>Sin Garantía</span>
                                     </div>
                                     {% endif %}
                                 </div>
                             </div>
                             {% endfor %}
-                        {% else %}
-                            <div class="no-products">
-                                <div class="no-products-icon">
-                                    <i class="fas fa-box-open"></i>
-                                </div>
-                                <h3>No hay productos adquiridos</h3>
-                                <p>Los productos que adquieras aparecerán aquí.</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Documentos Tab -->
-                <div class="tab-content" id="documentos-tab">
+                        </div>
+                    {% endif %} </div> <div class="tab-content" id="documentos-tab">
                     <div class="tab-header">
-                        <h2>Documentos y Archivos</h2>
-                        <div class="tab-actions">
-                            <button class="btn btn-outline sm">
-                                <i class="fas fa-upload"></i>
-                                <span>Subir</span>
-                            </button>
-                        </div>
+                        <h2>Mis Documentos</h2>
                     </div>
-                    
-                    <div class="documents-list">
-                        <div class="document-item">
-                            <div class="doc-icon">
-                                <i class="fas fa-file-pdf"></i>
-                            </div>
-                            <div class="doc-info">
-                                <h4>Contrato de Servicios.pdf</h4>
-                                <p>Contrato general de servicios eléctricos</p>
-                                <span>Subido: 15/01/2024 • 2.4 MB</span>
-                            </div>
-                            <div class="doc-actions">
-                                <button class="btn btn-outline">
-                                    <i class="fas fa-download"></i>
-                                    <span class="btn-text">Descargar</span>
-                                </button>
-                            </div>
+                     <div class="no-products">
+                        <div class="no-products-icon">
+                            <i class="fas fa-file-archive"></i>
                         </div>
-
-                        <div class="document-item">
-                            <div class="doc-icon">
-                                <i class="fas fa-file-contract"></i>
-                            </div>
-                            <div class="doc-info">
-                                <h4>Certificado Garantía.docx</h4>
-                                <p>Certificado de garantía extendida</p>
-                                <span>Subido: 20/02/2024 • 1.8 MB</span>
-                            </div>
-                            <div class="doc-actions">
-                                <button class="btn btn-outline">
-                                    <i class="fas fa-download"></i>
-                                    <span class="btn-text">Descargar</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="document-item">
-                            <div class="doc-icon">
-                                <i class="fas fa-file-invoice"></i>
-                            </div>
-                            <div class="doc-info">
-                                <h4>Factura FAC-2024-00125.pdf</h4>
-                                <p>Factura mensual de servicios</p>
-                                <span>Subido: 15/03/2024 • 1.2 MB</span>
-                            </div>
-                            <div class="doc-actions">
-                                <button class="btn btn-outline">
-                                    <i class="fas fa-download"></i>
-                                    <span class="btn-text">Descargar</span>
-                                </button>
-                            </div>
-                        </div>
+                        <h3>No hay documentos</h3>
+                        <p>Tus cotizaciones, facturas y manuales aparecerán aquí.</p>
                     </div>
                 </div>
 
-                <!-- Facturación Tab -->
-                <div class="tab-content" id="facturacion-tab">
+                 <div class="tab-content" id="facturacion-tab">
                     <div class="tab-header">
-                        <h2>Historial de Facturación</h2>
-                        <div class="tab-actions">
-                            <button class="btn btn-outline sm">
-                                <i class="fas fa-file-export"></i>
-                                <span>Exportar</span>
-                            </button>
-                        </div>
+                        <h2>Mi Facturación</h2>
                     </div>
-                    
-                    <div class="invoices-container">
-                        <div class="invoices-table">
-                            <div class="table-header">
-                                <div>N° Factura</div>
-                                <div>Fecha</div>
-                                <div>Monto</div>
-                                <div>Estado</div>
-                                <div>Acciones</div>
-                            </div>
-                            <div class="table-row">
-                                <div data-label="N° Factura">FAC-2024-00125</div>
-                                <div data-label="Fecha">15/03/2024</div>
-                                <div data-label="Monto">$ 1.250.000</div>
-                                <div data-label="Estado"><span class="status paid">Pagada</span></div>
-                                <div data-label="Acciones">
-                                    <button class="btn btn-outline sm">
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="table-row">
-                                <div data-label="N° Factura">FAC-2024-00118</div>
-                                <div data-label="Fecha">28/02/2024</div>
-                                <div data-label="Monto">$ 890.000</div>
-                                <div data-label="Estado"><span class="status paid">Pagada</span></div>
-                                <div data-label="Acciones">
-                                    <button class="btn btn-outline sm">
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="table-row">
-                                <div data-label="N° Factura">FAC-2024-00105</div>
-                                <div data-label="Fecha">15/01/2024</div>
-                                <div data-label="Monto">$ 2.150.000</div>
-                                <div data-label="Estado"><span class="status paid">Pagada</span></div>
-                                <div data-label="Acciones">
-                                    <button class="btn btn-outline sm">
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                </div>
-                            </div>
+                     <div class="no-products">
+                        <div class="no-products-icon">
+                            <i class="fas fa-file-invoice-dollar"></i>
                         </div>
+                        <h3>No hay movimientos</h3>
+                        <p>Tu historial de pagos y facturas pendientes aparecerá aquí.</p>
                     </div>
                 </div>
+
             </div>
         </main>
     </div>
 
-    <!-- Chatbot Widget Flotante -->
-    <div id="chatbotWidget" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
-        <div id="chatbotButton" style="width: 60px; height: 60px; background: linear-gradient(135deg, #00ff88, #00cc6a); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 5px 20px rgba(0, 255, 136, 0.5); border: 2px solid #00ff88; animation: pulse 2s infinite;">
-            <i class="fas fa-robot" style="font-size: 1.5rem; color: #000;"></i>
-        </div>
-    </div>
-
-    <!-- Chatbot Container -->
-    <div id="chatbotContainer" style="display: none; position: fixed; bottom: 90px; right: 20px; width: 350px; height: 500px; background: #000; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7); z-index: 1001; overflow: hidden; border: 2px solid #00ff88;">
-        <!-- Chatbot Header -->
-        <div style="background: linear-gradient(135deg, #00ff88, #00cc6a); padding: 15px; display: flex; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center;">
-                <div style="width: 40px; height: 40px; background: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
-                    <i class="fas fa-robot" style="font-size: 1.2rem; color: #00ff88;"></i>
-                </div>
-                <div>
-                    <h3 style="margin: 0; color: #000; font-weight: 600;">SIEERBot</h3>
-                    <p style="margin: 0; font-size: 0.8rem; color: #000; opacity: 0.8;">Asistente Virtual</p>
-                </div>
-            </div>
-            <button id="closeChatbot" style="background: none; border: none; color: #000; cursor: pointer; font-size: 1.2rem;">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <!-- Chat Messages Area -->
-        <div id="chatMessages" style="height: 340px; overflow-y: auto; padding: 15px; background: #000;">
-            <!-- Initial bot message -->
-            <div class="message bot-message" style="margin-bottom: 15px; animation: fadeIn 0.5s ease-in;">
-                <div style="display: flex; align-items: flex-start;">
-                    <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #00ff88, #00cc6a); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; flex-shrink: 0;">
-                        <i class="fas fa-robot" style="font-size: 0.8rem; color: #000;"></i>
-                    </div>
-                    <div style="background: #111; padding: 10px 15px; border-radius: 15px; border-top-left-radius: 0; max-width: 80%;">
-                        <p style="margin: 0; color: #00ff88; font-size: 0.9rem;">¡Hola! Soy SIEERBot, tu asistente virtual. ¿En qué puedo ayudarte hoy?</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Thinking Indicator (Hidden by default) -->
-        <div id="thinkingIndicator" style="display: none; padding: 0 15px 10px; animation: fadeIn 0.3s ease-in;">
-            <div style="display: flex; align-items: center;">
-                <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #00ff88, #00cc6a); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; flex-shrink: 0;">
-                    <i class="fas fa-robot" style="font-size: 0.8rem; color: #000;"></i>
-                </div>
-                <div style="background: #111; padding: 10px 15px; border-radius: 15px; border-top-left-radius: 0;">
-                    <div class="typing-indicator" style="display: flex; align-items: center;">
-                        <span style="color: #00ff88; font-size: 0.9rem;">Escribiendo</span>
-                        <div class="typing-dots" style="display: flex; margin-left: 5px;">
-                            <div style="width: 6px; height: 6px; background: #00ff88; border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite;"></div>
-                            <div style="width: 6px; height: 6px; background: #00ff88; border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite 0.2s;"></div>
-                            <div style="width: 6px; height: 6px; background: #00ff88; border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite 0.4s;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Chat Input Area -->
-        <div style="padding: 15px; background: #111; border-top: 1px solid #222;">
-            <div style="display: flex; align-items: center;">
-                <input type="text" id="chatInput" placeholder="Escribe tu mensaje..." style="flex: 1; padding: 12px 15px; background: #000; border: 1px solid #333; border-radius: 25px; color: #00ff88; font-size: 0.9rem; outline: none;">
-                <button id="sendMessage" style="width: 40px; height: 40px; background: linear-gradient(135deg, #00ff88, #00cc6a); border: none; border-radius: 50%; margin-left: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-paper-plane" style="color: #000;"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <style>
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 5px 20px rgba(0, 255, 136, 0.5); }
-            50% { transform: scale(1.05); box-shadow: 0 5px 25px rgba(0, 255, 136, 0.8); }
-            100% { transform: scale(1); box-shadow: 0 5px 20px rgba(0, 255, 136, 0.5); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-5px); }
-        }
-        
-        .user-message {
-            margin-bottom: 15px;
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        .user-message > div {
-            display: flex;
-            align-items: flex-start;
-            justify-content: flex-end;
-        }
-        
-        .user-message > div > div:first-child {
-            order: 2;
-            margin-left: 10px;
-            margin-right: 0;
-        }
-        
-        .user-message > div > div:last-child {
-            background: linear-gradient(135deg, #00ff88, #00cc6a);
-            color: #000;
-            border-radius: 15px;
-            border-top-right-radius: 0;
-            padding: 10px 15px;
-            max-width: 80%;
-        }
-        
-        .user-message p {
-            margin: 0;
-            font-size: 0.9rem;
-        }
-        
-        #chatMessages::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        #chatMessages::-webkit-scrollbar-track {
-            background: #111;
-        }
-        
-        #chatMessages::-webkit-scrollbar-thumb {
-            background: #00ff88;
-            border-radius: 3px;
-        }
-        
-        #chatMessages::-webkit-scrollbar-thumb:hover {
-            background: #00cc6a;
-        }
-
-        /* Estilos para productos sin datos */
-        .no-products {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 3rem;
-            color: #666;
-        }
-
-        .no-products-icon {
-            font-size: 3rem;
-            color: #ccc;
-            margin-bottom: 1rem;
-        }
-
-        .warranty-status {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-            margin-top: 0.5rem;
-        }
-
-        .warranty-status.active {
-            color: #00cc6a;
-        }
-
-        .warranty-status i {
-            font-size: 0.9rem;
-        }
-
-        /* Estilos para imágenes de productos */
-        .product-image img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .product-image {
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8f9fa;
-            border-radius: 12px;
-            margin-right: 15px;
-            font-size: 1.5rem;
-            color: #666;
-        }
-    </style>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const chatbotButton = document.getElementById('chatbotButton');
-            const chatbotContainer = document.getElementById('chatbotContainer');
-            const closeChatbot = document.getElementById('closeChatbot');
-            const chatMessages = document.getElementById('chatMessages');
-            const chatInput = document.getElementById('chatInput');
-            const sendMessage = document.getElementById('sendMessage');
-            const thinkingIndicator = document.getElementById('thinkingIndicator');
-            
-            // Toggle chatbot visibility
-            chatbotButton.addEventListener('click', function() {
-                chatbotContainer.style.display = 'block';
-                chatbotButton.style.display = 'none';
-            });
-            
-            closeChatbot.addEventListener('click', function() {
-                chatbotContainer.style.display = 'none';
-                chatbotButton.style.display = 'flex';
-            });
-            
-            // Send message function
-            function sendUserMessage() {
-                const message = chatInput.value.trim();
-                if (message === '') return;
+            // Sistema de pestañas
+            const tabs = document.querySelectorAll('.nav-tab, .mobile-nav-tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            function switchTab(tabName) {
+                // Ocultar todos los contenidos
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+
+                // Desactivar todas las pestañas
+                tabs.forEach(tab => {
+                    tab.classList.remove('active');
+                });
+
+                // Activar pestaña y contenido seleccionado
+                const allTabs = document.querySelectorAll(`[data-tab="${tabName}"]`);
+                const selectedContent = document.getElementById(`${tabName}-tab`);
                 
-                // Add user message to chat
-                const userMessageDiv = document.createElement('div');
-                userMessageDiv.className = 'message user-message';
-                userMessageDiv.innerHTML = `
-                    <div>
-                        <div style="width: 30px; height: 30px; background: #111; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <i class="fas fa-user" style="font-size: 0.8rem; color: #00ff88;"></i>
-                        </div>
-                        <div>
-                            <p>${message}</p>
-                        </div>
-                    </div>
-                `;
-                chatMessages.appendChild(userMessageDiv);
-                
-                // Clear input
-                chatInput.value = '';
-                
-                // Show thinking indicator
-                thinkingIndicator.style.display = 'block';
-                
-                // Scroll to bottom
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                
-                // Simulate bot response after delay
-                setTimeout(function() {
-                    thinkingIndicator.style.display = 'none';
-                    
-                    // Add bot response
-                    const botResponse = getBotResponse(message);
-                    const botMessageDiv = document.createElement('div');
-                    botMessageDiv.className = 'message bot-message';
-                    botMessageDiv.style.animation = 'fadeIn 0.5s ease-in';
-                    botMessageDiv.innerHTML = `
-                        <div style="display: flex; align-items: flex-start;">
-                            <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #00ff88, #00cc6a); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; flex-shrink: 0;">
-                                <i class="fas fa-robot" style="font-size: 0.8rem; color: #000;"></i>
-                            </div>
-                            <div style="background: #111; padding: 10px 15px; border-radius: 15px; border-top-left-radius: 0; max-width: 80%;">
-                                <p style="margin: 0; color: #00ff88; font-size: 0.9rem;">${botResponse}</p>
-                            </div>
-                        </div>
-                    `;
-                    chatMessages.appendChild(botMessageDiv);
-                    
-                    // Scroll to bottom
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                }, 1500 + Math.random() * 1000); // Random delay between 1.5-2.5 seconds
-            }
-            
-            // Send message on button click
-            sendMessage.addEventListener('click', sendUserMessage);
-            
-            // Send message on Enter key
-            chatInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    sendUserMessage();
-                }
-            });
-            
-            // Simple bot response logic
-            function getBotResponse(message) {
-                const lowerMessage = message.toLowerCase();
-                
-                if (lowerMessage.includes('hola') || lowerMessage.includes('buenas')) {
-                    return '¡Hola! Me alegra verte por aquí. ¿En qué puedo asistirte hoy?';
-                } else if (lowerMessage.includes('servicio') || lowerMessage.includes('instalación')) {
-                    return 'Puedo ayudarte con información sobre nuestros servicios eléctricos, instalaciones y mantenimiento. ¿Qué servicio específico te interesa?';
-                } else if (lowerMessage.includes('producto') || lowerMessage.includes('compra')) {
-                    return 'Tenemos una amplia gama de productos eléctricos y de energía solar. ¿Te interesa algún producto en particular?';
-                } else if (lowerMessage.includes('factura') || lowerMessage.includes('pago')) {
-                    return 'Puedo ayudarte con consultas sobre facturación y pagos. ¿Tienes alguna factura específica que quieras consultar?';
-                } else if (lowerMessage.includes('documento') || lowerMessage.includes('contrato')) {
-                    return 'Puedo orientarte sobre la documentación necesaria para nuestros servicios. ¿Qué tipo de documento necesitas?';
-                } else if (lowerMessage.includes('gracias') || lowerMessage.includes('agradezco')) {
-                    return '¡De nada! Estoy aquí para ayudarte. ¿Hay algo más en lo que pueda asistirte?';
-                } else if (lowerMessage.includes('adiós') || lowerMessage.includes('chao') || lowerMessage.includes('hasta luego')) {
-                    return '¡Hasta luego! No dudes en contactarme si necesitas más ayuda.';
-                } else {
-                    const responses = [
-                        'Interesante pregunta. Déjame ver cómo puedo ayudarte con eso.',
-                        'Entiendo tu consulta. Permíteme proporcionarte la información más relevante.',
-                        'Gracias por tu pregunta. Déjame pensar en la mejor manera de asistirte.',
-                        'Comprendo lo que necesitas. Te ayudo con eso.',
-                        'Buena pregunta. Déjame consultar la información más actualizada para ti.'
-                    ];
-                    return responses[Math.floor(Math.random() * responses.length)];
+                if (allTabs.length > 0 && selectedContent) {
+                    allTabs.forEach(tab => tab.classList.add('active'));
+                    selectedContent.classList.add('active');
                 }
             }
+
+            // Event listeners para pestañas
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.getAttribute('data-tab');
+                    switchTab(tabName);
+                    
+                    // Cerrar menú móvil si está abierto
+                    if (mobileNavOverlay.style.display === 'block') {
+                        mobileNavOverlay.style.display = 'none';
+                    }
+                });
+            });
+
+            // Menu móvil
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+            const mobileCloseBtn = document.getElementById('mobileCloseBtn');
+
+            if (mobileMenuToggle && mobileNavOverlay) {
+                mobileMenuToggle.addEventListener('click', () => {
+                    mobileNavOverlay.style.display = 'block';
+                });
+
+                mobileCloseBtn.addEventListener('click', () => {
+                    mobileNavOverlay.style.display = 'none';
+                });
+
+                // Cerrar menu al hacer clic fuera
+                mobileNavOverlay.addEventListener('click', (e) => {
+                    if (e.target === mobileNavOverlay) {
+                        mobileNavOverlay.style.display = 'none';
+                    }
+                });
+            }
+
+            // Debug: Mostrar información de productos en consola
+            console.log('Productos adquiridos:', {{ productos_adquiridos.count }});
+            {% for pa in productos_adquiridos %}
+            console.log('Producto Adquirido:', '{{ pa.producto.nombre }}', 'Precio:', '{{ pa.precio_adquisicion }}');
+            {% endfor %}
+            
+            console.log('Productos disponibles:', {{ productos_disponibles.count }});
+            {% for p in productos_disponibles %}
+            console.log('Producto Catálogo:', '{{ p.nombre }}', 'Precio:', '{{ p.precio }}');
+            {% endfor %}
         });
     </script>
-    <script src="{% static 'js/client_dashboard.js' %}"></script>
 </body>
 </html>
