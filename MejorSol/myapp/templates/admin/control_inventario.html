@@ -2,1045 +2,1150 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control de Inventario - SIEER Chile</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Inventario - SIEER Chile</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
-  <link rel="stylesheet" href="{% static 'css/inventario.css' %}">
-  <style>
-    /* Estilos integrados para formularios y detalles */
-    .form-container {
-      background: var(--ms-panel);
-      border-radius: 16px;
-      padding: 2rem;
-      border: 1px solid var(--ms-border);
-      max-width: 900px;
-      margin: 0 auto;
-    }
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
+    <link rel="stylesheet" href="{% static 'css/inventario.css' %}">
+    <style>
+        /* Estilos integrados para formularios y detalles */
+        .form-container {
+            background: var(--ms-panel);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid var(--ms-border);
+            max-width: 900px;
+            margin: 0 auto;
+        }
 
-    .form-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--ms-border);
-    }
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--ms-border);
+        }
 
-    .form-header h2 {
-      color: var(--ms-text);
-      margin: 0;
-    }
+        .form-header h2 {
+            color: var(--ms-text);
+            margin: 0;
+        }
 
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
 
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
 
-    .form-group.full-width {
-      grid-column: 1 / -1;
-    }
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
 
-    .form-group label {
-      color: var(--ms-text);
-      font-weight: 500;
-      font-size: 0.9rem;
-    }
+        .form-group label {
+            color: var(--ms-text);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
 
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      padding: 0.75rem;
-      border: 1px solid var(--ms-border);
-      border-radius: 12px;
-      background: #121a26;
-      color: var(--ms-text);
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.75rem;
+            border: 1px solid var(--ms-border);
+            border-radius: 12px;
+            background: #121a26;
+            color: var(--ms-text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
 
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: var(--ms-accent);
-      box-shadow: 0 0 0 2px rgba(41, 255, 154, 0.18);
-    }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--ms-accent);
+            box-shadow: 0 0 0 2px rgba(41, 255, 154, 0.18);
+        }
 
-    .form-actions {
-      display: flex;
-      gap: 1rem;
-      justify-content: flex-end;
-      margin-top: 2rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--ms-border);
-    }
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--ms-border);
+        }
 
-    /* Estilos para detalles de producto */
-    .detail-container {
-      background: var(--ms-panel);
-      border-radius: 16px;
-      padding: 2rem;
-      border: 1px solid var(--ms-border);
-      max-width: 600px;
-      margin: 0 auto;
-    }
+        /* Estilos para detalles de producto */
+        .detail-container {
+            background: var(--ms-panel);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid var(--ms-border);
+            max-width: 600px;
+            margin: 0 auto;
+        }
 
-    .detail-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--ms-border);
-    }
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--ms-border);
+        }
 
-    .detail-header h2 {
-      color: var(--ms-text);
-      margin: 0;
-    }
+        .detail-header h2 {
+            color: var(--ms-text);
+            margin: 0;
+        }
 
-    .detail-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
+        .detail-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
 
-    .detail-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
+        .detail-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
 
-    .detail-group label {
-      color: var(--ms-muted);
-      font-weight: 500;
-      font-size: 0.875rem;
-    }
+        .detail-group label {
+            color: var(--ms-muted);
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
 
-    .detail-group span {
-      color: var(--ms-text);
-      font-size: 1rem;
-    }
+        .detail-group span {
+            color: var(--ms-text);
+            font-size: 1rem;
+        }
 
-    .product-name {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--ms-text);
-      margin-bottom: 1rem;
-    }
+        .product-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--ms-text);
+            margin-bottom: 1rem;
+        }
 
-    .status-badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      display: inline-block;
-    }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: inline-block;
+        }
 
-    .status-active {
-      background: rgba(41, 255, 154, 0.2);
-      color: var(--ms-accent);
-      border: 1px solid var(--ms-accent);
-    }
+        .status-active {
+            background: rgba(41, 255, 154, 0.2);
+            color: var(--ms-accent);
+            border: 1px solid var(--ms-accent);
+        }
 
-    .status-inactive {
-      background: rgba(255, 68, 68, 0.2);
-      color: #ff4444;
-      border: 1px solid #ff4444;
-    }
+        .status-inactive {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+            border: 1px solid #ff4444;
+        }
 
-    .stock-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
+        .stock-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
 
-    .stock-normal {
-      background: rgba(41, 255, 154, 0.2);
-      color: var(--ms-accent);
-      border: 1px solid var(--ms-accent);
-    }
+        .stock-normal {
+            background: rgba(41, 255, 154, 0.2);
+            color: var(--ms-accent);
+            border: 1px solid var(--ms-accent);
+        }
 
-    .stock-low {
-      background: rgba(255, 170, 0, 0.2);
-      color: #ffaa00;
-      border: 1px solid #ffaa00;
-    }
+        .stock-low {
+            background: rgba(255, 170, 0, 0.2);
+            color: #ffaa00;
+            border: 1px solid #ffaa00;
+        }
 
-    .stock-out {
-      background: rgba(255, 68, 68, 0.2);
-      color: #ff4444;
-      border: 1px solid #ff4444;
-    }
+        .stock-out {
+            background: rgba(255, 68, 68, 0.2);
+            color: #ff4444;
+            border: 1px solid #ff4444;
+        }
 
-    .alert {
-      padding: 1rem;
-      border-radius: 12px;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
+        .alert {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
 
-    .alert-success {
-      background: rgba(41, 255, 154, 0.2);
-      border: 1px solid var(--ms-accent);
-      color: var(--ms-accent);
-    }
+        .alert-success {
+            background: rgba(41, 255, 154, 0.2);
+            border: 1px solid var(--ms-accent);
+            color: var(--ms-accent);
+        }
 
-    .alert-error {
-      background: rgba(255, 68, 68, 0.2);
-      border: 1px solid #ff4444;
-      color: #ff4444;
-    }
+        .alert-error {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid #ff4444;
+            color: #ff4444;
+        }
 
-    .alert-warning {
-      background: rgba(255, 170, 0, 0.2);
-      border: 1px solid #ffaa00;
-      color: #ffaa00;
-    }
+        .alert-warning {
+            background: rgba(255, 170, 0, 0.2);
+            border: 1px solid #ffaa00;
+            color: #ffaa00;
+        }
 
-    .error-text {
-      color: #ff4444;
-      font-size: 0.875rem;
-      margin-top: 0.25rem;
-    }
+        .error-text {
+            color: #ff4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
 
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      padding: 0.8rem;
-      background: #121a26;
-      border-radius: 12px;
-      border: 1px solid var(--ms-border);
-    }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem;
+            background: #121a26;
+            border-radius: 12px;
+            border: 1px solid var(--ms-border);
+        }
 
-    .checkbox-group input[type="checkbox"] {
-      display: none;
-    }
+        .checkbox-group input[type="checkbox"] {
+            display: none;
+        }
 
-    .checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      cursor: pointer;
-      color: var(--ms-text);
-      font-weight: 500;
-      margin: 0;
-    }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            color: var(--ms-text);
+            font-weight: 500;
+            margin: 0;
+        }
 
-    .checkbox-label i {
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--ms-muted);
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      color: transparent;
-      transition: all 0.3s ease;
-    }
+        .checkbox-label i {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--ms-muted);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: transparent;
+            transition: all 0.3s ease;
+        }
 
-    .checkbox-group input[type="checkbox"]:checked + .checkbox-label i {
-      background: var(--ms-accent);
-      border-color: var(--ms-accent);
-      color: #031019;
-    }
+        .checkbox-group input[type="checkbox"]:checked + .checkbox-label i {
+            background: var(--ms-accent);
+            border-color: var(--ms-accent);
+            color: #031019;
+        }
 
-    .checkbox-group input[type="checkbox"]:checked + .checkbox-label {
-      color: var(--ms-accent);
-    }
+        .checkbox-group input[type="checkbox"]:checked + .checkbox-label {
+            color: var(--ms-accent);
+        }
 
-    .back-button {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: transparent;
-      color: var(--ms-text);
-      border: 1px solid var(--ms-border);
-      border-radius: 12px;
-      text-decoration: none;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: transparent;
+            color: var(--ms-text);
+            border: 1px solid var(--ms-border);
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-    .back-button:hover {
-      border-color: var(--ms-accent);
-      color: var(--ms-accent);
-    }
+        .back-button:hover {
+            border-color: var(--ms-accent);
+            color: var(--ms-accent);
+        }
 
-    .help-text {
-      font-size: 0.75rem;
-      color: var(--ms-muted);
-      margin-top: 0.25rem;
-    }
-  </style>
+        .help-text {
+            font-size: 0.75rem;
+            color: var(--ms-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* ======================================= */
+        /* ¡NUEVOS ESTILOS PARA EL FORMSET DE IMÁGENES! */
+        /* ======================================= */
+        .image-formset {
+            background: #121a26;
+            border: 1px solid var(--ms-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            grid-column: 1 / -1; /* Ocupa todo el ancho */
+        }
+        .image-formset h3 {
+            color: var(--ms-text);
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--ms-border);
+        }
+        .image-form {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--ms-border-soft);
+        }
+        .image-form:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .image-form .form-group {
+            margin: 0;
+        }
+        /* Ajuste para checkbox de "Es Principal" y "Eliminar" */
+        .image-form .checkbox-group {
+             padding: 0;
+             background: none;
+             border: none;
+             justify-content: center;
+        }
+         /* Estilo específico para input de archivo */
+        .form-group input[type="file"] {
+            padding: 0.5rem;
+            background: #1a2a3a;
+        }
+        
+        .form-group input[type="file"]::file-selector-button {
+            background: var(--ms-accent);
+            color: #031019;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+    </style>
 </head>
 <body>
 <div class="admin-container">
-  <!-- Sidebar -->
-  <aside class="admin-sidebar">
-    <div class="sidebar-header">
-      <div class="admin-logo">
-        <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo">
-        <div class="logo-text">
-          <h2>SIEER Chile</h2>
-          <span>Panel Administrativo</span>
-        </div>
-      </div>
-    </div>
-
-    <nav class="sidebar-nav">
-      <div class="nav-section">
-        <h3>Facturación</h3>
-        <ul>
-          <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
-            <a href="{% url 'admin_panel' %}">
-              <i class="fas fa-file-invoice"></i><span>Boleta y Factura Electrónica</span>
-            </a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}">
-            <a href="{% url 'calculos_estadisticas' %}">
-              <i class="fas fa-calculator"></i><span>Cálculos y Estadísticas</span>
-            </a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'cotizaciones' %}active{% endif %}">
-            <a href="{% url 'cotizaciones' %}">
-              <i class="fas fa-file-alt"></i><span>Cotizaciones</span>
-            </a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'control_inventario' %}active{% endif %}">
-            <a href="{% url 'control_inventario' %}">
-              <i class="fas fa-boxes"></i><span>Control de Inventario</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-      <div class="nav-section">
-        <h3>Reportes</h3>
-        <ul>
-          <li class="nav-item {% if request.resolver_match.url_name == 'reportes_graficos' %}active{% endif %}">
-            <a href="{% url 'reportes_graficos' %}">
-              <i class="fas fa-chart-bar"></i><span>Reportes Gráficos</span>
-            </a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'historial_ventas' %}active{% endif %}">
-            <a href="{% url 'historial_ventas' %}">
-              <i class="fas fa-history"></i><span>Historial de Ventas</span>
-            </a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}">
-            <a href="{% url 'cuenta' %}">
-              <i class="fas fa-user-cog"></i><span>Cuenta</span>
-            </a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'configuracion' %}active{% endif %}">
-            <a href="{% url 'configuracion' %}">
-              <i class="fas fa-cogs"></i><span>Configuración</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
-        <div class="user-details"><strong>Administrador</strong><span>{{ user.username }}</span></div>
-      </div>
-      <form method="post" action="{% url 'logout' %}" class="logout-form">
-        {% csrf_token %}
-        <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i>Cerrar Sesión</button>
-      </form>
-    </div>
-  </aside>
-
-  <!-- Main -->
-  <main class="admin-main inv-page">
-    <header class="admin-header">
-      <div class="header-left">
-        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
-        <h1>Control de <span class="accent">Inventario</span></h1>
-      </div>
-      <div class="header-right">
-        <button class="btn btn-primary" onclick="window.location.href='/'">
-          <i class="fas fa-eye"></i> VER SITIO WEB
-        </button>
-        <div class="notification-bell"><i class="fas fa-bell"></i><span class="notification-count">3</span></div>
-      </div>
-    </header>
-
-    <div class="admin-content inv-container">
-      <!-- Mensajes de Django -->
-      {% if messages %}
-      <div class="messages-container">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-          <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
-          {{ message }}
-        </div>
-        {% endfor %}
-      </div>
-      {% endif %}
-
-      <!-- FORMULARIO DE PRODUCTO -->
-      {% if mostrar_formulario %}
-      <div class="form-container">
-        <div class="form-header">
-          <h2>{{ titulo }}</h2>
-          <a href="{% url 'control_inventario' %}" class="back-button">
-            <i class="fas fa-arrow-left"></i> Volver al Inventario
-          </a>
-        </div>
-
-        <form method="post" class="product-form" enctype="multipart/form-data">
-          {% csrf_token %}
-          
-          {% if form.errors %}
-          <div class="alert alert-error">
-            <i class="fas fa-exclamation-triangle"></i>
-            Por favor, corrige los errores en el formulario.
-          </div>
-          {% endif %}
-          
-          <!-- Información Básica -->
-          <div class="form-row">
-            <div class="form-group">
-              <label for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }}</label>
-              {{ form.nombre }}
-              {% if form.nombre.errors %}
-              <div class="error-text">{{ form.nombre.errors }}</div>
-              {% endif %}
-            </div>
-            
-            <div class="form-group">
-              <label for="{{ form.sku.id_for_label }}">{{ form.sku.label }}</label>
-              {{ form.sku }}
-              {% if form.sku.errors %}
-              <div class="error-text">{{ form.sku.errors }}</div>
-              {% endif %}
-              {% if form.sku.help_text %}
-              <div class="help-text">{{ form.sku.help_text }}</div>
-              {% endif %}
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="{{ form.categoria.id_for_label }}">{{ form.categoria.label }}</label>
-              {{ form.categoria }}
-              {% if form.categoria.errors %}
-              <div class="error-text">{{ form.categoria.errors }}</div>
-              {% endif %}
-            </div>
-            
-            <div class="form-group">
-              <label for="{{ form.precio.id_for_label }}">{{ form.precio.label }}</label>
-              {{ form.precio }}
-              {% if form.precio.errors %}
-              <div class="error-text">{{ form.precio.errors }}</div>
-              {% endif %}
-            </div>
-          </div>
-
-          <!-- Costo y Stock -->
-          <div class="form-row">
-            <div class="form-group">
-              <label for="{{ form.costo.id_for_label }}">{{ form.costo.label }}</label>
-              {{ form.costo }}
-              {% if form.costo.errors %}
-              <div class="error-text">{{ form.costo.errors }}</div>
-              {% endif %}
-            </div>
-            
-            <div class="form-group">
-              <label for="{{ form.stock.id_for_label }}">{{ form.stock.label }}</label>
-              {{ form.stock }}
-              {% if form.stock.errors %}
-              <div class="error-text">{{ form.stock.errors }}</div>
-              {% endif %}
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="{{ form.stock_minimo.id_for_label }}">{{ form.stock_minimo.label }}</label>
-              {{ form.stock_minimo }}
-              {% if form.stock_minimo.errors %}
-              <div class="error-text">{{ form.stock_minimo.errors }}</div>
-              {% endif %}
-              {% if form.stock_minimo.help_text %}
-              <div class="help-text">{{ form.stock_minimo.help_text }}</div>
-              {% endif %}
-            </div>
-            
-            <div class="form-group">
-              <label for="{{ form.icono.id_for_label }}">{{ form.icono.label }}</label>
-              {{ form.icono }}
-              {% if form.icono.errors %}
-              <div class="error-text">{{ form.icono.errors }}</div>
-              {% endif %}
-              {% if form.icono.help_text %}
-              <div class="help-text">{{ form.icono.help_text }}</div>
-              {% endif %}
-            </div>
-          </div>
-
-          <!-- Especificaciones Técnicas -->
-          <div class="form-row">
-            <div class="form-group">
-              <label for="{{ form.potencia.id_for_label }}">{{ form.potencia.label }}</label>
-              {{ form.potencia }}
-              {% if form.potencia.errors %}
-              <div class="error-text">{{ form.potencia.errors }}</div>
-              {% endif %}
-            </div>
-            
-            <div class="form-group">
-              <label for="{{ form.voltaje.id_for_label }}">{{ form.voltaje.label }}</label>
-              {{ form.voltaje }}
-              {% if form.voltaje.errors %}
-              <div class="error-text">{{ form.voltaje.errors }}</div>
-              {% endif %}
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group full-width">
-              <label for="{{ form.dimensiones.id_for_label }}">{{ form.dimensiones.label }}</label>
-              {{ form.dimensiones }}
-              {% if form.dimensiones.errors %}
-              <div class="error-text">{{ form.dimensiones.errors }}</div>
-              {% endif %}
-            </div>
-          </div>
-          
-          <!-- Descripción -->
-          <div class="form-group full-width">
-            <label for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}</label>
-            {{ form.descripcion }}
-            {% if form.descripcion.errors %}
-            <div class="error-text">{{ form.descripcion.errors }}</div>
-            {% endif %}
-          </div>
-          
-          <!-- Estado -->
-          <div class="form-row">
-            <div class="form-group full-width">
-              <div class="checkbox-group">
-                {{ form.activo }}
-                <label for="{{ form.activo.id_for_label }}" class="checkbox-label">
-                  <i class="fas fa-check"></i>
-                  {{ form.activo.label }}
-                </label>
-              </div>
-              {% if form.activo.errors %}
-              <div class="error-text">{{ form.activo.errors }}</div>
-              {% endif %}
-            </div>
-          </div>
-          
-          <div class="form-actions">
-            <button type="submit" class="btn btn-solid">
-              <i class="fas fa-save"></i>
-              Guardar Producto
-            </button>
-            <a href="{% url 'control_inventario' %}" class="btn btn-outline">
-              <i class="fas fa-times"></i>
-              Cancelar
-            </a>
-          </div>
-        </form>
-      </div>
-
-      <!-- DETALLES DE PRODUCTO -->
-      {% elif mostrar_detalles %}
-      <div class="detail-container">
-        <div class="detail-header">
-          <h2>Detalles del Producto</h2>
-          <a href="{% url 'control_inventario' %}" class="back-button">
-            <i class="fas fa-arrow-left"></i> Volver al Inventario
-          </a>
-        </div>
-
-        <div class="product-detail">
-          <div class="detail-row">
-            <div class="detail-group">
-              <label>ID:</label>
-              <span>#{{ producto.id }}</span>
-            </div>
-            <div class="detail-group">
-              <label>SKU:</label>
-              <span class="sku-code">{{ producto.sku|default:"N/A" }}</span>
-            </div>
-          </div>
-
-          <div class="detail-row">
-            <div class="detail-group">
-              <label>Estado:</label>
-              <span class="status-badge {% if producto.activo %}status-active{% else %}status-inactive{% endif %}">
-                {% if producto.activo %}Activo{% else %}Inactivo{% endif %}
-              </span>
-            </div>
-            <div class="detail-group">
-              <label>Categoría:</label>
-              <span>{{ producto.categoria }}</span>
-            </div>
-          </div>
-          
-          <div class="detail-group full-width">
-            <label>Nombre:</label>
-            <span class="product-name">{{ producto.nombre }}</span>
-          </div>
-          
-          <div class="detail-group full-width">
-            <label>Descripción:</label>
-            <span class="product-description">{{ producto.descripcion|default:"Sin descripción" }}</span>
-          </div>
-          
-          <!-- Precios -->
-          <div class="detail-row">
-            <div class="detail-group">
-              <label>Precio Venta:</label>
-              <span class="price">$ {{ producto.precio }}</span>
-            </div>
-            <div class="detail-group">
-              <label>Costo:</label>
-              <span>$ {{ producto.costo|default:"0" }}</span>
-            </div>
-          </div>
-
-          <!-- Stock -->
-          <div class="detail-row">
-            <div class="detail-group">
-              <label>Stock Actual:</label>
-              <span class="stock-badge {% if producto.stock <= producto.stock_minimo %}stock-low{% elif producto.stock == 0 %}stock-out{% else %}stock-normal{% endif %}">
-                {{ producto.stock }} unidades
-                {% if producto.stock <= producto.stock_minimo and producto.stock > 0 %}
-                <i class="fas fa-exclamation-triangle" title="Stock bajo"></i>
-                {% elif producto.stock == 0 %}
-                <i class="fas fa-times-circle" title="Stock agotado"></i>
-                {% endif %}
-              </span>
-            </div>
-            <div class="detail-group">
-              <label>Stock Mínimo:</label>
-              <span>{{ producto.stock_minimo }} unidades</span>
-            </div>
-          </div>
-
-          <!-- Especificaciones Técnicas -->
-          {% if producto.potencia or producto.voltaje or producto.dimensiones %}
-          <div class="detail-row">
-            {% if producto.potencia %}
-            <div class="detail-group">
-              <label>Potencia:</label>
-              <span>{{ producto.potencia }}</span>
-            </div>
-            {% endif %}
-            {% if producto.voltaje %}
-            <div class="detail-group">
-              <label>Voltaje:</label>
-              <span>{{ producto.voltaje }}</span>
-            </div>
-            {% endif %}
-          </div>
-          {% endif %}
-
-          {% if producto.dimensiones %}
-          <div class="detail-row">
-            <div class="detail-group full-width">
-              <label>Dimensiones:</label>
-              <span>{{ producto.dimensiones }}</span>
-            </div>
-          </div>
-          {% endif %}
-
-          {% if producto.icono %}
-          <div class="detail-row">
-            <div class="detail-group">
-              <label>Icono:</label>
-              <span><i class="fas fa-{{ producto.icono }}"></i> {{ producto.icono }}</span>
-            </div>
-          </div>
-          {% endif %}
-          
-          <!-- Fechas -->
-          {% if producto.fecha_creacion %}
-          <div class="detail-row">
-            <div class="detail-group">
-              <label>Fecha Creación:</label>
-              <span>{{ producto.fecha_creacion|date:"d/m/Y H:i" }}</span>
-            </div>
-            {% if producto.fecha_actualizacion %}
-            <div class="detail-group">
-              <label>Última Actualización:</label>
-              <span>{{ producto.fecha_actualizacion|date:"d/m/Y H:i" }}</span>
-            </div>
-            {% endif %}
-          </div>
-          {% endif %}
-
-          <!-- Margen de Ganancia -->
-          <div class="detail-row">
-            <div class="detail-group">
-              <label>Margen Ganancia:</label>
-              <span>{{ producto.margen_ganancia|floatformat:2 }}%</span>
-            </div>
-            <div class="detail-group">
-              <label>¿Necesita Reposición?</label>
-              <span>{% if producto.necesita_reposicion %}Sí{% else %}No{% endif %}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- MOVIMIENTO DE INVENTARIO -->
-      {% elif mostrar_movimiento %}
-      <div class="form-container">
-        <div class="form-header">
-          <h2>Movimiento de Inventario - {{ producto.nombre }}</h2>
-          <a href="{% url 'control_inventario' %}" class="back-button">
-            <i class="fas fa-arrow-left"></i> Volver al Inventario
-          </a>
-        </div>
-
-        <form method="post" class="movimiento-form">
-          {% csrf_token %}
-          <div class="form-row">
-            <div class="form-group">
-              <label for="tipo_movimiento">Tipo de Movimiento:</label>
-              <select name="tipo_movimiento" id="tipo_movimiento" class="input" required>
-                <option value="ENTRADA">Entrada</option>
-                <option value="SALIDA">Salida</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="cantidad">Cantidad:</label>
-              <input type="number" name="cantidad" id="cantidad" class="input" min="1" required>
-            </div>
-          </div>
-          <div class="form-group full-width">
-            <label for="observaciones">Observaciones:</label>
-            <textarea name="observaciones" id="observaciones" class="input" rows="3" placeholder="Motivo del movimiento..."></textarea>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-solid">
-              <i class="fas fa-save"></i>
-              Guardar Movimiento
-            </button>
-            <a href="{% url 'control_inventario' %}" class="btn btn-outline">
-              <i class="fas fa-times"></i>
-              Cancelar
-            </a>
-          </div>
-        </form>
-      </div>
-
-      <!-- LISTA DE PRODUCTOS (MODO NORMAL) -->
-      {% else %}
-      <!-- Filtros y acciones -->
-      <section class="inv-toolbar card">
-        <form method="GET" class="filter-form">
-          <input type="text" name="q" value="{{ request.GET.q }}" class="input search" placeholder="Buscar por SKU o nombre…">
-          <select name="categoria" class="input">
-            <option value="">Todas las categorías</option>
-            {% for categoria in categorias %}
-            <option value="{{ categoria.id }}" {% if request.GET.categoria == categoria.id|stringformat:"i" %}selected{% endif %}>
-              {{ categoria.nombre }}
-            </option>
-            {% endfor %}
-          </select>
-          <select name="estado" class="input">
-            <option value="">Todos los estados</option>
-            <option value="activo" {% if request.GET.estado == 'activo' %}selected{% endif %}>Activos</option>
-            <option value="inactivo" {% if request.GET.estado == 'inactivo' %}selected{% endif %}>Inactivos</option>
-            <option value="bajo" {% if request.GET.estado == 'bajo' %}selected{% endif %}>Stock Bajo</option>
-          </select>
-
-          <div class="toolbar-actions">
-            <button type="submit" class="btn btn-outline">
-              <i class="fas fa-search"></i> Buscar
-            </button>
-            <a href="{% url 'control_inventario' %}?action=crear" class="btn btn-solid">
-              <i class="fas fa-plus"></i> Nuevo producto
-            </a>
-            <a href="{% url 'control_inventario' %}?export=csv" class="btn btn-outline">
-              <i class="fas fa-download"></i> Exportar CSV
-            </a>
-          </div>
-        </form>
-      </section>
-
-      <!-- Tabla -->
-      <section class="card inv-table-wrap">
-        <table class="inv-table" id="tablaInventario">
-          <thead>
-            <tr>
-              <th>SKU</th>
-              <th>Producto</th>
-              <th>Categoría</th>
-              <th class="num">Stock</th>
-              <th class="num">Mínimo</th>
-              <th>Estado</th>
-              <th class="num">Precio ($)</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyInventario">
-            {% for producto in productos %}
-            <tr data-sku="{{ producto.sku }}" data-categoria="{{ producto.categoria.nombre }}">
-              <td>{{ producto.sku }}</td>
-              <td>
-                <div class="producto-info">
-                  {% if producto.imagenes.first %}
-                  <img src="{{ producto.imagenes.first.imagen.url }}" alt="{{ producto.nombre }}" class="producto-thumb">
-                  {% else %}
-                  <div class="producto-thumb no-image">
-                    <i class="fas fa-{{ producto.icono|default:'box' }}"></i>
-                  </div>
-                  {% endif %}
-                  <span>{{ producto.nombre }}</span>
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <div class="admin-logo">
+                <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo">
+                <div class="logo-text">
+                    <h2>SIEER Chile</h2>
+                    <span>Panel Administrativo</span>
                 </div>
-              </td>
-              <td>{{ producto.categoria.nombre }}</td>
-              <td class="num">{{ producto.stock }}</td>
-              <td class="num">{{ producto.stock_minimo }}</td>
-              <td>
-                {% if producto.stock <= producto.stock_minimo %}
-                  <span class="badge danger">Bajo Stock</span>
-                {% elif not producto.activo %}
-                  <span class="badge warning">Inactivo</span>
-                {% else %}
-                  <span class="badge ok">OK</span>
-                {% endif %}
-              </td>
-              <td class="num">${{ producto.precio|floatformat:0 }}</td>
-              <td class="actions">
-                <a href="{% url 'control_inventario' %}?action=movimiento&producto_id={{ producto.id }}" class="btn-icon in" title="Entrada de stock">
-                  <i class="fas fa-arrow-down"></i>
-                </a>
-                <a href="{% url 'control_inventario' %}?action=movimiento&producto_id={{ producto.id }}" class="btn-icon out" title="Salida de stock">
-                  <i class="fas fa-arrow-up"></i>
-                </a>
-                <a href="{% url 'control_inventario' %}?action=detalle&producto_id={{ producto.id }}" class="btn-icon view" title="Ver detalles">
-                  <i class="fas fa-eye"></i>
-                </a>
-                <a href="{% url 'control_inventario' %}?action=editar&producto_id={{ producto.id }}" class="btn-icon edit" title="Editar">
-                  <i class="fas fa-pen"></i>
-                </a>
-                <form method="post" action="{% url 'producto_delete' producto.id %}" class="delete-form" style="display: inline;">
-                  {% csrf_token %}
-                  <button type="submit" class="btn-icon delete" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar {{ producto.nombre }}?')">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </form>
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="8" class="empty">
-                {% if request.GET.q or request.GET.categoria or request.GET.estado %}
-                No se encontraron productos con los filtros aplicados.
-                {% else %}
-                No hay productos cargados. <a href="{% url 'control_inventario' %}?action=crear">Crear primer producto</a>
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-
-        <!-- Paginación -->
-        {% if productos.has_other_pages %}
-        <div class="pager">
-          {% if productos.has_previous %}
-          <a href="?page={{ productos.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}" class="btn btn-outline">
-            Anterior
-          </a>
-          {% endif %}
-
-          <span class="page-info">
-            Página {{ productos.number }} de {{ productos.paginator.num_pages }}
-          </span>
-
-          {% if productos.has_next %}
-          <a href="?page={{ productos.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}" class="btn btn-outline">
-            Siguiente
-          </a>
-          {% endif %}
+            </div>
         </div>
-        {% endif %}
-      </section>
-      {% endif %}
-    </div>
-  </main>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <h3>Facturación</h3>
+                <ul>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
+                        <a href="{% url 'admin_panel' %}">
+                            <i class="fas fa-file-invoice"></i><span>Boleta y Factura Electrónica</span>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}">
+                        <a href="{% url 'calculos_estadisticas' %}">
+                            <i class="fas fa-calculator"></i><span>Cálculos y Estadísticas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'cotizaciones' %}active{% endif %}">
+                        <a href="{% url 'cotizaciones' %}">
+                            <i class="fas fa-file-alt"></i><span>Cotizaciones</span>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'control_inventario' %}active{% endif %}">
+                        <a href="{% url 'control_inventario' %}">
+                            <i class="fas fa-boxes"></i><span>Control de Inventario</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <h3>Reportes</h3>
+                <ul>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'reportes_graficos' %}active{% endif %}">
+                        <a href="{% url 'reportes_graficos' %}">
+                            <i class="fas fa-chart-bar"></i><span>Reportes Gráficos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'historial_ventas' %}active{% endif %}">
+                        <a href="{% url 'historial_ventas' %}">
+                            <i class="fas fa-history"></i><span>Historial de Ventas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}">
+                        <a href="{% url 'cuenta' %}">
+                            <i class="fas fa-user-cog"></i><span>Cuenta</span>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'configuracion' %}active{% endif %}">
+                        <a href="{% url 'configuracion' %}">
+                            <i class="fas fa-cogs"></i><span>Configuración</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+                <div class="user-details"><strong>Administrador</strong><span>{{ user.username }}</span></div>
+            </div>
+            <form method="post" action="{% url 'logout' %}" class="logout-form">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i>Cerrar Sesión</button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="admin-main inv-page">
+        <header class="admin-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+                <h1>Control de <span class="accent">Inventario</span></h1>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-primary" onclick="window.location.href='/'">
+                    <i class="fas fa-eye"></i> VER SITIO WEB
+                </button>
+                <div class="notification-bell"><i class="fas fa-bell"></i><span class="notification-count">3</span></div>
+            </div>
+        </header>
+
+        <div class="admin-content inv-container">
+            {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if mostrar_formulario %}
+            <div class="form-container">
+                <div class="form-header">
+                    <h2>{{ titulo }}</h2>
+                    <a href="{% url 'control_inventario' %}" class="back-button">
+                        <i class="fas fa-arrow-left"></i> Volver al Inventario
+                    </a>
+                </div>
+
+                <form method="post" class="product-form" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    {% if form.errors or formset.errors %}
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Por favor, corrige los errores en el formulario.
+                        {% for error in formset.non_form_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }}</label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                            <div class="error-text">{{ form.nombre.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.sku.id_for_label }}">{{ form.sku.label }}</label>
+                            {{ form.sku }}
+                            {% if form.sku.errors %}
+                            <div class="error-text">{{ form.sku.errors }}</div>
+                            {% endif %}
+                            {% if form.sku.help_text %}
+                            <div class="help-text">{{ form.sku.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.categoria.id_for_label }}">{{ form.categoria.label }}</label>
+                            {{ form.categoria }}
+                            {% if form.categoria.errors %}
+                            <div class="error-text">{{ form.categoria.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.precio.id_for_label }}">{{ form.precio.label }}</label>
+                            {{ form.precio }}
+                            {% if form.precio.errors %}
+                            <div class="error-text">{{ form.precio.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.costo.id_for_label }}">{{ form.costo.label }}</label>
+                            {{ form.costo }}
+                            {% if form.costo.errors %}
+                            <div class="error-text">{{ form.costo.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.stock.id_for_label }}">{{ form.stock.label }}</label>
+                            {{ form.stock }}
+                            {% if form.stock.errors %}
+                            <div class="error-text">{{ form.stock.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.stock_minimo.id_for_label }}">{{ form.stock_minimo.label }}</label>
+                            {{ form.stock_minimo }}
+                            {% if form.stock_minimo.errors %}
+                            <div class="error-text">{{ form.stock_minimo.errors }}</div>
+                            {% endif %}
+                            {% if form.stock_minimo.help_text %}
+                            <div class="help-text">{{ form.stock_minimo.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.icono.id_for_label }}">{{ form.icono.label }}</label>
+                            {{ form.icono }}
+                            {% if form.icono.errors %}
+                            <div class="error-text">{{ form.icono.errors }}</div>
+                            {% endif %}
+                            {% if form.icono.help_text %}
+                            <div class="help-text">{{ form.icono.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.potencia.id_for_label }}">{{ form.potencia.label }}</label>
+                            {{ form.potencia }}
+                            {% if form.potencia.errors %}
+                            <div class="error-text">{{ form.potencia.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.voltaje.id_for_label }}">{{ form.voltaje.label }}</label>
+                            {{ form.voltaje }}
+                            {% if form.voltaje.errors %}
+                            <div class="error-text">{{ form.voltaje.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="{{ form.dimensiones.id_for_label }}">{{ form.dimensiones.label }}</label>
+                            {{ form.dimensiones }}
+                            {% if form.dimensiones.errors %}
+                            <div class="error-text">{{ form.dimensiones.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}</label>
+                        {{ form.descripcion }}
+                        {% if form.descripcion.errors %}
+                        <div class="error-text">{{ form.descripcion.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <div class="checkbox-group">
+                                {{ form.activo }}
+                                <label for="{{ form.activo.id_for_label }}" class="checkbox-label">
+                                    <i class="fas fa-check"></i>
+                                    {{ form.activo.label }}
+                                </label>
+                            </div>
+                            {% if form.activo.errors %}
+                            <div class="error-text">{{ form.activo.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="image-formset">
+                        <h3>Imágenes del Producto</h3>
+                        
+                        {{ formset.management_form }} {% for img_form in formset %}
+                            <div class="image-form">
+                                {{ img_form.id }} <div class="form-group">
+                                    <label for="{{ img_form.imagen.id_for_label }}">Imagen</label>
+                                    {{ img_form.imagen }}
+                                    {% if img_form.imagen.errors %}<div class="error-text">{{ img_form.imagen.errors }}</div>{% endif %}
+                                </div>
+                                <div class="form-group">
+                                    <label for="{{ img_form.orden.id_for_label }}">Orden</label>
+                                    {{ img_form.orden }}
+                                    {% if img_form.orden.errors %}<div class="error-text">{{ img_form.orden.errors }}</div>{% endif %}
+                                </div>
+                                <div class="form-group">
+                                    <label>Principal</label>
+                                    <div class="checkbox-group">
+                                        {{ img_form.es_principal }}
+                                        <label for="{{ img_form.es_principal.id_for_label }}" class="checkbox-label">
+                                            <i class="fas fa-check"></i>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% if img_form.instance.pk %} <div class="form-group">
+                                    <label>Eliminar</label>
+                                    <div class="checkbox-group">
+                                        {{ img_form.DELETE }}
+                                        <label for="{{ img_form.DELETE.id_for_label }}" class="checkbox-label" style="color: #ef4444;">
+                                            <i class="fas fa-trash"></i>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-solid">
+                            <i class="fas fa-save"></i>
+                            Guardar Producto
+                        </button>
+                        <a href="{% url 'control_inventario' %}" class="btn btn-outline">
+                            <i class="fas fa-times"></i>
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            {% elif mostrar_detalles %}
+            <div class="detail-container">
+                <div class="detail-header">
+                    <h2>Detalles del Producto</h2>
+                    <a href="{% url 'control_inventario' %}" class="back-button">
+                        <i class="fas fa-arrow-left"></i> Volver al Inventario
+                    </a>
+                </div>
+
+                <div class="product-detail">
+                    <div class="detail-row">
+                        <div class="detail-group">
+                            <label>ID:</label>
+                            <span>#{{ producto.id }}</span>
+                        </div>
+                        <div class="detail-group">
+                            <label>SKU:</label>
+                            <span class="sku-code">{{ producto.sku|default:"N/A" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-group">
+                            <label>Estado:</label>
+                            <span class="status-badge {% if producto.activo %}status-active{% else %}status-inactive{% endif %}">
+                                {% if producto.activo %}Activo{% else %}Inactivo{% endif %}
+                            </span>
+                        </div>
+                        <div class="detail-group">
+                            <label>Categoría:</label>
+                            <span>{{ producto.categoria }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-group full-width">
+                        <label>Nombre:</label>
+                        <span class="product-name">{{ producto.nombre }}</span>
+                    </div>
+                    
+                    <div class="detail-group full-width">
+                        <label>Descripción:</label>
+                        <span class="product-description">{{ producto.descripcion|default:"Sin descripción" }}</span>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-group">
+                            <label>Precio Venta:</label>
+                            <span class="price">$ {{ producto.precio }}</span>
+                        </div>
+                        <div class="detail-group">
+                            <label>Costo:</label>
+                            <span>$ {{ producto.costo|default:"0" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-group">
+                            <label>Stock Actual:</label>
+                            <span class="stock-badge {% if producto.stock <= producto.stock_minimo %}stock-low{% elif producto.stock == 0 %}stock-out{% else %}stock-normal{% endif %}">
+                                {{ producto.stock }} unidades
+                                {% if producto.stock <= producto.stock_minimo and producto.stock > 0 %}
+                                <i class="fas fa-exclamation-triangle" title="Stock bajo"></i>
+                                {% elif producto.stock == 0 %}
+                                <i class="fas fa-times-circle" title="Stock agotado"></i>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="detail-group">
+                            <label>Stock Mínimo:</label>
+                            <span>{{ producto.stock_minimo }} unidades</span>
+                        </div>
+                    </div>
+
+                    {% if producto.potencia or producto.voltaje or producto.dimensiones %}
+                    <div class="detail-row">
+                        {% if producto.potencia %}
+                        <div class="detail-group">
+                            <label>Potencia:</label>
+                            <span>{{ producto.potencia }}</span>
+                        </div>
+                        {% endif %}
+                        {% if producto.voltaje %}
+                        <div class="detail-group">
+                            <label>Voltaje:</label>
+                            <span>{{ producto.voltaje }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% if producto.dimensiones %}
+                    <div class="detail-row">
+                        <div class="detail-group full-width">
+                            <label>Dimensiones:</label>
+                            <span>{{ producto.dimensiones }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if producto.icono %}
+                    <div class="detail-row">
+                        <div class="detail-group">
+                            <label>Icono:</label>
+                            <span><i class="fas fa-{{ producto.icono }}"></i> {{ producto.icono }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if producto.fecha_creacion %}
+                    <div class="detail-row">
+                        <div class="detail-group">
+                            <label>Fecha Creación:</label>
+                            <span>{{ producto.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        {% if producto.fecha_actualizacion %}
+                        <div class="detail-group">
+                            <label>Última Actualización:</label>
+                            <span>{{ producto.fecha_actualizacion|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div class="detail-row">
+                        <div class="detail-group">
+                            <label>Margen Ganancia:</label>
+                            <span>{{ producto.margen_ganancia|floatformat:2 }}%</span>
+                        </div>
+                        <div class="detail-group">
+                            <label>¿Necesita Reposición?</label>
+                            <span>{% if producto.necesita_reposicion %}Sí{% else %}No{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% elif mostrar_movimiento %}
+            <div class="form-container">
+                <div class="form-header">
+                    <h2>Movimiento de Inventario - {{ producto.nombre }}</h2>
+                    <a href="{% url 'control_inventario' %}" class="back-button">
+                        <i class="fas fa-arrow-left"></i> Volver al Inventario
+                    </a>
+                </div>
+
+                <form method="post" class="movimiento-form">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tipo_movimiento">Tipo de Movimiento:</label>
+                            <select name="tipo_movimiento" id="tipo_movimiento" class="input" required>
+                                <option value="ENTRADA">Entrada</option>
+                                <option value="SALIDA">Salida</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="cantidad">Cantidad:</label>
+                            <input type="number" name="cantidad" id="cantidad" class="input" min="1" required>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="observaciones">Observaciones:</label>
+                        <textarea name="observaciones" id="observaciones" class="input" rows="3" placeholder="Motivo del movimiento..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-solid">
+                            <i class="fas fa-save"></i>
+                            Guardar Movimiento
+                        </button>
+                        <a href="{% url 'control_inventario' %}" class="btn btn-outline">
+                            <i class="fas fa-times"></i>
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            {% else %}
+            <section class="inv-toolbar card">
+                <form method="GET" class="filter-form">
+                    <input type="text" name="q" value="{{ request.GET.q|default_if_none:'' }}" class="input search" placeholder="Buscar por SKU o nombre…">
+                    
+                    <select name="categoria" class="input">
+                        <option value="">Todas las categorías</option>
+                        {% for categoria in categorias %}
+                            {% with cat_id_str=categoria.id|stringformat:"i" %}
+                                {% if request.GET.categoria == cat_id_str %}
+                                    <option value="{{ categoria.id }}" selected>
+                                        {{ categoria.nombre }}
+                                    </option>
+                                {% else %}
+                                    <option value="{{ categoria.id }}">
+                                        {{ categoria.nombre }}
+                                    </option>
+                                {% endif %}
+                            {% endwith %}
+                        {% endfor %}
+                    </select>
+                    
+                    <select name="estado" class="input">
+                        <option value="">Todos los estados</option>
+                        
+                        {% if request.GET.estado == 'activo' %}
+                            <option value="activo" selected>Activos</option>
+                        {% else %}
+                            <option value="activo">Activos</option>
+                        {% endif %}
+                        
+                        {% if request.GET.estado == 'inactivo' %}
+                            <option value="inactivo" selected>Inactivos</option>
+                        {% else %}
+                            <option value="inactivo">Inactivos</option>
+                        {% endif %}
+                        
+                        {% if request.GET.estado == 'bajo' %}
+                            <option value="bajo" selected>Stock Bajo</option>
+                        {% else %}
+                            <option value="bajo">Stock Bajo</option>
+                        {% endif %}
+                    </select>
+
+                    <div class="toolbar-actions">
+                        <button type="submit" class="btn btn-outline">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                        <a href="{% url 'control_inventario' %}?action=crear" class="btn btn-solid">
+                            <i class="fas fa-plus"></i> Nuevo producto
+                        </a>
+                        <a href="{% url 'control_inventario' %}?export=csv" class="btn btn-outline">
+                            <i class="fas fa-download"></i> Exportar CSV
+                        </a>
+                    </div>
+                </form>
+            </section>
+
+            <section class="card inv-table-wrap">
+                <table class="inv-table" id="tablaInventario">
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th class="num">Stock</th>
+                            <th class="num">Mínimo</th>
+                            <th>Estado</th>
+                            <th class="num">Precio ($)</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyInventario">
+                        {% for producto in productos %}
+                        <tr data-sku="{{ producto.sku }}" data-categoria="{{ producto.categoria.nombre }}">
+                            <td>{{ producto.sku }}</td>
+                            <td>
+                                <div class="producto-info">
+                                    {% if producto.imagenes.first %}
+                                    <img src="{{ producto.imagenes.first.imagen.url }}" alt="{{ producto.nombre }}" class="producto-thumb">
+                                    {% else %}
+                                    <div class="producto-thumb no-image">
+                                        <i class="fas fa-{{ producto.icono|default:'box' }}"></i>
+                                    </div>
+                                    {% endif %}
+                                    <span>{{ producto.nombre }}</span>
+                                </div>
+                            </td>
+                            <td>{{ producto.categoria.nombre }}</td>
+                            <td class="num">{{ producto.stock }}</td>
+                            <td class="num">{{ producto.stock_minimo }}</td>
+                            <td>
+                                {% if producto.stock <= producto.stock_minimo %}
+                                <span class="badge danger">Bajo Stock</span>
+                                {% elif not producto.activo %}
+                                <span class="badge warning">Inactivo</span>
+                                {% else %}
+                                <span class="badge ok">OK</span>
+                                {% endif %}
+                            </td>
+                            <td class="num">${{ producto.precio|floatformat:0 }}</td>
+                            <td class="actions">
+                                <a href="{% url 'control_inventario' %}?action=movimiento&producto_id={{ producto.id }}" class="btn-icon in" title="Entrada de stock">
+                                    <i class="fas fa-arrow-down"></i>
+                                </a>
+                                <a href="{% url 'control_inventario' %}?action=movimiento&producto_id={{ producto.id }}" class="btn-icon out" title="Salida de stock">
+                                    <i class="fas fa-arrow-up"></i>
+                                </a>
+                                <a href="{% url 'control_inventario' %}?action=detalle&producto_id={{ producto.id }}" class="btn-icon view" title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'control_inventario' %}?action=editar&producto_id={{ producto.id }}" class="btn-icon edit" title="Editar">
+                                    <i class="fas fa-pen"></i>
+                                </a>
+                                <form method="post" action="{% url 'producto_delete' producto.id %}" class="delete-form" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-icon delete" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar {{ producto.nombre }}?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="empty">
+                                {% if request.GET.q or request.GET.categoria or request.GET.estado %}
+                                No se encontraron productos con los filtros aplicados.
+                                {% else %}
+                                No hay productos cargados. <a href="{% url 'control_inventario' %}?action=crear">Crear primer producto</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                {% if productos.has_other_pages %}
+                <div class="pager">
+                    {% if productos.has_previous %}
+                    <a href="?page={{ productos.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}" class="btn btn-outline">
+                        Anterior
+                    </a>
+                    {% endif %}
+
+                    <span class="page-info">
+                        Página {{ productos.number }} de {{ productos.paginator.num_pages }}
+                    </span>
+
+                    {% if productos.has_next %}
+                    <a href="?page={{ productos.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}" class="btn btn-outline">
+                        Siguiente
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+                </section>
+            {% endif %}
+        </div>
+    </main>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Filtros en tiempo real
-  const buscarInput = document.querySelector('input[name="q"]');
-  const categoriaSelect = document.querySelector('select[name="categoria"]');
-  const estadoSelect = document.querySelector('select[name="estado"]');
-  
-  function aplicarFiltros() {
-    document.querySelector('.filter-form').submit();
-  }
-  
-  // Buscar con delay
-  let searchTimeout;
-  if (buscarInput) {
-    buscarInput.addEventListener('input', function() {
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(aplicarFiltros, 500);
-    });
-  }
-  
-  if (categoriaSelect) {
-    categoriaSelect.addEventListener('change', aplicarFiltros);
-  }
-  
-  if (estadoSelect) {
-    estadoSelect.addEventListener('change', aplicarFiltros);
-  }
+    // Filtros
+    const filterForm = document.querySelector('.filter-form');
+    if (filterForm) {
+        const buscarInput = filterForm.querySelector('input[name="q"]');
+        const categoriaSelect = filterForm.querySelector('select[name="categoria"]');
+        const estadoSelect = filterForm.querySelector('select[name="estado"]');
+        
+        function aplicarFiltros() {
+            filterForm.submit();
+        }
+        
+        let searchTimeout;
+        if (buscarInput) {
+            buscarInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(aplicarFiltros, 500);
+            });
+        }
+        
+        if (categoriaSelect) {
+            categoriaSelect.addEventListener('change', aplicarFiltros);
+        }
+        
+        if (estadoSelect) {
+            estadoSelect.addEventListener('change', aplicarFiltros);
+        }
+    }
 
-  // Confirmación para eliminación
-  document.querySelectorAll('.delete-form').forEach(form => {
-    form.addEventListener('submit', function(e) {
-      if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-        e.preventDefault();
-      }
+    // Confirmación para eliminación
+    document.querySelectorAll('.delete-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+                e.preventDefault();
+            }
+        });
     });
-  });
 
-  // Mostrar/ocultar mensajes
-  const messages = document.querySelector('.messages-container');
-  if (messages) {
-    setTimeout(() => {
-      messages.style.opacity = '0';
-      setTimeout(() => messages.remove(), 300);
-    }, 5000);
-  }
+    // Mostrar/ocultar mensajes
+    const messages = document.querySelector('.messages-container');
+    if (messages) {
+        setTimeout(() => {
+            messages.style.opacity = '0';
+            setTimeout(() => messages.remove(), 300);
+        }, 5000);
+    }
 });
 </script>
 
 <style>
 /* Estilos adicionales */
 .messages-container {
-  margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .producto-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .producto-thumb {
-  width: 40px;
-  height: 40px;
-  border-radius: 4px;
-  object-fit: cover;
-  border: 1px solid var(--ms-border);
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    object-fit: cover;
+    border: 1px solid var(--ms-border);
 }
 
 .producto-thumb.no-image {
-  background: #121a26;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ms-muted);
-  font-size: 1.2rem;
+    background: #121a26;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ms-muted);
+    font-size: 1.2rem;
 }
 
 .filter-form {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .badge.warning {
-  background: rgba(255, 170, 0, 0.2);
-  color: #ffaa00;
-  border: 1px solid #ffaa00;
+    background: rgba(255, 170, 0, 0.2);
+    color: #ffaa00;
+    border: 1px solid #ffaa00;
 }
 
 .delete-form {
-  display: inline;
+    display: inline;
 }
 
 .page-info {
-  padding: 8px 16px;
-  color: var(--ms-muted);
+    padding: 8px 16px;
+    color: var(--ms-muted);
 }
 
 .actions .btn-icon {
-  background: var(--ms-soft);
-  border: 1px solid var(--ms-border);
-  color: #cfe3ff;
-  padding: .4rem .5rem;
-  border-radius: .5rem;
-  margin-right: .25rem;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+    background: var(--ms-soft);
+    border: 1px solid var(--ms-border);
+    color: #cfe3ff;
+    padding: .4rem .5rem;
+    border-radius: .5rem;
+    margin-right: .25rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .actions .btn-icon:hover {
-  filter: brightness(1.1);
+    filter: brightness(1.1);
 }
 
 .actions .btn-icon.view {
-  background: rgba(59, 130, 246, 0.2);
-  color: #3b82f6;
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
 }
 
 .actions .btn-icon.edit {
-  background: rgba(34, 197, 94, 0.2);
-  color: #22c55e;
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
 }
 
 .actions .btn-icon.delete {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
 }
 
 .actions .btn-icon.in {
-  background: rgba(34, 197, 94, 0.2);
-  color: #22c55e;
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
 }
 
 .actions .btn-icon.out {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
 }
 </style>
 </body>

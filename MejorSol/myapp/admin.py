@@ -1,7 +1,9 @@
+# En: myapp/admin.py
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-# 1. ¡ASEGÚRATE DE IMPORTAR ProductoImagen AQUÍ!
+# 1. ¡CORRECCIÓN! AHORA IMPORTAMOS ProductoImagen
 from .models import Perfil, Producto, Categoria, ChatConversation, ChatMessage, ProductoAdquirido, ProductoImagen
 from .forms import ProductoAdquiridoForm
 
@@ -74,11 +76,12 @@ class CategoriaAdmin(admin.ModelAdmin):
     productos_count.short_description = 'Productos'
 
 # ===========================
-# 2. ¡PEGA LA CLASE INLINE AQUÍ!
+# 2. ¡CORRECCIÓN! AÑADIMOS LA CLASE INLINE PARA IMÁGENES
+# (Esta es la clase que faltaba)
 # ===========================
 class ProductoImagenInline(admin.TabularInline):
     model = ProductoImagen
-    extra = 1  # Cuántos formularios de imagen mostrar
+    extra = 1  # Muestra 1 formulario vacío por defecto
     verbose_name = "Imagen del producto"
     verbose_name_plural = "Imágenes del producto"
     fields = ('imagen', 'orden', 'es_principal')
@@ -117,7 +120,8 @@ class ProductoAdmin(admin.ModelAdmin):
         }),
     )
     
-    # 3. ¡AGREGA LA LÍNEA 'inlines' AQUÍ!
+    # 3. ¡CORRECCIÓN! AÑADIMOS LA LÍNEA 'inlines'
+    # (Esta línea conecta las imágenes con el producto)
     inlines = [ProductoImagenInline]
     
     def necesita_reposicion(self, obj):

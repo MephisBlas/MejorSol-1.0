@@ -1,8 +1,9 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
-from .models import Perfil, Producto, Categoria, ProductoAdquirido
+# ¡Importamos el inlineformset_factory!
+from django.forms import inlineformset_factory
+from .models import Perfil, Producto, Categoria, ProductoAdquirido, ProductoImagen
 
 # ===========================
 # FORMULARIOS DE USUARIO Y AUTENTICACIÓN
@@ -166,7 +167,6 @@ class CategoriaForm(forms.ModelForm):
         }
 
 class ProductoForm(forms.ModelForm):
-    # Campo para categoría como choice field
     categoria = forms.ModelChoiceField(
         queryset=Categoria.objects.filter(activo=True),
         empty_label="Seleccione una categoría",
@@ -285,6 +285,23 @@ class ProductoForm(forms.ModelForm):
         if costo and costo < 0:
             raise forms.ValidationError("El costo no puede ser negativo.")
         return costo
+
+# ===========================
+# ¡AQUÍ ESTÁ LA MAGIA! ESTE ES EL FORMSET PARA IMÁGENES
+# ===========================
+ProductoImagenFormSet = inlineformset_factory(
+    Producto,  # Modelo padre
+    ProductoImagen,  # Modelo hijo
+    fields=('imagen', 'orden', 'es_principal'),  # Campos a mostrar
+    extra=1,  # Cuántos formularios extra mostrar (para nuevas imágenes)
+    can_delete=True,  # Permitir borrar imágenes
+    widgets={
+        'imagen': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        'orden': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),
+        'es_principal': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+    }
+)
+
 
 # ===========================
 # FORMULARIOS DE PRODUCTOS ADQUIRIDOS
