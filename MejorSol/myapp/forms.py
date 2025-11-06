@@ -1,67 +1,25 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-# ¡Importamos el inlineformset_factory!
-from django.forms import inlineformset_factory
-from .models import Perfil, Producto, Categoria, ProductoAdquirido, ProductoImagen
+from django.core.exceptions import ValidationError
+from django.forms import inlineformset_factory # ¡Importante!
+from .models import Perfil, Producto, Categoria, ProductoAdquirido, ProductoImagen, Cotizacion # ¡Importamos Cotizacion!
 
 # ===========================
 # FORMULARIOS DE USUARIO Y AUTENTICACIÓN
 # ===========================
 
 class RegistroForm(UserCreationForm):
-    email = forms.EmailField(
-        required=True, 
-        label="Correo Electrónico",
-        widget=forms.EmailInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'ejemplo@correo.com'
-        })
-    )
-    first_name = forms.CharField(
-        required=True, 
-        label="Nombre",
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Tu nombre'
-        })
-    )
-    last_name = forms.CharField(
-        required=True, 
-        label="Apellido",
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Tu apellido'
-        })
-    )
-    telefono = forms.CharField(
-        required=False, 
-        label="Teléfono",
-        max_length=15,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': '+56 9 1234 5678'
-        })
-    )
-    direccion = forms.CharField(
-        required=False,
-        label="Dirección",
-        widget=forms.Textarea(attrs={
-            "rows": 3,
-            'class': 'form-control',
-            'placeholder': 'Tu dirección completa'
-        })
-    )
+    # ... (Tu código de RegistroForm... no necesita cambios) ...
+    email = forms.EmailField(required=True, label="Correo Electrónico")
+    first_name = forms.CharField(required=True, label="Nombre")
+    last_name = forms.CharField(required=True, label="Apellido")
+    telefono = forms.CharField(required=False, label="Teléfono")
+    direccion = forms.CharField(required=False, label="Dirección", widget=forms.Textarea)
 
     class Meta:
         model = User
         fields = ["username", "email", "first_name", "last_name", "password1", "password2"]
-        widgets = {
-            'username': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Nombre de usuario único'
-            }),
-        }
 
     def clean_email(self):
         email = self.cleaned_data.get("email")
@@ -74,48 +32,21 @@ class RegistroForm(UserCreationForm):
         user.email = self.cleaned_data["email"]
         user.first_name = self.cleaned_data["first_name"]
         user.last_name = self.cleaned_data["last_name"]
-
         if commit:
             user.save()
             perfil, created = Perfil.objects.get_or_create(usuario=user)
             perfil.telefono = self.cleaned_data.get("telefono", "")
             perfil.direccion = self.cleaned_data.get("direccion", "")
             perfil.save()
-
         return user
 
 class ProfileForm(forms.ModelForm):
-    first_name = forms.CharField(
-        label="Nombre", 
-        max_length=30, 
-        required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
-    last_name = forms.CharField(
-        label="Apellido", 
-        max_length=30, 
-        required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
-    email = forms.EmailField(
-        label="Correo Electrónico", 
-        required=True,
-        widget=forms.EmailInput(attrs={'class': 'form-control'})
-    )
-    telefono = forms.CharField(
-        label="Teléfono",
-        max_length=15,
-        required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
-    direccion = forms.CharField(
-        label="Dirección",
-        required=False,
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',
-            'rows': 3
-        })
-    )
+    # ... (Tu código de ProfileForm... no necesita cambios) ...
+    first_name = forms.CharField(label="Nombre", max_length=30, required=True)
+    last_name = forms.CharField(label="Apellido", max_length=30, required=True)
+    email = forms.EmailField(label="Correo Electrónico", required=True)
+    telefono = forms.CharField(label="Teléfono", max_length=15, required=False)
+    direccion = forms.CharField(label="Dirección", required=False, widget=forms.Textarea)
 
     class Meta:
         model = User
@@ -151,20 +82,7 @@ class CategoriaForm(forms.ModelForm):
     class Meta:
         model = Categoria
         fields = ['nombre', 'descripcion', 'activo']
-        widgets = {
-            'nombre': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Nombre de la categoría'
-            }),
-            'descripcion': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Descripción de la categoría'
-            }),
-            'activo': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
-            }),
-        }
+        # ... (tus widgets) ...
 
 class ProductoForm(forms.ModelForm):
     categoria = forms.ModelChoiceField(
@@ -172,129 +90,24 @@ class ProductoForm(forms.ModelForm):
         empty_label="Seleccione una categoría",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
-
     class Meta:
         model = Producto
         fields = [
-            'nombre', 
-            'descripcion', 
-            'sku',
-            'categoria',
-            'precio',
-            'costo',
-            'stock', 
-            'stock_minimo',
-            'potencia',
-            'voltaje',
-            'dimensiones',
-            'icono',
-            'activo'
+            'nombre', 'descripcion', 'sku', 'categoria', 'precio', 'costo',
+            'stock', 'stock_minimo', 'potencia', 'voltaje', 'dimensiones', 'icono', 'activo'
         ]
-        widgets = {
-            'nombre': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Nombre completo del producto'
-            }),
-            'descripcion': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4,
-                'placeholder': 'Descripción detallada del producto...'
-            }),
-            'sku': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Código SKU único (ej: PROD-001)'
-            }),
-            'precio': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0',
-                'placeholder': '0.00'
-            }),
-            'costo': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0',
-                'placeholder': '0.00'
-            }),
-            'stock': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': '0',
-                'placeholder': '0'
-            }),
-            'stock_minimo': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': '0',
-                'placeholder': '5'
-            }),
-            'potencia': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ej: 50 KVA, 3.0 KW'
-            }),
-            'voltaje': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ej: 13.2KV, 220V'
-            }),
-            'dimensiones': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ej: 500m, 100x50x30cm'
-            }),
-            'icono': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Nombre de icono FontAwesome (ej: bolt, solar-panel)'
-            }),
-            'activo': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
-            }),
-        }
-        help_texts = {
-            'sku': 'Código único de identificación del producto',
-            'stock_minimo': 'Stock mínimo antes de generar alerta',
-            'icono': 'Nombre del icono de FontAwesome sin el prefijo "fa-"',
-        }
-    
-    def clean_sku(self):
-        sku = self.cleaned_data.get('sku')
-        if not sku:
-            raise forms.ValidationError("El SKU es obligatorio.")
-        
-        if len(sku) < 3:
-            raise forms.ValidationError("El SKU debe tener al menos 3 caracteres.")
-        
-        qs = Producto.objects.filter(sku__iexact=sku)
-        if self.instance.pk:
-            qs = qs.exclude(pk=self.instance.pk)
-        if qs.exists():
-            raise forms.ValidationError("Este SKU ya existe en el sistema.")
-        
-        return sku.upper()
-
-    def clean_stock_minimo(self):
-        stock_minimo = self.cleaned_data.get('stock_minimo')
-        if stock_minimo < 0:
-            raise forms.ValidationError("El stock mínimo no puede ser negativo.")
-        return stock_minimo
-
-    def clean_precio(self):
-        precio = self.cleaned_data.get('precio')
-        if precio and precio < 0:
-            raise forms.ValidationError("El precio no puede ser negativo.")
-        return precio
-
-    def clean_costo(self):
-        costo = self.cleaned_data.get('costo')
-        if costo and costo < 0:
-            raise forms.ValidationError("El costo no puede ser negativo.")
-        return costo
+        # ... (tus widgets) ...
+    # ... (tus clean methods) ...
 
 # ===========================
-# ¡AQUÍ ESTÁ LA MAGIA! ESTE ES EL FORMSET PARA IMÁGENES
+# ¡NUEVO! FORMSET PARA IMÁGENES
 # ===========================
 ProductoImagenFormSet = inlineformset_factory(
     Producto,  # Modelo padre
     ProductoImagen,  # Modelo hijo
-    fields=('imagen', 'orden', 'es_principal'),  # Campos a mostrar
-    extra=1,  # Cuántos formularios extra mostrar (para nuevas imágenes)
-    can_delete=True,  # Permitir borrar imágenes
+    fields=('imagen', 'orden', 'es_principal'),
+    extra=1,
+    can_delete=True,
     widgets={
         'imagen': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         'orden': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),
@@ -302,8 +115,27 @@ ProductoImagenFormSet = inlineformset_factory(
     }
 )
 
-
 # ===========================
+# ¡NUEVO! FORMULARIO DE SOLICITUD DE COTIZACIÓN
+# ===========================
+class SolicitudCotizacionForm(forms.ModelForm):
+    class Meta:
+        model = Cotizacion  # Usa el modelo 'Cotizacion' ANTIGUO para esto
+        fields = [
+            'cliente_nombre', 
+            'cliente_email', 
+            'cliente_telefono', 
+            'cliente_rut',
+            'notas_cliente'
+        ]
+        widgets = {
+            'cliente_nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Tu nombre completo'}),
+            'cliente_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'tu.correo@ejemplo.com'}),
+            'cliente_telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+56 9 1234 5678'}),
+            'cliente_rut': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '12.345.678-9'}),
+            'notas_cliente': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Escríbenos sobre tu proyecto (ej: metros cuadrados, comuna, región, etc.)'}),
+        }
+
 # FORMULARIOS DE PRODUCTOS ADQUIRIDOS
 # ===========================
 
@@ -438,3 +270,41 @@ class ProductoAdquiridoSearchForm(forms.Form):
         label='Solo garantías activas',
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
+
+# ===========================
+# ¡NUEVO! FORMULARIO DE SOLICITUD DE COTIZACIÓN
+# ===========================
+class SolicitudCotizacionForm(forms.ModelForm):
+    class Meta:
+        model = Cotizacion  # Usa tu modelo 'Cotizacion'
+        # ¡Estos son los campos que le pediremos al cliente!
+        fields = [
+            'cliente_nombre', 
+            'cliente_email', 
+            'cliente_telefono', 
+            'cliente_rut',
+            'notas_cliente' # Para que el cliente escriba un mensaje
+        ]
+        widgets = {
+            'cliente_nombre': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Tu nombre completo'
+            }),
+            'cliente_email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'tu.correo@ejemplo.com'
+            }),
+            'cliente_telefono': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '+56 9 1234 5678'
+            }),
+            'cliente_rut': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '12.345.678-9'
+            }),
+            'notas_cliente': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Escríbenos sobre tu proyecto (ej: metros cuadrados, comuna, región, etc.)'
+            }),
+        }

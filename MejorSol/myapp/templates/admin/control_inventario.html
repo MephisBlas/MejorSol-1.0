@@ -920,17 +920,19 @@
                         {% for producto in productos %}
                         <tr data-sku="{{ producto.sku }}" data-categoria="{{ producto.categoria.nombre }}">
                             <td>{{ producto.sku }}</td>
-                            <td>
-                                <div class="producto-info">
-                                    {% if producto.imagenes.first %}
+                          <td>
+                            <div class="producto-info">
+                                {% if producto.imagenes.first %}
                                     <img src="{{ producto.imagenes.first.imagen.url }}" alt="{{ producto.nombre }}" class="producto-thumb">
-                                    {% else %}
+                                    <img src="{{ producto.imagenes.first.imagen.url }}" alt="{{ producto.nombre }}" class="producto-thumb-large">
+                                {% else %}
                                     <div class="producto-thumb no-image">
                                         <i class="fas fa-{{ producto.icono|default:'box' }}"></i>
                                     </div>
-                                    {% endif %}
-                                    <span>{{ producto.nombre }}</span>
-                                </div>
+                                {% endif %}
+                                <span>{{ producto.nombre }}</span>
+                            </div>
+                        </td>
                             </td>
                             <td>{{ producto.categoria.nombre }}</td>
                             <td class="num">{{ producto.stock }}</td>
@@ -1056,6 +1058,32 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
+
+    /* ======================================= */
+        /* ¡NUEVO! ESTILOS PARA HOVER DE IMAGEN      */
+        /* ======================================= */
+        .producto-info {
+            position: relative; /* Contenedor para la imagen grande */
+        }
+
+        .producto-thumb-large {
+            display: none; /* Oculta por defecto */
+            position: absolute;
+            left: 50px; /* Se muestra a la derecha del thumbnail */
+            top: -50px; /* Sube un poco */
+            width: 250px;  /* Tamaño grande */
+            height: 250px; /* Tamaño grande */
+            object-fit: cover;
+            border: 3px solid var(--ms-accent);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            z-index: 99; /* Para que aparezca por encima de todo */
+        }
+
+        /* Al pasar el cursor sobre el thumbnail... */
+        .producto-thumb:hover + .producto-thumb-large {
+            display: block; /* ...se muestra la imagen grande */
+        }
 /* Estilos adicionales */
 .messages-container {
     margin-bottom: 20px;

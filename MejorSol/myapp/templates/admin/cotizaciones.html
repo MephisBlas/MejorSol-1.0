@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cotizaciones - SIEER Chile</title>
 
-  <!-- Dependencias -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
@@ -83,6 +83,7 @@
     }
     .badge-success{ background:#10b981; }
     .badge-warning{ background:#f59e0b; box-shadow:0 0 10px rgba(245,158,11,.25); }
+    .badge-info{ background:#3b82f6; box-shadow:0 0 10px rgba(59,130,246,.25); }
     .badge-secondary{ background:#64748b; box-shadow:none; }
 
     /* Botones acciones */
@@ -99,18 +100,73 @@
 
     /* === Fijar alturas/anchos para cuadrar columnas === */
     .styled-table th, .styled-table td{ vertical-align:middle; height:56px; }
-    .styled-table th:nth-child(1), .styled-table td:nth-child(1){ width:140px; }   /* ID */
-    .styled-table th:nth-child(2), .styled-table td:nth-child(2){ width:34%; }     /* Cliente */
-    .styled-table th:nth-child(3), .styled-table td:nth-child(3){ width:18%; }     /* Fecha */
-    .styled-table th:nth-child(4), .styled-table td:nth-child(4){ width:16%; }     /* Monto */
+    .styled-table th:nth-child(1), .styled-table td:nth-child(1){ width:100px; }   /* ID */
+    .styled-table th:nth-child(2), .styled-table td:nth-child(2){ width:25%; }     /* Cliente */
+    .styled-table th:nth-child(3), .styled-table td:nth-child(3){ width:120px; }     /* Fecha */
+    .styled-table th:nth-child(4), .styled-table td:nth-child(4){ width:100px; }     /* Monto */
     .styled-table th:nth-child(5), .styled-table td:nth-child(5){ width:140px; text-align:center; } /* Estado */
-    .styled-table th:nth-child(6), .styled-table td:nth-child(6){ width:150px; text-align:center; } /* Acciones */
+    .styled-table th:nth-child(6), .styled-table td:nth-child(6){ width:180px; text-align:center; } /* Acciones */
+
+    /* ======================================= */
+    /* ESTILOS DE CHAT MODAL FLOTANTE (Admin)  */
+    /* ======================================= */
+    .chat-modal-container {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 400px;
+        height: 600px;
+        background: var(--ms-panel);
+        border: 1px solid #10b981; /* Color diferente al del cliente para distinguir */
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(16, 185, 129, 0.2);
+        z-index: 2000;
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        animation: slideIn 0.4s ease;
+    }
+    .chat-modal-container.active {
+        display: flex;
+    }
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(50px) translateX(50px); }
+        to { opacity: 1; transform: translateY(0) translateX(0); }
+    }
+    .chat-modal-header {
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        padding: 1rem; 
+        background: #121a26; 
+        border-bottom: 1px solid var(--ms-border);
+    }
+    .chat-modal-header h3 { 
+        margin: 0; 
+        color: var(--ms-text); 
+        font-size: 1.1rem; 
+    }
+    .chat-modal-header button {
+        background: none; 
+        border: none; 
+        color: var(--ms-muted); 
+        font-size: 1.5rem; 
+        cursor: pointer;
+    }
+    .chat-modal-body { 
+        flex: 1; 
+        overflow: hidden; 
+    }
+    .chat-modal-body iframe { 
+        width: 100%; 
+        height: 100%; 
+        border: none; 
+    }
   </style>
 </head>
 
 <body>
   <div class="admin-container">
-    <!-- Sidebar -->
     <aside class="admin-sidebar">
       <div class="sidebar-header">
         <div class="admin-logo">
@@ -191,7 +247,6 @@
       </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="admin-main">
       <header class="admin-header">
         <div class="header-left">
@@ -216,9 +271,10 @@
             <form method="get" action="{% url 'cotizaciones' %}">
               <select name="estado" class="filter-select" onchange="this.form.submit()">
                 <option value="">Todos los estados</option>
-                <option value="Pendiente" {% if request.GET.estado|default:'' == 'Pendiente' %}selected{% endif %}>Pendiente</option>
-                <option value="Aprobada"  {% if request.GET.estado|default:'' == 'Aprobada'  %}selected{% endif %}>Aprobada</option>
-                <option value="Rechazada" {% if request.GET.estado|default:'' == 'Rechazada' %}selected{% endif %}>Rechazada</option>
+                <option value="pendiente" {% if request.GET.estado|default:'' == 'pendiente' %}selected{% endif %}>Pendiente de Admin</option>
+                <option value="en_proceso"  {% if request.GET.estado|default:'' == 'en_proceso'  %}selected{% endif %}>En Proceso</option>
+                <option value="aprobada"  {% if request.GET.estado|default:'' == 'aprobada'  %}selected{% endif %}>Aprobada</option>
+                <option value="rechazada" {% if request.GET.estado|default:'' == 'rechazada' %}selected{% endif %}>Rechazada</option>
               </select>
             </form>
 
@@ -231,10 +287,10 @@
         <div class="table-card">
           <div class="card-head">
             <span><i class="fas fa-table"></i> Listado</span>
-            <span>Total: {{ cotizaciones|length }}</span>
+            <span>Total: {{ chats_cotizacion|length }}</span> 
           </div>
 
-          {% if cotizaciones %}
+          {% if chats_cotizacion %}
           <div class="table-responsive">
             <table class="styled-table">
               <thead>
@@ -242,27 +298,30 @@
                   <th>ID</th>
                   <th>Cliente</th>
                   <th>Fecha</th>
-                  <th>Monto</th>
+                  <th>Producto</th>
                   <th>Estado</th>
-                  <th style="width:140px;">Acciones</th>
+                  <th style="width:180px;">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {% for cot in cotizaciones %}
+                {% for cot in chats_cotizacion %}
                 <tr>
                   <td>#{{ cot.id }}</td>
-                  <td>{{ cot.cliente }}</td>
-                  <td>{{ cot.fecha|date:"d/m/Y" }}</td>
-                  <td>${{ cot.total }}</td>
+                  <td>{{ cot.cliente.get_full_name|default:cot.cliente.username }}</td>
+                  <td>{{ cot.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
+                  <td>{{ cot.producto.nombre }}</td>
                   <td>
-                    <span class="badge {% if cot.estado == 'Aprobada' %}badge-success{% elif cot.estado == 'Pendiente' %}badge-warning{% else %}badge-secondary{% endif %}">
-                      {{ cot.estado }}
+                    <span class="badge 
+                      {% if cot.estado == 'aprobada' %}badge-success
+                      {% elif cot.estado == 'pendiente' %}badge-warning
+                      {% elif cot.estado == 'en_proceso' %}badge-info
+                      {% else %}badge-secondary{% endif %}">
+                      {{ cot.get_estado_display }}
                     </span>
                   </td>
                   <td>
                     <div class="table-actions">
-                      <a href="{% url 'ver_cotizacion' cot.id %}" class="btn btn-outline btn-sm" title="Ver"><i class="fas fa-eye"></i></a>
-                      <a href="{% url 'editar_cotizacion' cot.id %}" class="btn btn-outline btn-sm" title="Editar"><i class="fas fa-edit"></i></a>
+                      <a href="{% url 'admin_chat_cotizacion' chat_id=cot.id %}" class="btn btn-primary btn-sm btn-chat" title="Chat"><i class="fas fa-comments"></i> Chat</a>
                       <a href="{% url 'eliminar_cotizacion' cot.id %}" class="btn btn-danger btn-sm" title="Eliminar"><i class="fas fa-trash"></i></a>
                     </div>
                   </td>
@@ -284,6 +343,55 @@
     </main>
   </div>
 
-  <script src="{% static 'js/admin_panel.js' %}"></script>
+  <div class="chat-modal-container" id="adminChatModalContainer">
+      <div class="chat-modal-header">
+          <h3 id="adminChatModalTitle">Chat de Cotización</h3>
+          <button id="adminChatModalCloseBtn">&times;</button>
+      </div>
+      <div class="chat-modal-body">
+          <iframe id="admin-chat-iframe" src="about:blank" frameborder="0"></iframe>
+      </div>
+  </div>
+  <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          const chatModalContainer = document.getElementById('adminChatModalContainer');
+          const chatIframe = document.getElementById('admin-chat-iframe');
+          const chatModalCloseBtn = document.getElementById('adminChatModalCloseBtn');
+          const chatModalTitle = document.getElementById('adminChatModalTitle');
+
+          // 1. Función para abrir el chat flotante
+          function openChatModal(chatId) {
+              // Cargamos la vista de chat del admin en el iframe
+              // Reemplazamos '0' por el ID real para construir la URL de admin_chat_cotizacion
+              chatIframe.src = `{% url 'admin_chat_cotizacion' chat_id=0 %}`.replace('0', chatId);
+              chatModalTitle.textContent = `Cotización #${chatId}`;
+              chatModalContainer.classList.add('active');
+          }
+
+          // 2. Función para cerrar el chat flotante
+          function closeChatModal() {
+              chatIframe.src = 'about:blank'; // Limpiar iframe
+              chatModalContainer.classList.remove('active');
+              // Opcional: Recargar la página principal para actualizar estados si es necesario
+              // window.location.reload(); 
+          }
+
+          chatModalCloseBtn.addEventListener('click', closeChatModal);
+
+          // 3. Interceptar clics en el botón de CHAT
+          document.querySelectorAll('.btn-chat').forEach(button => {
+              button.addEventListener('click', function(e) {
+                  e.preventDefault(); // Detener la navegación por defecto
+                  
+                  const url = new URL(this.href);
+                  // Extraer el ID del chat/cotización de la URL (asumiendo que es el último segmento)
+                  const parts = url.pathname.split('/').filter(p => p);
+                  const chatId = parts[parts.length - 1]; 
+                  
+                  openChatModal(chatId);
+              });
+          });
+      });
+  </script>
 </body>
 </html>
