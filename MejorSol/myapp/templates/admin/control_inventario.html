@@ -15,26 +15,58 @@
     <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
     <link rel="stylesheet" href="{% static 'css/inventario.css' %}">
     <style>
+        /* Variables y Estilos adaptados de admin_panel.css */
+        :root {
+            /* Variables de admin_panel.css para coherencia */
+            --primary-green: #00ff88;
+            --dark-green: #00cc6a;
+            --light-green: #33ff99;
+            --accent-green: #00ffaa; /* Usaremos esta como ms-accent */
+            --neon-glow: 0 0 20px rgba(0, 255, 136, 0.5);
+            --dark-bg: rgba(15, 15, 20, 0.95);
+            --darker-bg: rgba(10, 10, 15, 0.98);
+            --card-bg: rgba(25, 25, 35, 0.9); /* Usaremos esta como ms-panel */
+            --border-glow: 1px solid rgba(0, 255, 136, 0.3); /* Usaremos esta como ms-border */
+            --text-light: #ffffff; /* Usaremos esta como ms-text */
+            --text-gray: #b0b0b0; /* Usaremos esta como ms-muted */
+            --danger-color: #ff4757; /* Para errores */
+            --warning-color: #ffa500; /* Para warnings */
+            --info-color: #007bff; /* Para info */
+
+            /* Asignación de variables para el contexto de este archivo */
+            --ms-panel: var(--card-bg);
+            --ms-border: var(--border-glow);
+            --ms-border-soft: rgba(255, 255, 255, 0.1); /* Nueva para separar items */
+            --ms-text: var(--text-light);
+            --ms-muted: var(--text-gray);
+            --ms-accent: var(--accent-green); /* Verde neón principal */
+        }
+        
         /* Estilos integrados para formularios y detalles */
-        .form-container {
+        .form-container, .detail-container {
             background: var(--ms-panel);
             border-radius: 16px;
             padding: 2rem;
-            border: 1px solid var(--ms-border);
+            border: var(--ms-border);
             max-width: 900px;
             margin: 0 auto;
+            box-shadow: var(--neon-glow);
         }
 
-        .form-header {
+        .detail-container {
+            max-width: 600px;
+        }
+
+        .form-header, .detail-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
             padding-bottom: 1rem;
-            border-bottom: 1px solid var(--ms-border);
+            border-bottom: var(--ms-border);
         }
 
-        .form-header h2 {
+        .form-header h2, .detail-header h2 {
             color: var(--ms-text);
             margin: 0;
         }
@@ -66,9 +98,9 @@
         .form-group select,
         .form-group textarea {
             padding: 0.75rem;
-            border: 1px solid var(--ms-border);
+            border: 1px solid rgba(0, 255, 136, 0.2); /* Borde suave */
             border-radius: 12px;
-            background: #121a26;
+            background: #121a26; /* Fondo más oscuro para inputs */
             color: var(--ms-text);
             font-size: 1rem;
             transition: all 0.3s ease;
@@ -79,7 +111,7 @@
         .form-group textarea:focus {
             outline: none;
             border-color: var(--ms-accent);
-            box-shadow: 0 0 0 2px rgba(41, 255, 154, 0.18);
+            box-shadow: 0 0 0 2px rgba(41, 255, 154, 0.3); /* Sombra neón suave */
         }
 
         .form-actions {
@@ -88,57 +120,10 @@
             justify-content: flex-end;
             margin-top: 2rem;
             padding-top: 1rem;
-            border-top: 1px solid var(--ms-border);
+            border-top: var(--ms-border);
         }
 
         /* Estilos para detalles de producto */
-        .detail-container {
-            background: var(--ms-panel);
-            border-radius: 16px;
-            padding: 2rem;
-            border: 1px solid var(--ms-border);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .detail-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--ms-border);
-        }
-
-        .detail-header h2 {
-            color: var(--ms-text);
-            margin: 0;
-        }
-
-        .detail-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .detail-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .detail-group label {
-            color: var(--ms-muted);
-            font-weight: 500;
-            font-size: 0.875rem;
-        }
-
-        .detail-group span {
-            color: var(--ms-text);
-            font-size: 1rem;
-        }
-
         .product-name {
             font-size: 1.25rem;
             font-weight: 600;
@@ -154,16 +139,22 @@
             display: inline-block;
         }
 
-        .status-active {
+        .status-active, .stock-normal {
             background: rgba(41, 255, 154, 0.2);
             color: var(--ms-accent);
             border: 1px solid var(--ms-accent);
         }
 
-        .status-inactive {
+        .status-inactive, .stock-out {
             background: rgba(255, 68, 68, 0.2);
-            color: #ff4444;
-            border: 1px solid #ff4444;
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+        
+        .stock-low {
+            background: rgba(255, 170, 0, 0.2);
+            color: var(--warning-color);
+            border: 1px solid var(--warning-color);
         }
 
         .stock-badge {
@@ -174,24 +165,6 @@
             border-radius: 20px;
             font-size: 0.875rem;
             font-weight: 500;
-        }
-
-        .stock-normal {
-            background: rgba(41, 255, 154, 0.2);
-            color: var(--ms-accent);
-            border: 1px solid var(--ms-accent);
-        }
-
-        .stock-low {
-            background: rgba(255, 170, 0, 0.2);
-            color: #ffaa00;
-            border: 1px solid #ffaa00;
-        }
-
-        .stock-out {
-            background: rgba(255, 68, 68, 0.2);
-            color: #ff4444;
-            border: 1px solid #ff4444;
         }
 
         .alert {
@@ -211,18 +184,18 @@
 
         .alert-error {
             background: rgba(255, 68, 68, 0.2);
-            border: 1px solid #ff4444;
-            color: #ff4444;
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
         }
 
         .alert-warning {
             background: rgba(255, 170, 0, 0.2);
-            border: 1px solid #ffaa00;
-            color: #ffaa00;
+            border: 1px solid var(--warning-color);
+            color: var(--warning-color);
         }
 
         .error-text {
-            color: #ff4444;
+            color: var(--danger-color);
             font-size: 0.875rem;
             margin-top: 0.25rem;
         }
@@ -234,7 +207,7 @@
             padding: 0.8rem;
             background: #121a26;
             border-radius: 12px;
-            border: 1px solid var(--ms-border);
+            border: var(--ms-border);
         }
 
         .checkbox-group input[type="checkbox"] {
@@ -281,7 +254,7 @@
             padding: 0.5rem 1rem;
             background: transparent;
             color: var(--ms-text);
-            border: 1px solid var(--ms-border);
+            border: var(--ms-border);
             border-radius: 12px;
             text-decoration: none;
             font-weight: 500;
@@ -292,6 +265,7 @@
         .back-button:hover {
             border-color: var(--ms-accent);
             color: var(--ms-accent);
+            box-shadow: 0 0 10px rgba(41, 255, 154, 0.3);
         }
 
         .help-text {
@@ -301,11 +275,11 @@
         }
 
         /* ======================================= */
-        /* ¡NUEVOS ESTILOS PARA EL FORMSET DE IMÁGENES! */
+        /* ESTILOS PARA EL FORMSET DE IMÁGENES */
         /* ======================================= */
         .image-formset {
             background: #121a26;
-            border: 1px solid var(--ms-border);
+            border: var(--ms-border);
             border-radius: 12px;
             padding: 1.5rem;
             margin-top: 2rem;
@@ -316,7 +290,7 @@
             margin-top: 0;
             margin-bottom: 1.5rem;
             padding-bottom: 1rem;
-            border-bottom: 1px solid var(--ms-border);
+            border-bottom: var(--ms-border);
         }
         .image-form {
             display: grid;
@@ -346,6 +320,7 @@
         .form-group input[type="file"] {
             padding: 0.5rem;
             background: #1a2a3a;
+            border-color: var(--ms-border-soft);
         }
         
         .form-group input[type="file"]::file-selector-button {
@@ -356,6 +331,149 @@
             border-radius: 8px;
             cursor: pointer;
             margin-right: 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-group input[type="file"]::file-selector-button:hover {
+            filter: brightness(1.1);
+        }
+
+        /* Estilos adicionales para la lista y filtros */
+        .messages-container {
+            margin-bottom: 20px;
+        }
+
+        .producto-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .producto-thumb {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            object-fit: cover;
+            border: 1px solid var(--ms-border);
+        }
+
+        .producto-thumb.no-image {
+            background: #121a26;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ms-muted);
+            font-size: 1.2rem;
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        /* Badges de la tabla */
+        .badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge.ok { /* Activo y Stock Suficiente */
+            background: rgba(41, 255, 154, 0.2);
+            color: var(--ms-accent);
+            border: 1px solid var(--ms-accent);
+        }
+        
+        .badge.warning { /* Inactivo */
+            background: rgba(255, 170, 0, 0.2);
+            color: var(--warning-color);
+            border: 1px solid var(--warning-color);
+        }
+        
+        .badge.danger { /* Bajo Stock */
+            background: rgba(255, 68, 68, 0.2);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+
+        .delete-form {
+            display: inline;
+        }
+
+        .page-info {
+            padding: 8px 16px;
+            color: var(--ms-muted);
+        }
+
+        .actions .btn-icon {
+            background: #1a2a3a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--ms-text);
+            padding: .4rem .5rem;
+            border-radius: .5rem;
+            margin-right: .25rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .actions .btn-icon:hover {
+            filter: brightness(1.1);
+            border-color: var(--ms-accent);
+        }
+
+        .actions .btn-icon.view {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .actions .btn-icon.edit {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .actions .btn-icon.delete {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .actions .btn-icon.in {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .actions .btn-icon.out {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        /* Hover de Imagen */
+        .producto-info {
+            position: relative; 
+        }
+
+        .producto-thumb-large {
+            display: none; 
+            position: absolute;
+            left: 50px; 
+            top: -50px; 
+            width: 250px; 
+            height: 250px; 
+            object-fit: cover;
+            border: 3px solid var(--ms-accent);
+            border-radius: 8px;
+            box-shadow: var(--neon-glow);
+            z-index: 99; 
+            background: #121a26;
+        }
+
+        .producto-thumb:hover + .producto-thumb-large {
+            display: block; 
         }
     </style>
 </head>
@@ -620,9 +738,11 @@
                     <div class="image-formset">
                         <h3>Imágenes del Producto</h3>
                         
-                        {{ formset.management_form }} {% for img_form in formset %}
+                        {{ formset.management_form }} 
+                        {% for img_form in formset %}
                             <div class="image-form">
-                                {{ img_form.id }} <div class="form-group">
+                                {{ img_form.id }} 
+                                <div class="form-group">
                                     <label for="{{ img_form.imagen.id_for_label }}">Imagen</label>
                                     {{ img_form.imagen }}
                                     {% if img_form.imagen.errors %}<div class="error-text">{{ img_form.imagen.errors }}</div>{% endif %}
@@ -641,7 +761,8 @@
                                         </label>
                                     </div>
                                 </div>
-                                {% if img_form.instance.pk %} <div class="form-group">
+                                {% if img_form.instance.pk %} 
+                                <div class="form-group">
                                     <label>Eliminar</label>
                                     <div class="checkbox-group">
                                         {{ img_form.DELETE }}
@@ -655,7 +776,7 @@
                         {% endfor %}
                     </div>
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-solid">
+                        <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i>
                             Guardar Producto
                         </button>
@@ -725,7 +846,7 @@
                     <div class="detail-row">
                         <div class="detail-group">
                             <label>Stock Actual:</label>
-                            <span class="stock-badge {% if producto.stock <= producto.stock_minimo %}stock-low{% elif producto.stock == 0 %}stock-out{% else %}stock-normal{% endif %}">
+                            <span class="stock-badge {% if producto.stock == 0 %}stock-out{% elif producto.stock <= producto.stock_minimo %}stock-low{% else %}stock-normal{% endif %}">
                                 {{ producto.stock }} unidades
                                 {% if producto.stock <= producto.stock_minimo and producto.stock > 0 %}
                                 <i class="fas fa-exclamation-triangle" title="Stock bajo"></i>
@@ -832,7 +953,7 @@
                         <textarea name="observaciones" id="observaciones" class="input" rows="3" placeholder="Motivo del movimiento..."></textarea>
                     </div>
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-solid">
+                        <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i>
                             Guardar Movimiento
                         </button>
@@ -870,9 +991,9 @@
                         <option value="">Todos los estados</option>
                         
                         {% if request.GET.estado == 'activo' %}
-                            <option value="activo" selected>Activos</option>
+                            <option value="activo" selected>Activos (Stock OK/Bajo)</option>
                         {% else %}
-                            <option value="activo">Activos</option>
+                            <option value="activo">Activos (Stock OK/Bajo)</option>
                         {% endif %}
                         
                         {% if request.GET.estado == 'inactivo' %}
@@ -882,9 +1003,9 @@
                         {% endif %}
                         
                         {% if request.GET.estado == 'bajo' %}
-                            <option value="bajo" selected>Stock Bajo</option>
+                            <option value="bajo" selected>Stock Bajo/Agotado</option>
                         {% else %}
-                            <option value="bajo">Stock Bajo</option>
+                            <option value="bajo">Stock Bajo/Agotado</option>
                         {% endif %}
                     </select>
 
@@ -892,7 +1013,7 @@
                         <button type="submit" class="btn btn-outline">
                             <i class="fas fa-search"></i> Buscar
                         </button>
-                        <a href="{% url 'control_inventario' %}?action=crear" class="btn btn-solid">
+                        <a href="{% url 'control_inventario' %}?action=crear" class="btn btn-primary">
                             <i class="fas fa-plus"></i> Nuevo producto
                         </a>
                         <a href="{% url 'control_inventario' %}?export=csv" class="btn btn-outline">
@@ -922,12 +1043,15 @@
                             <td>{{ producto.sku }}</td>
                           <td>
                             <div class="producto-info">
-                                {% if producto.imagenes.first %}
+                                {% if producto.imagenes.first.imagen.url %}
                                     <img src="{{ producto.imagenes.first.imagen.url }}" alt="{{ producto.nombre }}" class="producto-thumb">
                                     <img src="{{ producto.imagenes.first.imagen.url }}" alt="{{ producto.nombre }}" class="producto-thumb-large">
                                 {% else %}
                                     <div class="producto-thumb no-image">
                                         <i class="fas fa-{{ producto.icono|default:'box' }}"></i>
+                                    </div>
+                                    <div class="producto-thumb-large" style="display:none; padding: 20px;">
+                                        <i class="fas fa-image" style="font-size: 100px; color: var(--ms-muted);"></i>
                                     </div>
                                 {% endif %}
                                 <span>{{ producto.nombre }}</span>
@@ -938,8 +1062,10 @@
                             <td class="num">{{ producto.stock }}</td>
                             <td class="num">{{ producto.stock_minimo }}</td>
                             <td>
-                                {% if producto.stock <= producto.stock_minimo %}
+                                {% if producto.stock <= producto.stock_minimo and producto.stock > 0 %}
                                 <span class="badge danger">Bajo Stock</span>
+                                {% elif producto.stock == 0 %}
+                                <span class="badge danger">Agotado</span>
                                 {% elif not producto.activo %}
                                 <span class="badge warning">Inactivo</span>
                                 {% else %}
@@ -1017,6 +1143,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const estadoSelect = filterForm.querySelector('select[name="estado"]');
         
         function aplicarFiltros() {
+            // Evitar doble envío de filtros si se presiona el botón "Buscar"
+            const submitButton = filterForm.querySelector('button[type="submit"]');
+            if (submitButton && document.activeElement === submitButton) {
+                return;
+            }
             filterForm.submit();
         }
         
@@ -1057,124 +1188,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<style>
-
-    /* ======================================= */
-        /* ¡NUEVO! ESTILOS PARA HOVER DE IMAGEN      */
-        /* ======================================= */
-        .producto-info {
-            position: relative; /* Contenedor para la imagen grande */
-        }
-
-        .producto-thumb-large {
-            display: none; /* Oculta por defecto */
-            position: absolute;
-            left: 50px; /* Se muestra a la derecha del thumbnail */
-            top: -50px; /* Sube un poco */
-            width: 250px;  /* Tamaño grande */
-            height: 250px; /* Tamaño grande */
-            object-fit: cover;
-            border: 3px solid var(--ms-accent);
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            z-index: 99; /* Para que aparezca por encima de todo */
-        }
-
-        /* Al pasar el cursor sobre el thumbnail... */
-        .producto-thumb:hover + .producto-thumb-large {
-            display: block; /* ...se muestra la imagen grande */
-        }
-/* Estilos adicionales */
-.messages-container {
-    margin-bottom: 20px;
-}
-
-.producto-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.producto-thumb {
-    width: 40px;
-    height: 40px;
-    border-radius: 4px;
-    object-fit: cover;
-    border: 1px solid var(--ms-border);
-}
-
-.producto-thumb.no-image {
-    background: #121a26;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--ms-muted);
-    font-size: 1.2rem;
-}
-
-.filter-form {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.badge.warning {
-    background: rgba(255, 170, 0, 0.2);
-    color: #ffaa00;
-    border: 1px solid #ffaa00;
-}
-
-.delete-form {
-    display: inline;
-}
-
-.page-info {
-    padding: 8px 16px;
-    color: var(--ms-muted);
-}
-
-.actions .btn-icon {
-    background: var(--ms-soft);
-    border: 1px solid var(--ms-border);
-    color: #cfe3ff;
-    padding: .4rem .5rem;
-    border-radius: .5rem;
-    margin-right: .25rem;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.actions .btn-icon:hover {
-    filter: brightness(1.1);
-}
-
-.actions .btn-icon.view {
-    background: rgba(59, 130, 246, 0.2);
-    color: #3b82f6;
-}
-
-.actions .btn-icon.edit {
-    background: rgba(34, 197, 94, 0.2);
-    color: #22c55e;
-}
-
-.actions .btn-icon.delete {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
-}
-
-.actions .btn-icon.in {
-    background: rgba(34, 197, 94, 0.2);
-    color: #22c55e;
-}
-
-.actions .btn-icon.out {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
-}
-</style>
 </body>
 </html>

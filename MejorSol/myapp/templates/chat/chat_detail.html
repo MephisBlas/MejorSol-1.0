@@ -14,8 +14,22 @@
     
     <style>
         /* ======================================= */
-        /* ¡CSS REPARADO PARA EL MODAL!            */
+        /* ¡CSS REPARADO Y MEJORADO CON TEMA NEÓN! */
         /* ======================================= */
+        
+        :root {
+            /* Variables del tema Neón (extraídas de admin_panel.css) */
+            --ms-panel: rgba(25, 25, 35, 0.9);
+            --ms-accent: #00ffaa;
+            --ms-text: #ffffff;
+            --ms-muted: #b0b0b0;
+            --ms-border: 1px solid rgba(0, 255, 136, 0.3);
+            --darker-bg: #121a26;
+            --darkest-bg: #0f172a;
+            --dark-text: #031019; /* Texto oscuro para fondos claros/neón */
+            --bot-color: #ffaa00; /* Amarillo para el Bot */
+        }
+
         html, body {
             height: 100%;
             margin: 0;
@@ -32,8 +46,6 @@
             overflow: hidden;
         }
 
-        /* (Quitamos el header, ya lo pone el modal) */
-
         .message-list {
             flex: 1;
             padding: 1.5rem;
@@ -45,22 +57,27 @@
 
         .message-bubble {
             display: flex;
+            flex-direction: column; /* Cambiado para alinear el timestamp abajo */
             max-width: 75%;
             padding: 0.8rem 1.2rem;
             border-radius: 18px;
             line-height: 1.5;
             position: relative;
         }
+        
+        /* Mensajes del Bot o Admin (Fondo Oscuro) */
         .message-bubble.is-bot,
         .message-bubble.is-admin {
-            background: #121a26;
+            background: var(--darker-bg);
             color: var(--ms-text);
             border-bottom-left-radius: 5px;
             align-self: flex-start;
         }
+        
+        /* Mensajes del Usuario (Fondo Neón) */
         .message-bubble.is-user {
             background: var(--ms-accent);
-            color: var(--ms-text); /* ¡REPARADO! Color de texto */
+            color: var(--dark-text); /* ¡FIX DE LEGIBILIDAD! Texto oscuro sobre fondo neón */
             border-bottom-right-radius: 5px;
             align-self: flex-end;
         }
@@ -68,34 +85,42 @@
         .message-author {
             font-weight: 600;
             font-size: 0.8rem;
-            color: var(--ms-accent);
             margin-bottom: 0.25rem;
         }
-        .message-bubble.is-user .message-author {
-            color: var(--ms-text);
-            opacity: 0.8;
+        
+        .message-bubble.is-admin .message-author {
+             color: var(--ms-accent); /* Admin en verde neón */
         }
         .message-bubble.is-bot .message-author {
-            color: #ffaa00; /* Color especial para el Bot */
+            color: var(--bot-color); /* Bot en amarillo */
         }
+        .message-bubble.is-user .message-author {
+            color: var(--dark-text); /* Usuario (Tú) en texto oscuro */
+            opacity: 0.8;
+        }
+
         .message-content {
              word-break: break-word;
         }
+        
+        /* Estilo para la hora del mensaje (Timestamp) */
         .message-timestamp {
             font-size: 0.7rem;
             color: var(--ms-muted);
             margin-top: 0.5rem;
             text-align: right;
+            align-self: flex-end; /* Asegura que se alinee a la derecha */
         }
         .message-bubble.is-user .message-timestamp {
-            color: var(--ms-text);
+            color: var(--dark-text);
             opacity: 0.7;
         }
 
+        /* Área de input */
         .message-input-area {
             padding: 1rem;
-            border-top: 1px solid var(--ms-border);
-            background: #121a26;
+            border-top: var(--ms-border);
+            background: var(--darker-bg);
         }
         .message-input-form {
             display: flex;
@@ -106,17 +131,20 @@
             padding: 0.75rem;
             border: 1px solid var(--ms-border);
             border-radius: 12px;
-            background: #0f172a;
+            background: var(--darkest-bg);
             color: var(--ms-text);
             font-size: 1rem;
         }
         #messageInput:focus {
             outline: none;
             border-color: var(--ms-accent);
+            box-shadow: 0 0 10px rgba(0, 255, 170, 0.3);
         }
+        
+        /* Botón de enviar (estilo neón) */
         .btn-solid {
             background: var(--ms-accent);
-            color: #031019;
+            color: var(--dark-text);
             border: none;
             padding: 0 1.5rem;
             border-radius: 12px;
@@ -126,18 +154,26 @@
         }
         .btn-solid:hover {
             filter: brightness(1.1);
+            box-shadow: 0 0 15px rgba(0, 255, 170, 0.5);
+        }
+        .btn-solid:disabled {
+            background: var(--ms-muted);
+            color: var(--darker-bg);
+            cursor: not-allowed;
+            box-shadow: none;
+            filter: none;
         }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="message-list" id="messageList">
-            </div>
+        </div>
 
         <div class="message-input-area">
             <form id="messageForm" class="message-input-form">
                 <input type="text" id="messageInput" placeholder="Escribe tu mensaje..." autocomplete="off">
-                <button type="submit" class="btn btn-solid">
+                <button type="submit" class="btn btn-solid" id="sendButton">
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </form>
@@ -149,11 +185,33 @@
             const messageList = document.getElementById('messageList');
             const messageForm = document.getElementById('messageForm');
             const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
             
             const chatId = '{{ chat.id }}';
+            // Esta URL debe coincidir con tu urls.py
             const chatApiUrl = `/api/chat/${chatId}/mensajes/`;
             let lastMessageTimestamp = null;
-            
+            let isFetching = false; // Para evitar polling duplicado
+            let isSending = false; // Para evitar envíos duplicados
+
+            // --- 0. ¡FIX DE CSRF! ---
+            // Función para obtener la cookie CSRF (necesaria para POST en iframe)
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            const csrftoken = getCookie('csrftoken');
+
             // --- 1. Función para DIBUJAR un mensaje en la pantalla ---
             function drawMessage(msg) {
                 const bubble = document.createElement('div');
@@ -169,14 +227,21 @@
                     authorName = 'Tú';
                 } else {
                     bubble.classList.add('is-admin');
-                    authorName = 'Administrador';
+                    authorName = msg.autor; // Mostrar nombre del admin
                 }
+
+                // ¡MEJORA! Añadimos la hora del mensaje
+                const timeString = new Date(msg.timestamp).toLocaleTimeString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
 
                 bubble.innerHTML = `
                     <div class="message-content">
                         <div class="message-author">${authorName}</div>
                         ${msg.mensaje}
                     </div>
+                    <div class="message-timestamp">${timeString}</div>
                 `;
                 
                 messageList.appendChild(bubble);
@@ -186,42 +251,53 @@
             // --- 2. Función para ENVIAR un mensaje (POST) ---
             async function sendMessage(e) {
                 e.preventDefault();
+                if (isSending) return; // Evitar doble envío
+
                 const mensajeTexto = messageInput.value;
                 if (!mensajeTexto.trim()) return;
 
-                const tempMessageText = mensajeTexto;
-                messageInput.value = '';
+                isSending = true;
                 messageInput.disabled = true;
+                sendButton.disabled = true;
 
                 try {
                     const response = await fetch(chatApiUrl, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token }}' // Esto fallará en iframe, necesita JS-Cookie
+                            'X-CSRFToken': csrftoken // ¡FIX! Usar la cookie
                         },
-                        body: JSON.stringify({ mensaje: tempMessageText })
+                        body: JSON.stringify({ mensaje: mensajeTexto })
                     });
                     
                     if (response.ok) {
                         const data = await response.json();
+                        messageInput.value = ''; // Limpiar solo si el envío fue exitoso
+                        
+                        // Dibujar los mensajes que acabamos de enviar (el nuestro + el bot si respondió)
                         if (data.mensajes && data.mensajes.length > 0) {
                             data.mensajes.forEach(drawMessage);
-                            messageList.scrollTop = messageList.scrollHeight;
+                            scrollToBottom();
                         }
                     } else {
-                        messageInput.value = tempMessageText;
+                        // No limpiar el input si falló, para que el usuario no pierda el texto
+                        console.error('Error al enviar el mensaje');
                     }
                 } catch (err) {
-                    messageInput.value = tempMessageText;
+                    console.error('Error de red al enviar:', err);
                 }
                 
+                isSending = false;
                 messageInput.disabled = false;
+                sendButton.disabled = false;
                 messageInput.focus();
             }
 
             // --- 3. Función para OBTENER mensajes nuevos (GET - Polling) ---
             async function fetchMessages() {
+                if (isFetching) return;
+                isFetching = true;
+
                 let url = chatApiUrl;
                 if (lastMessageTimestamp) {
                     url += `?ultimo_mensaje=${lastMessageTimestamp}`;
@@ -233,16 +309,28 @@
                     
                     if (data.mensajes && data.mensajes.length > 0) {
                         data.mensajes.forEach(drawMessage);
-                        messageList.scrollTop = messageList.scrollHeight;
+                        scrollToBottom();
                     }
                 } catch (err) {
                     console.error('Error al buscar mensajes:', err);
                 }
+                isFetching = false;
+            }
+            
+            // --- 4. Función para hacer scroll ---
+            function scrollToBottom() {
+                messageList.scrollTop = messageList.scrollHeight;
             }
 
-            // --- 4. Iniciar todo ---
+            // --- 5. Iniciar todo ---
             messageForm.addEventListener('submit', sendMessage);
-            fetchMessages(); 
+            
+            // Carga inicial de mensajes
+            fetchMessages().then(() => {
+                scrollToBottom(); // Asegurarse de estar abajo al cargar
+            }); 
+            
+            // Polling para nuevos mensajes
             setInterval(fetchMessages, 5000); 
         });
     </script>

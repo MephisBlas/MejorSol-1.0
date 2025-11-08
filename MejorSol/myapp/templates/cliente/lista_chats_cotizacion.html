@@ -13,30 +13,156 @@
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     
     <style>
-        /* Estilos de la lista de chats (MEJORADOS) */
-        body { background: transparent; font-family: 'Roboto', sans-serif; color: var(--ms-text); padding: 0.5rem; }
-        .cotizacion-list { display: flex; flex-direction: column; gap: 1rem; }
-        .cotizacion-card {
-            background: var(--ms-panel); border: 1px solid rgba(41, 255, 154, 0.4); box-shadow: 0 0 8px rgba(41, 255, 154, 0.2);
-            border-radius: 12px; padding: 1.5rem; display: grid; grid-template-columns: 3fr 1fr 1fr; gap: 1rem;
-            align-items: center; transition: all 0.3s ease; text-decoration: none; color: var(--ms-text); cursor: pointer;
+        /* Variables y Estilos adaptados de admin_panel.css para coherencia */
+        :root {
+            --primary-green: #00ff88;
+            --accent-green: #00ffaa;
+            --card-bg: rgba(25, 25, 35, 0.9);
+            --border-glow: 1px solid rgba(0, 255, 136, 0.3);
+            --text-light: #ffffff;
+            --text-gray: #b0b0b0;
+            
+            --ms-panel: var(--card-bg);
+            --ms-border: var(--border-glow);
+            --ms-text: var(--text-light);
+            --ms-muted: var(--text-gray);
+            --ms-accent: var(--accent-green); 
+            
+            --danger-color: #ff4444;
+            --info-color: #3b82f6;
+            --warning-color: #ffaa00;
         }
-        .cotizacion-card:hover { border-color: rgba(41, 255, 154, 0.8); transform: translateY(-2px); box-shadow: 0 0 15px rgba(41, 255, 154, 0.6); }
-        .producto-info { display: flex; align-items: center; gap: 1rem; }
-        .producto-avatar { width: 50px; height: 50px; border-radius: 8px; background: #121a26; flex-shrink: 0; border: 1px solid var(--ms-border); }
-        .producto-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
-        .producto-avatar i { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--ms-accent); }
-        .producto-info strong { font-weight: 600; }
-        .producto-info span { color: var(--ms-muted); font-size: 0.875rem; }
-        .status-badge { padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 0.4rem; justify-content: center; }
-        .status-pendiente { background: rgba(136, 153, 170, 0.2); color: #8899aa; border: 1px solid #8899aa; }
-        .status-en_proceso { background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid #3b82f6; }
-        .status-aprobada { background: rgba(41, 255, 154, 0.2); color: var(--ms-accent); border: 1px solid var(--ms-accent); }
-        .status-rechazada { background: rgba(255, 68, 68, 0.2); color: #ff4444; border: 1px solid #ff4444; }
-         .btn-outline { background: transparent; color: var(--ms-text); border: 1px solid var(--ms-border); padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 0.9rem; text-align: center; transition: all 0.3s ease; }
-        .btn-outline:hover { border-color: var(--ms-accent); color: var(--ms-accent); background: rgba(41, 255, 154, 0.1); }
-        .no-chats { text-align: center; padding: 3rem; color: var(--ms-muted); }
-        .no-chats i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+        
+        /* Estilos de la lista de chats (MEJORADOS) */
+        body { 
+            background: transparent; 
+            font-family: 'Roboto', sans-serif; 
+            color: var(--ms-text); 
+            padding: 0.5rem; 
+        }
+        .cotizacion-list { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 1rem; 
+        }
+        .cotizacion-card {
+            background: var(--ms-panel); 
+            border: 1px solid rgba(0, 255, 136, 0.5); 
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+            border-radius: 12px; 
+            padding: 1.5rem; 
+            display: grid; 
+            grid-template-columns: 3fr 1fr 1fr; 
+            gap: 1rem;
+            align-items: center; 
+            transition: all 0.3s ease; 
+            text-decoration: none; 
+            color: var(--ms-text); 
+            cursor: pointer;
+        }
+        .cotizacion-card:hover { 
+            border-color: var(--ms-accent); 
+            transform: translateY(-2px); 
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.8); 
+        }
+        .producto-info { 
+            display: flex; 
+            align-items: center; 
+            gap: 1rem; 
+        }
+        .producto-avatar { 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 8px; 
+            background: #121a26; 
+            flex-shrink: 0; 
+            border: 1px solid var(--ms-border); 
+            display: flex; /* Centrar icono */
+            align-items: center;
+            justify-content: center;
+        }
+        .producto-avatar img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            border-radius: 8px; 
+        }
+        .producto-avatar i { 
+            font-size: 1.5rem; 
+            color: var(--ms-accent); 
+        }
+        .producto-info strong { 
+            font-weight: 600; 
+            color: var(--ms-text);
+        }
+        .producto-info span { 
+            color: var(--ms-muted); 
+            font-size: 0.875rem; 
+        }
+        .status-badge { 
+            padding: 0.4rem 0.8rem; 
+            border-radius: 20px; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 0.4rem; 
+            justify-content: center; 
+        }
+        .status-pendiente { 
+            background: rgba(136, 153, 170, 0.2); 
+            color: #8899aa; 
+            border: 1px solid #8899aa; 
+        }
+        .status-en_proceso { 
+            background: rgba(59, 130, 246, 0.2); 
+            color: var(--info-color); 
+            border: 1px solid var(--info-color); 
+        }
+        .status-aprobada { 
+            background: rgba(41, 255, 154, 0.2); 
+            color: var(--ms-accent); 
+            border: 1px solid var(--ms-accent); 
+        }
+        .status-rechazada { 
+            background: rgba(255, 68, 68, 0.2); 
+            color: var(--danger-color); 
+            border: 1px solid var(--danger-color); 
+        }
+        
+        .btn-outline { 
+            background: transparent; 
+            color: var(--ms-accent);
+            border: 1px solid var(--ms-accent); 
+            padding: 0.5rem 1rem; 
+            border-radius: 8px; 
+            text-decoration: none; 
+            font-weight: 500; 
+            font-size: 0.9rem; 
+            text-align: center; 
+            transition: all 0.3s ease; 
+        }
+        .btn-outline:hover { 
+            border-color: var(--ms-accent); 
+            color: #031019; 
+            background: var(--ms-accent); 
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        .no-chats { 
+            text-align: center; 
+            padding: 3rem; 
+            color: var(--ms-muted); 
+            background: var(--ms-panel);
+            border-radius: 12px;
+            border: 2px dashed var(--ms-border);
+        }
+        .no-chats i { 
+            font-size: 3rem; 
+            margin-bottom: 1rem; 
+            opacity: 0.5; 
+        }
     </style>
 </head>
 <body>
@@ -47,7 +173,7 @@
                 
                 <div class="producto-info">
                     <div class="producto-avatar">
-                        {% if chat.producto.imagenes.first %}
+                        {% if chat.producto.imagenes.first.imagen.url %}
                             <img src="{{ chat.producto.imagenes.first.imagen.url }}" alt="{{ chat.producto.nombre }}">
                         {% else %}
                             <i class="fas fa-{{ chat.producto.icono|default:'box' }}"></i>
@@ -81,10 +207,9 @@
     <script>
         // Este script escucha los clics en la lista de chats
         document.querySelectorAll('.btn-abrir-chat').forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevenir doble clic si se da en el botón
                 const chatId = this.dataset.chatId;
-                // Envía un mensaje a la ventana "padre" (client_dashboard.html)
-                // El dashboard principal recibirá esto y abrirá el modal flotante
                 window.parent.postMessage({
                     type: 'OPEN_CHAT_MODAL',
                     chatId: chatId
@@ -95,7 +220,6 @@
         // Clic en la tarjeta completa para abrir el chat
         document.querySelectorAll('.cotizacion-card').forEach(card => {
              card.addEventListener('click', function(e) {
-                 // Previene abrir el chat si el clic fue en el botón (ya que el botón tiene su propio listener)
                  if (e.target.closest('.btn-abrir-chat')) return; 
                  
                  const chatId = this.dataset.chatId;

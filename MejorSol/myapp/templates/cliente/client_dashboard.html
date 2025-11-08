@@ -14,6 +14,27 @@
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/client_dashboard.css' %}">
     <style>
+        /* Variables y Estilos adaptados de admin_panel.css para coherencia */
+        :root {
+            --primary-green: #00ff88;
+            --dark-green: #00cc6a;
+            --light-green: #33ff99;
+            --accent-green: #00ffaa;
+            --neon-glow: 0 0 20px rgba(0, 255, 136, 0.5);
+            --card-bg: rgba(25, 25, 35, 0.9);
+            --border-glow: 1px solid rgba(0, 255, 136, 0.3);
+            --text-light: #ffffff;
+            --text-gray: #b0b0b0;
+            --danger-color: #ff4757;
+            --warning-color: #ffa500;
+            
+            --ms-panel: var(--card-bg);
+            --ms-border: var(--border-glow);
+            --ms-text: var(--text-light);
+            --ms-muted: var(--text-gray);
+            --ms-accent: var(--accent-green); 
+        }
+        
         /* Estilos de Product Card (con Neón) */
         .products-grid {
             display: grid;
@@ -46,7 +67,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #1a2a3a, #2a3a4a);
+            background: #1a2a3a;
             border-radius: 12px;
             flex-shrink: 0;
             font-size: 2rem;
@@ -137,7 +158,7 @@
         }
         .warranty-status.expired {
             background: rgba(255, 68, 68, 0.2);
-            color: #ff4444;
+            color: var(--danger-color);
             border: 1px solid rgba(255, 68, 68, 0.3);
         }
         .no-products {
@@ -180,7 +201,7 @@
         }
         .status-warranty {
             background: rgba(255, 193, 7, 0.2);
-            color: #ffc107;
+            color: var(--warning-color);
             border: 1px solid rgba(255, 193, 7, 0.3);
         }
         
@@ -218,7 +239,7 @@
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
-            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.2);
+            box-shadow: var(--neon-glow);
             animation: slideUp 0.4s ease;
         }
         
@@ -360,6 +381,10 @@
             color: var(--ms-muted); 
             font-size: 1.5rem; 
             cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .chat-modal-header button:hover {
+            color: var(--ms-accent); 
         }
         .chat-modal-body { 
             flex: 1; 
@@ -499,7 +524,7 @@
                             {% for producto in productos_disponibles %}
                             <div class="product-card">
                                 <div class="product-image">
-                                    {% if producto.imagenes.first %}
+                                    {% if producto.imagenes.first.imagen.url %}
                                         <img src="{{ producto.imagenes.first.imagen.url }}" alt="{{ producto.nombre }}">
                                     {% else %}
                                         <i class="fas fa-{{ producto.icono|default:'box' }}"></i>
@@ -558,8 +583,7 @@
                         <div class="products-grid">
                             {% for producto_adquirido in productos_adquiridos %}
                             <div class="product-card">
-                                <!-- Contenido de productos adquiridos -->
-                            </div>
+                                </div>
                             {% endfor %}
                         </div>
                     {% endif %} 
@@ -569,7 +593,7 @@
                     <div class="tab-header">
                         <h2>Mis Cotizaciones</h2>
                     </div>
-                    <iframe id="cotizaciones-iframe" src="{% url 'lista_chats_cotizacion' %}" style="width: 100%; height: 60vh; border: none; border-radius: 8px;"></iframe>
+                    <iframe id="cotizaciones-iframe" src="{% url 'lista_chats_cotizacion' %}" style="width: 100%; min-height: 60vh; border: none; border-radius: 8px; background: transparent;"></iframe>
                 </div>
                 
                 <div class="tab-content" id="documentos-tab">
@@ -586,36 +610,32 @@
         </main>
     </div>
 
-    <!-- Modal de Producto -->
     <div class="modal-overlay" id="productModal">
         <div class="modal-content">
             <button class="modal-close" id="modalCloseBtn">&times;</button>
             
             <div class="modal-carousel">
-                <img src="" alt="Imagen principal del producto" class="modal-main-image" id="modalMainImage">
+                <img src="{% static 'img/placeholder.png' %}" alt="Imagen principal del producto" class="modal-main-image" id="modalMainImage">
                 <div class="modal-thumbnails" id="modalThumbnails">
-                    <!-- Thumbnails se generan dinámicamente -->
-                </div>
+                    </div>
             </div>
 
             <div class="modal-info">
                 <h2 id="modalProductName">Nombre del Producto</h2>
                 <p id="modalProductDescription">Descripción del producto...</p>
                 <div class="product-specs" id="modalProductSpecs">
-                    <!-- Especificaciones se generan dinámicamente -->
-                </div>
+                    </div>
             </div>
 
             <div class="modal-footer">
                 <span class="modal-price" id="modalProductPrice">$0</span>
-                <button class="btn btn-solid" id="modalCotizacionBtn">
+                <button class="btn btn-primary" id="modalCotizacionBtn">
                     <i class="fas fa-comments"></i> Iniciar Cotización por Chat
                 </button>
             </div>
         </div>
     </div>
     
-    <!-- Modal de Chat Flotante -->
     <div class="chat-modal-container" id="chatModalContainer">
         <div class="chat-modal-header">
             <h3 id="chatModalTitle">Chat de Cotización</h3>
@@ -697,31 +717,30 @@
                 const modalThumbnails = document.getElementById('modalThumbnails');
                 const modalCotizacionBtn = document.getElementById('modalCotizacionBtn');
 
-                // Función para cerrar el modal
+                const PLACEHOLDER_IMG_URL = "{% static 'img/placeholder.png' %}";
+
                 function closeModal() {
                     modalOverlay.classList.remove('active');
                 }
 
-                // Función para abrir el modal
                 function openModal(e) {
                     const btn = e.currentTarget;
 
-                    // 1. Llenar info
                     modalProductName.textContent = btn.dataset.nombre;
                     modalProductDescription.textContent = btn.dataset.descripcion;
                     modalProductPrice.textContent = btn.dataset.precio;
 
-                    // 2. Llenar specs
                     modalProductSpecs.innerHTML = '';
                     if (btn.dataset.potencia) modalProductSpecs.innerHTML += `<span><i class="fas fa-bolt"></i> ${btn.dataset.potencia}</span>`;
                     if (btn.dataset.voltaje) modalProductSpecs.innerHTML += `<span><i class="fas fa-plug"></i> ${btn.dataset.voltaje}</span>`;
                     if (btn.dataset.dimensiones) modalProductSpecs.innerHTML += `<span><i class="fas fa-ruler"></i> ${btn.dataset.dimensiones}</span>`;
 
-                    // 3. Llenar carrusel
                     modalThumbnails.innerHTML = '';
                     const imageUrls = btn.dataset.images.split(',').filter(Boolean);
+                    
                     if (imageUrls.length > 0) {
                         modalMainImage.src = imageUrls[0];
+                        
                         imageUrls.forEach((imgUrl, index) => {
                             const thumb = document.createElement('img');
                             thumb.src = imgUrl;
@@ -735,17 +754,13 @@
                             modalThumbnails.appendChild(thumb);
                         });
                     } else {
-                        modalMainImage.src = "{% static 'img/placeholder.png' %}";
+                        modalMainImage.src = PLACEHOLDER_IMG_URL;
                     }
 
-                    // 4. Guardar el ID del producto en el botón
                     modalCotizacionBtn.dataset.productoId = btn.dataset.id;
-
-                    // 5. Mostrar el modal
                     modalOverlay.classList.add('active');
                 }
 
-                // Asignar eventos de apertura y cierre
                 openModalBtns.forEach(btn => btn.addEventListener('click', openModal));
                 modalCloseBtn.addEventListener('click', closeModal);
                 modalOverlay.addEventListener('click', (e) => {
@@ -760,22 +775,21 @@
                 const chatModalCloseBtn = document.getElementById('chatModalCloseBtn');
                 const chatModalTitle = document.getElementById('chatModalTitle');
 
-                // Función para abrir el chat flotante
+                // FUNCIÓN CORREGIDA (Línea 779 del error)
                 function openChatModal(chatId) {
-                    chatIframe.src = `/chat-cotizacion/${chatId}/`;
+                    // FIX: Revertido a la URL hard-coded original que SÍ funcionaba
+                    chatIframe.src = `/chat-cotizacion/${chatId}/`; 
                     chatModalTitle.textContent = `Cotización #${chatId}`;
                     chatModalContainer.classList.add('active');
                 }
 
-                // Función para cerrar el chat flotante
                 function closeChatModal() {
                     chatIframe.src = 'about:blank';
                     chatModalContainer.classList.remove('active');
                     
-                    // Recargar la lista de chats para actualizar estado
                     const cotizacionesIframe = document.getElementById('cotizaciones-iframe');
                     if (cotizacionesIframe) {
-                        cotizacionesIframe.src = cotizacionesIframe.src;
+                        cotizacionesIframe.src = cotizacionesIframe.src; 
                     }
                 }
 
@@ -789,26 +803,20 @@
                     if (!productoId) return;
 
                     try {
-                        // 1. Llamar a la vista para iniciar chat
+                        // FIX: Revertido a la URL hard-coded original que SÍ funcionaba
                         const response = await fetch(`/iniciar-chat-cotizacion/${productoId}/`);
                         const data = await response.json();
 
                         if (data.status === 'ok' && data.chat_id) {
-                            // 2. Éxito - tenemos el ID del chat
                             const chatId = data.chat_id;
-                            
-                            // 3. Cerrar el modal de producto
                             closeModal();
-                            
-                            // 4. Abrir el modal de chat flotante
                             openChatModal(chatId);
-                            
-                            // 5. Cambiar a la pestaña de cotizaciones
                             switchTab('cotizaciones');
                         } else {
                             alert("Error al iniciar el chat.");
                         }
                     } catch (err) {
+                        console.error("Error de red al iniciar el chat:", err);
                         alert("Error de red al iniciar el chat.");
                     }
                 });
@@ -817,7 +825,11 @@
                 // ESCUCHAR MENSAJES DEL IFRAME (LISTA DE CHATS)
                 // ==================================
                 window.addEventListener('message', function(event) {
-                    // El mensaje viene de lista_chats_cotizacion.html
+                    const cotizacionesIframe = document.getElementById('cotizaciones-iframe');
+                    if (!cotizacionesIframe || event.source !== cotizacionesIframe.contentWindow) {
+                        return;
+                    }
+
                     if (event.data && event.data.type === 'OPEN_CHAT_MODAL') {
                         openChatModal(event.data.chatId);
                         switchTab('cotizaciones');

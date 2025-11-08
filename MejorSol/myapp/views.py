@@ -11,7 +11,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
-from django.db.models import Q, F, Sum, Count
+from django.db.models import Q, F, Sum, Count, ProtectedError
 from django.db.models.functions import TruncMonth
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -27,7 +27,6 @@ from .forms import (
     ProductoAdquiridoForm, ProductoImagenFormSet
 )
 # --- Modelos ---
-# (Asegúrate de que tienes todos estos modelos definidos en models.py)
 from .models import (
     ChatConversation, ChatMessage, Producto, Categoria, 
     ProductoAdquirido, ProductoImagen, Cotizacion, ItemCotizacion,
@@ -133,7 +132,8 @@ def control_inventario_view(request):
             titulo = 'Nuevo Producto'
         
         if request.method == 'POST':
-            form = ProductoForm(request.POST, instance=producto)
+            # FIX DE IMAGEN: Se asegura que el form y el formset reciban request.FILES
+            form = ProductoForm(request.POST, request.FILES, instance=producto)
             formset = ProductoImagenFormSet(request.POST, request.FILES, instance=producto)
             
             if form.is_valid() and formset.is_valid():
@@ -179,7 +179,29 @@ def control_inventario_view(request):
         return render(request, 'admin/control_inventario.html', context)
     
     # --- MODO NORMAL: LISTA DE PRODUCTOS ---
-    productos = Producto.objects.select_related('categoria').all().order_by('-fecha_creacion')
+    # Lógica de filtrado para el inventario - AÑADIDA para coincidir con el HTML
+    q = request.GET.get('q')
+    categoria = request.GET.get('categoria')
+    estado = request.GET.get('estado')
+    
+    productos = Producto.objects.select_related('categoria').all()
+
+    if q:
+        productos = productos.filter(Q(sku__icontains=q) | Q(nombre__icontains=q))
+    
+    if categoria:
+        productos = productos.filter(categoria__id=categoria)
+        
+    if estado == 'activo':
+        productos = productos.filter(activo=True)
+    elif estado == 'inactivo':
+        productos = productos.filter(activo=False)
+    elif estado == 'bajo':
+        # Filtra productos con stock <= stock_minimo Y activo=True
+        productos = productos.filter(stock__lte=F('stock_minimo'), activo=True, stock__gt=0)
+
+
+    productos = productos.order_by('-fecha_creacion')
     
     if request.GET.get('export') == 'csv':
         return export_inventario_csv(productos)
@@ -198,14 +220,39 @@ def control_inventario_view(request):
     return render(request, 'admin/control_inventario.html', context)
 
 
+# ===========================
+# VISTA DE ELIMINAR PRODUCTO (¡¡FIXED!!)
+# ===========================
 @login_required
 @user_passes_test(is_admin)
 @require_http_methods(["POST"])
 def producto_delete(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
     nombre_producto = producto.nombre
-    producto.delete()
-    messages.success(request, f'Producto "{nombre_producto}" eliminado exitosamente.')
+    
+    # Contamos si este producto tiene chats o productos adquiridos (que también podrían protegerlo)
+    chat_count = ChatCotizacion.objects.filter(producto=producto).count()
+    adquirido_count = ProductoAdquirido.objects.filter(producto=producto).count()
+
+    if chat_count > 0 or adquirido_count > 0:
+        # Si hay chats o ventas, no podemos borrar. Lo desactivamos.
+        try:
+            producto.activo = False
+            producto.save()
+            messages.warning(request, f'El producto "{nombre_producto}" no se puede eliminar porque tiene {chat_count} chats y {adquirido_count} ventas asociadas. En su lugar, ha sido marcado como "Inactivo".')
+        except Exception as e:
+            messages.error(request, f'Error al intentar desactivar el producto: {e}')
+    else:
+        # Si no hay chats NI ventas, intentamos borrarlo.
+        try:
+            producto.delete()
+            messages.success(request, f'Producto "{nombre_producto}" eliminado exitosamente (no tenía chats ni ventas).')
+        except ProtectedError as e:
+            # Catch por si OTRA cosa (que no revisamos) lo protege
+            messages.error(request, f'Error: No se pudo eliminar "{nombre_producto}". Está protegido por otras relaciones: {e}')
+        except Exception as e:
+            messages.error(request, f'Error inesperado al eliminar: {e}')
+            
     return redirect('control_inventario')
 
 
@@ -289,7 +336,7 @@ def admin_chat_cotizacion_view(request, chat_id):
 def cotizaciones_view(request):
     """ ¡REPARADO! Redirección directa al listado principal. """
     # Esta es la que causaba el ciclo si estaba en urls.py con el mismo nombre.
-    return redirect('cotizaciones') # Redirige a admin_lista_chats_cotizacion_view
+    return redirect('admin_lista_chats_cotizacion') # Redirige a admin_lista_chats_cotizacion_view
 
 
 @login_required
@@ -491,10 +538,11 @@ def handler_500(request):
 def client_dashboard(request):
     productos_adquiridos = ProductoAdquirido.objects.filter(cliente=request.user).select_related('producto')
     
+    # FIX: El error indica que el related_name es 'imagenes', no 'productoimagen_set'.
+    # Usamos 'imagenes' para el prefetch, que es el nombre correcto.
     productos_disponibles = Producto.objects.filter(
-        activo=True,
-        estado='activo'
-    ).select_related('categoria').prefetch_related('imagenes')
+        activo=True
+    ).select_related('categoria').prefetch_related('imagenes') 
     
     context = {
         'user': request.user,
