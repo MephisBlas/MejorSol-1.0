@@ -1,23 +1,21 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from datetime import timedelta # <--- AÑADIDO: Necesario para la configuración de JWT
 
-# Cargar variables de entorno
+# Cargar variables de entorno (buscará el .env en la carpeta 'Mejorsol/')
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+# BASE_DIR apunta a 'Mejorsol/' (donde está manage.py)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ===========================
 # CONFIGURACIONES DE SEGURIDAD
 # ===========================
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-clave-temporal-cambiar-en-produccion')
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
-
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # Configuraciones de seguridad para producción
@@ -43,17 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     
-    # Third party apps (opcionales - instalar con pip)
-    # 'crispy_forms',
-    # 'crispy_bootstrap5',
+    # === TAREA T-R.S2.5 (Erick): AÑADIR APPS DE API Y SEGURIDAD JWT ===
+    'rest_framework',
+    'rest_framework_simplejwt',
     
     # Local apps
     'myapp',
 ]
-
-# Configuración de crispy forms (si se instala)
-# CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-# CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # ===========================
 # CONFIGURACIÓN DE MIDDLEWARE
@@ -73,7 +67,7 @@ MIDDLEWARE = [
 # CONFIGURACIÓN DE URLS Y TEMPLATES
 # ===========================
 
-ROOT_URLCONF = 'MejorSol.urls'
+ROOT_URLCONF = 'MejorSol.urls' # (Asegúrate de que 'MejorSol' sea el nombre correcto de la carpeta de settings)
 
 TEMPLATES = [
     {
@@ -94,18 +88,24 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'MejorSol.wsgi.application'
+WSGI_APPLICATION = 'MejorSol.wsgi.application' # (Asegúrate de que 'MejorSol' sea el nombre correcto)
 
 # ===========================
 # CONFIGURACIÓN DE BASE DE DATOS
 # ===========================
 
+# === TAREA T-R.S2.2 (Isaí): MIGRACIÓN A MYSQL ===
+# Esta configuración reemplaza SQLite y lee las credenciales del archivo .env
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('MYSQL_DATABASE_NAME', 'mejorsol_db_prod'), 
+        'USER': os.getenv('MYSQL_DATABASE_USER', 'root'),             
+        'PASSWORD': os.getenv('MYSQL_DATABASE_PASSWORD', ''),         
+        'HOST': os.getenv('MYSQL_DATABASE_HOST', 'localhost'),
+        'PORT': os.getenv('MYSQL_DATABASE_PORT', '3308'), # <-- USA EL PUERTO QUE TE FUNCIONÓ (3308 o 3309)
         'OPTIONS': {
-            'timeout': 20,
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         }
     }
 }
@@ -115,21 +115,10 @@ DATABASES = {
 # ===========================
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 8,
-        }
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 8}},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 # ===========================
@@ -146,16 +135,12 @@ USE_L10N = True
 # ARCHIVOS ESTÁTICOS Y MEDIA
 # ===========================
 
-# Archivos estáticos
 STATIC_URL = '/static/'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATICFILES_DIRS = [
     BASE_DIR / 'myapp/static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Archivos media
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -167,9 +152,24 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/login/'
 
-# Configuraciones de sesión
-SESSION_COOKIE_AGE = 1209600  # 2 semanas en segundos
+SESSION_COOKIE_AGE = 1209600
 SESSION_SAVE_EVERY_REQUEST = True
+
+# === CONFIGURACIÓN DE AUTENTICACIÓN DE API CON JWT (SPRINT 1 - Erick) ===
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated', # Por defecto, todas las APIs requieren token
+    ]
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), # Duración del token de acceso
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),   # Duración del token para refrescar
+    'AUTH_HEADER_TYPES': ('Bearer',),              # El tipo de token que se espera en la cabecera
+}
 
 # ===========================
 # CONFIGURACIÓN DE CORREO
@@ -187,14 +187,10 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@sieer.cl')
 # CONFIGURACIONES ADICIONALES
 # ===========================
 
-# Primary key type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Tamaño máximo de upload (10MB)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760
 
-# Configuraciones personalizadas de la aplicación
 APP_CONFIG = {
     'EMPRESA_NOMBRE': 'SIEER Chile',
     'EMPRESA_RUT': '76.123.456-7',

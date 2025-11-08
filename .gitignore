@@ -1,0 +1,45 @@
+# --------------------------------------------------------
+# 1. ARCHIVOS Y CARPETAS GENERADOS POR PYTHON/VENV (NO SUBIR)
+# --------------------------------------------------------
+
+# Entorno Virtual de Python (asumiendo que está en la raíz de Django)
+Mejorsol/venv/
+Mejorsol/.venv/
+
+# Caché de Python (ignorar en todas las carpetas)
+**/__pycache__/
+*.pyc
+
+# Archivos de logs y depuración
+*.log
+
+# --------------------------------------------------------
+# 2. CREDENCIALES Y CONFIGURACIÓN LOCAL (SEGURIDAD CRÍTICA)
+# --------------------------------------------------------
+
+# Archivo de Variables de Entorno (ubicado en Mejorsol/.env)
+Mejorsol/.env
+*.env
+
+# Archivos de base de datos de desarrollo (SQLite)
+Mejorsol/db.sqlite3
+db.sqlite3
+
+# --------------------------------------------------------
+# 3. ARCHIVOS GENERADOS POR DJANGO (No son código fuente)
+# --------------------------------------------------------
+
+# Archivos estáticos recolectados (STATIC_ROOT en settings.py)
+Mejorsol/staticfiles/
+
+# Archivos de media subidos (MEDIA_ROOT en settings.py)
+Mejorsol/media/
+
+# Sesiones
+Mejorsol/sessions/
+
+# --------------------------------------------------------
+# 4. CONFIGURACIÓN DE EDITORES Y HERRAMIENTAS
+# ----------------------------------------
+.vscode/
+.idea/
