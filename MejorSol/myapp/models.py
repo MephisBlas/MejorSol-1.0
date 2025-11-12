@@ -133,7 +133,7 @@ class Producto(models.Model):
             return ((self.precio - self.costo) / self.costo) * 100
         return 0
 
-# --- ¡REPARADO! Función movida fuera de la clase para arreglar migraciones ---
+
 def upload_to_producto_path(instance, filename):
     """Función para generar ruta de upload dinámica"""
     ext = filename.split('.')[-1]
@@ -142,7 +142,7 @@ def upload_to_producto_path(instance, filename):
 
 class ProductoImagen(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='imagenes')
-    imagen = models.ImageField(upload_to=upload_to_producto_path, verbose_name="Archivo de Imagen") # <-- ¡REPARADO!
+    imagen = models.ImageField(upload_to=upload_to_producto_path, verbose_name="Archivo de Imagen")
     orden = models.IntegerField(default=0, verbose_name="Orden de Visualización")
     es_principal = models.BooleanField(default=False, verbose_name="Imagen Principal")
     fecha_creacion = models.DateTimeField(auto_now_add=True)
@@ -177,53 +177,6 @@ class MovimientoInventario(models.Model):
         verbose_name_plural = 'Movimientos de Inventario'
         db_table = 'movimientos_inventario'
         ordering = ['-fecha_movimiento']
-
-# ===========================
-# MODELOS DE COTIZACIÓN (FORMULARIO ANTIGUO)
-# ===========================
-
-class Cotizacion(models.Model):
-    ESTADO_COTIZACION_CHOICES = [
-        ('borrador', 'Borrador'),
-        ('enviada', 'Enviada'),
-        ('aprobada', 'Aprobada'),
-        ('rechazada', 'Rechazada'),
-        ('expirada', 'Expirada'),
-    ]
-    cliente_nombre = models.CharField(max_length=200, verbose_name="Nombre del Cliente")
-    cliente_rut = models.CharField(max_length=12, blank=True, verbose_name="RUT del Cliente")
-    cliente_email = models.EmailField(blank=True, verbose_name="Email del Cliente")
-    cliente_telefono = models.CharField(max_length=15, blank=True, verbose_name="Teléfono del Cliente")
-    numero_cotizacion = models.CharField(max_length=20, unique=True, null=True, blank=True, verbose_name="Número de Cotización")
-    fecha_emision = models.DateField(default=timezone.now, verbose_name="Fecha de Emisión")
-    fecha_vencimiento = models.DateField(verbose_name="Fecha de Vencimiento", null=True, blank=True)
-    estado = models.CharField(max_length=10, choices=ESTADO_COTIZACION_CHOICES, default='borrador')
-    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    iva = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    observaciones = models.TextField(blank=True, verbose_name="Observaciones Internas")
-    notas_cliente = models.TextField(blank=True, verbose_name="Notas para el Cliente")
-    vendedor = models.ForeignKey(User, on_delete=models.PROTECT, related_name='cotizaciones')
-    fecha_creacion = models.DateTimeField(auto_now_add=True)
-    fecha_actualizacion = models.DateTimeField(auto_now=True)
-    class Meta:
-        verbose_name = 'Cotización (Formulario)'
-        verbose_name_plural = 'Cotizaciones (Formulario)'
-        db_table = 'cotizaciones_formulario'
-        ordering = ['-fecha_emision']
-    def __str__(self):
-        return f"Cotización (Form) #{self.id} - {self.cliente_nombre}"
-
-class ItemCotizacion(models.Model):
-    cotizacion = models.ForeignKey(Cotizacion, on_delete=models.CASCADE, related_name='items')
-    producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
-    cantidad = models.IntegerField(validators=[MinValueValidator(1)])
-    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
-    descuento_porcentaje = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    class Meta:
-        db_table = 'items_cotizacion'
-        verbose_name = 'Item de Cotización'
-        verbose_name_plural = 'Items de Cotización'
 
 # ===========================
 # MODELO DE PRODUCTOS ADQUIRIDOS
@@ -273,6 +226,94 @@ class ProductoAdquirido(models.Model):
             self.save()
             return False
         return self.estado_garantia == 'activa'
+
+# ===========================
+# MODELO DE INSTALACIONES (PROYECTOS) - HU-H09 <<<--- MOVIDO AQUÍ PARA RESOLVER NameError
+# ===========================
+
+class Instalacion(models.Model):
+    ESTADO_PROYECTO_CHOICES = [
+        ('cotizado', 'Cotizado / Pendiente de Aprobación'),
+        ('aprobado', 'Aprobado / Esperando Inicio'),
+        ('en_curso', 'En Curso'),
+        ('finalizado', 'Finalizado / Entregado'),
+        ('garantia', 'En Garantía'),
+        ('cancelado', 'Cancelado'),
+    ]
+
+    # Datos clave de la relación (ForeignKey)
+    cliente = models.ForeignKey(User, on_delete=models.PROTECT, related_name='instalaciones_cliente', verbose_name="Cliente Asociado")
+    # AHORA PRODUCTOADQUIRIDO EXISTE, POR LO QUE ESTA LÍNEA FUNCIONARÁ:
+    producto_adquirido = models.ForeignKey(ProductoAdquirido, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Producto Adquirido")
+    
+    # Datos del proyecto
+    nombre_proyecto = models.CharField(max_length=255, verbose_name="Nombre o Código del Proyecto", unique=True)
+    fecha_inicio = models.DateField(verbose_name="Fecha de Inicio Estimada", default=timezone.now)
+    fecha_termino_estimada = models.DateField(verbose_name="Fecha de Término Estimada", null=True, blank=True)
+    fecha_termino_real = models.DateField(verbose_name="Fecha de Término Real", null=True, blank=True)
+    
+    # Datos de gestión y estado
+    estado = models.CharField(max_length=20, choices=ESTADO_PROYECTO_CHOICES, default='cotizado', verbose_name="Estado Actual")
+    observaciones = models.TextField(blank=True, verbose_name="Notas del Administrador")
+    costo_total = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Costo Total Estimado")
+
+    class Meta:
+        verbose_name = 'Instalación (Proyecto)'
+        verbose_name_plural = 'Instalaciones (Proyectos)'
+        db_table = 'instalaciones_proyectos'
+        ordering = ['estado', '-fecha_inicio']
+    
+    def __str__(self):
+        return f"{self.nombre_proyecto} - {self.get_estado_display()}"
+
+
+# ===========================
+# MODELOS DE COTIZACIÓN (FORMULARIO ANTIGUO)
+# ===========================
+# NOTA: Estos modelos se dejan aquí ya que no dependen de Instalacion.
+
+class Cotizacion(models.Model):
+    ESTADO_COTIZACION_CHOICES = [
+        ('borrador', 'Borrador'),
+        ('enviada', 'Enviada'),
+        ('aprobada', 'Aprobada'),
+        ('rechazada', 'Rechazada'),
+        ('expirada', 'Expirada'),
+    ]
+    cliente_nombre = models.CharField(max_length=200, verbose_name="Nombre del Cliente")
+    cliente_rut = models.CharField(max_length=12, blank=True, verbose_name="RUT del Cliente")
+    cliente_email = models.EmailField(blank=True, verbose_name="Email del Cliente")
+    cliente_telefono = models.CharField(max_length=15, blank=True, verbose_name="Teléfono del Cliente")
+    numero_cotizacion = models.CharField(max_length=20, unique=True, null=True, blank=True, verbose_name="Número de Cotización")
+    fecha_emision = models.DateField(default=timezone.now, verbose_name="Fecha de Emisión")
+    fecha_vencimiento = models.DateField(verbose_name="Fecha de Vencimiento", null=True, blank=True)
+    estado = models.CharField(max_length=10, choices=ESTADO_COTIZACION_CHOICES, default='borrador')
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    iva = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    observaciones = models.TextField(blank=True, verbose_name="Observaciones Internas")
+    notas_cliente = models.TextField(blank=True, verbose_name="Notas para el Cliente")
+    vendedor = models.ForeignKey(User, on_delete=models.PROTECT, related_name='cotizaciones')
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    class Meta:
+        verbose_name = 'Cotización (Formulario)'
+        verbose_name_plural = 'Cotizaciones (Formulario)'
+        db_table = 'cotizaciones_formulario'
+        ordering = ['-fecha_emision']
+    def __str__(self):
+        return f"Cotización (Form) #{self.id} - {self.cliente_nombre}"
+
+class ItemCotizacion(models.Model):
+    cotizacion = models.ForeignKey(Cotizacion, on_delete=models.CASCADE, related_name='items')
+    producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
+    cantidad = models.IntegerField(validators=[MinValueValidator(1)])
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+    descuento_porcentaje = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    class Meta:
+        db_table = 'items_cotizacion'
+        verbose_name = 'Item de Cotización'
+        verbose_name_plural = 'Items de Cotización'
 
 # ===========================
 # ¡NUEVO! MODELOS PARA CHAT DE COTIZACIÓN

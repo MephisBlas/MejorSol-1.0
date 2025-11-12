@@ -1,4 +1,3 @@
-# En: myapp/services.py
 
 import os
 import requests
