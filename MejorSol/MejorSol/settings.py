@@ -1,13 +1,11 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-from datetime import timedelta # <--- AÑADIDO: Necesario para la configuración de JWT
+from datetime import timedelta
 
-# Cargar variables de entorno (buscará el .env en la carpeta 'Mejorsol/')
+
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-# BASE_DIR apunta a 'Mejorsol/' (donde está manage.py)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ===========================
@@ -99,14 +97,11 @@ WSGI_APPLICATION = 'MejorSol.wsgi.application' # (Asegúrate de que 'MejorSol' s
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('MYSQL_DATABASE_NAME', 'mejorsol_db_prod'), 
-        'USER': os.getenv('MYSQL_DATABASE_USER', 'root'),             
-        'PASSWORD': os.getenv('MYSQL_DATABASE_PASSWORD', ''),         
-        'HOST': os.getenv('MYSQL_DATABASE_HOST', 'localhost'),
-        'PORT': os.getenv('MYSQL_DATABASE_PORT', '3308'), # <-- USA EL PUERTO QUE TE FUNCIONÓ (3308 o 3309)
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        }
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': '3306',
     }
 }
 
