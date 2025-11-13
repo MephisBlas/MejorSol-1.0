@@ -62,6 +62,19 @@ def is_cliente(user):
 # ===========================
 
 def index(request):
+    # --- ARREGLO DE REDIRECCIÓN ---
+    # 1. Verifica si el usuario ya está conectado
+    if request.user.is_authenticated:
+        
+        # 2. Si es admin/staff, llévalo al panel de admin
+        if request.user.is_staff or request.user.is_superuser:
+            return redirect('admin_panel') # Asegúrate que 'admin_panel' es el nombre en tu urls.py
+        
+        # 3. Si es cualquier otro usuario (cliente), llévalo al panel de cliente
+        else:
+            return redirect('client_dashboard') # Asegúrate que 'client_dashboard' es el nombre en tu urls.py
+
+    # 4. Si no está conectado, recién ahí le muestras la landing page
     return render(request, 'index.html')
 
 

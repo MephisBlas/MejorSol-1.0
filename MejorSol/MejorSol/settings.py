@@ -194,3 +194,4 @@ APP_CONFIG = {
     'EMPRESA_EMAIL': 'contacto@sieer.cl',
     'IVA_PORCENTAJE': 19,
 }
+
