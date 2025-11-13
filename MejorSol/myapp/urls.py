@@ -55,7 +55,7 @@ urlpatterns = [
     # ===========================
     path('calculos/', views.calculos_estadisticas_view, name='calculos_estadisticas'),
     path('reportes/', views.reportes_graficos_view, name='reportes_graficos'),
-    path('historial-ventas/', views.historial_ventas_view, name='historial_ventas'),
+    path('historial-cotizaciones/', views.historial_cotizaciones_view, name='historial_cotizaciones'),
     
     # ===========================
     # URLS DE CUENTA

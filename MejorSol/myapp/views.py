@@ -67,7 +67,7 @@ def index(request):
     if request.user.is_authenticated:
         
         # 2. Si es admin/staff, llévalo al panel de admin
-        if request.user.is_staff or request.user.is_superuser:
+        if request.user.is_staff or request.is_superuser:
             return redirect('admin_panel') # Asegúrate que 'admin_panel' es el nombre en tu urls.py
         
         # 3. Si es cualquier otro usuario (cliente), llévalo al panel de cliente
@@ -105,20 +105,56 @@ class CustomLoginView(LoginView):
             return reverse('client_dashboard')
 
 
+# ===========================
+# VISTA DEL DASHBOARD (ADMIN)
+# ===========================
+
 @login_required
 @user_passes_test(is_admin)
 def admin_panel(request):
-    """Vista principal del panel administrativo"""
-    productos = Producto.objects.select_related('categoria').all().order_by('-fecha_creacion')[:10]
+    """
+    Vista principal del panel administrativo con KPIs dinámicos
+    y actividad reciente.
+    """
     
-    categorias = Categoria.objects.filter(activo=True)
-    total_productos = Producto.objects.count()
+    # --- 1. Datos para las tarjetas (KPIs) ---
+    now = timezone.now()
     
+    # KPI 1: Cotizaciones del Mes (Tu solicitud)
+    kpi_cotizaciones_mes = ChatCotizacion.objects.filter(
+        fecha_creacion__year=now.year,
+        fecha_creacion__month=now.month
+    ).count()
+
+    # KPI 2: Productos Registrados (Tu solicitud)
+    kpi_total_productos = Producto.objects.count()
+
+    # KPI 3: Clientes Registrados (Tu solicitud)
+    kpi_total_clientes = Perfil.objects.filter(tipo_usuario='cliente').count()
+
+    # KPI 4: Stock Total (Tu solicitud)
+    stock_data = Producto.objects.aggregate(total_stock=Sum('stock'))
+    kpi_stock_total = stock_data['total_stock'] or 0 # 'or 0' si no hay productos
+    
+    # --- 2. Datos para "Actividad Reciente" (¡También dinámico!) ---
+    act_cotizaciones = ChatCotizacion.objects.select_related('cliente', 'producto').order_by('-fecha_creacion')[:3]
+    act_productos = Producto.objects.select_related('categoria').order_by('-fecha_creacion')[:2]
+    act_clientes = Perfil.objects.select_related('usuario').filter(tipo_usuario='cliente').order_by('-fecha_creacion')[:2]
+
+    # --- 3. Enviar todo al template ---
     context = {
         'user': request.user,
-        'productos': productos,
-        'categorias': categorias,
-        'total_productos': total_productos,
+        
+        # Enviar KPIs
+        'kpi_cotizaciones_mes': kpi_cotizaciones_mes,
+        'kpi_total_productos': kpi_total_productos,
+        'kpi_total_clientes': kpi_total_clientes,
+        'kpi_stock_total': kpi_stock_total,
+        
+        # Enviar Actividad Reciente
+        'act_cotizaciones': act_cotizaciones,
+        'act_productos': act_productos,
+        'act_clientes': act_clientes,
     }
     return render(request, 'admin/admin_panel.html', context)
 
@@ -390,7 +426,6 @@ def eliminar_cotizacion(request, cot_id):
 
 # ===========================
 # VISTAS DE REPORTES, CUENTA, Y CHATBOT GENERAL
-# (Se omite el código por ser extenso y no relacionado con la reparación de Cotizaciones)
 # ===========================
 
 @login_required
@@ -434,14 +469,61 @@ def reportes_graficos_view(request):
 
 @login_required
 @user_passes_test(is_admin)
-def historial_ventas_view(request):
-    ventas_reales = ProductoAdquirido.objects.select_related('cliente', 'producto').all().order_by('-fecha_compra')
-    paginator = Paginator(ventas_reales, 25) 
+def historial_cotizaciones_view(request):
+    """
+    NUEVA VISTA: Muestra el historial de TODAS las cotizaciones
+    con filtros de fecha, estado y búsqueda.
+    """
+    # 1. Obtenemos todos los valores de los filtros del form
+    q = request.GET.get('q', '')
+    estado = request.GET.get('estado', '')
+    desde = request.GET.get('desde', '')
+    hasta = request.GET.get('hasta', '')
+
+    # 2. Query base: Todas las cotizaciones
+    queryset = ChatCotizacion.objects.select_related(
+        'cliente', 
+        'producto', 
+        'admin_asignado'
+    ).all()
+
+    # 3. Aplicamos los filtros si existen
+    if q:
+        queryset = queryset.filter(
+            Q(id__icontains=q) | 
+            Q(cliente__username__icontains=q) |
+            Q(producto__nombre__icontains=q)
+        )
+    
+    if estado:
+        queryset = queryset.filter(estado=estado)
+    
+    # ¡Aquí está el filtro de tiempo que pediste!
+    if desde:
+        queryset = queryset.filter(fecha_actualizacion__date__gte=desde)
+        
+    if hasta:
+        queryset = queryset.filter(fecha_actualizacion__date__lte=hasta)
+
+    # Ordenamos por la más reciente
+    queryset = queryset.order_by('-fecha_actualizacion')
+    
+    # 4. Paginación
+    paginator = Paginator(queryset, 25) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    context = { "ventas": page_obj, "demo": False }
-    return render(request, "admin/historial_ventas.html", context)
+    # 5. Enviamos todo al template
+    context = { 
+        "cotizaciones": page_obj,  # Enviamos las cotizaciones paginadas
+        "page_obj": page_obj,      # El Paginator también se usa para los enlaces
+        "q": q,                    # Devolvemos los filtros para que se queden en los inputs
+        "estado": estado,
+        "desde": desde,
+        "hasta": hasta
+    }
+    # Apuntamos a un NUEVO template que crearemos en el Paso 2
+    return render(request, "admin/historial_cotizaciones.html", context)
 
 
 @login_required

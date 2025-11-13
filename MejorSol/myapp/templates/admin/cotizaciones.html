@@ -182,11 +182,12 @@
         <div class="nav-section">
           <h3>Facturación</h3>
           <ul>
-            <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
-              <a href="{% url 'admin_panel' %}">
-                <i class="fas fa-file-invoice"></i><span>Boleta y Factura Electrónica</span>
-              </a>
-            </li>
+                      <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
+                            <a href="{% url 'admin_panel' %}">
+                                <i class="fas fa-tachometer-alt"></i> <!-- Ícono cambiado -->
+                                <span>Dashboard</span> <!-- Texto cambiado -->
+                            </a>
+                        </li>
 
             <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}">
               <a href="{% url 'calculos_estadisticas' %}">
@@ -216,11 +217,11 @@
                 <i class="fas fa-chart-bar"></i><span>Reportes Gráficos</span>
               </a>
             </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'historial_ventas' %}active{% endif %}">
-              <a href="{% url 'historial_ventas' %}">
-                <i class="fas fa-history"></i><span>Historia de Ventas</span>
-              </a>
-            </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'historial_cotizaciones' %}active{% endif %}">
+                    <a href="{% url 'historial_cotizaciones' %}">
+                        <i class="fas fa-history"></i><span>Historial de Cotizaciones</span>
+                    </a>
+                </li>
             <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}">
               <a href="{% url 'cuenta' %}">
                 <i class="fas fa-user-cog"></i><span>Cuenta</span>

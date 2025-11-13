@@ -1,13 +1,15 @@
 {% load static %}
+{% load humanize %} <!-- Carga humanize para formatear números -->
+
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin - SIEER Chile</title>
+    <title>Dashboard - SIEER Chile</title>
 
-    <!-- Mismas dependencias que index -->
+    <!-- Mismas dependencias -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -37,12 +39,15 @@
                 <div class="nav-section">
                     <h3>Facturación</h3>
                     <ul>
+                        <!-- ===== CAMBIO 1: Nombre del enlace ===== -->
                         <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
                             <a href="{% url 'admin_panel' %}">
-                                <i class="fas fa-file-invoice"></i>
-                                <span>Boleta y Factura Electrónica</span>
+                                <i class="fas fa-tachometer-alt"></i> <!-- Ícono cambiado -->
+                                <span>Dashboard</span> <!-- Texto cambiado -->
                             </a>
                         </li>
+                        <!-- ======================================== -->
+
                         <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}">
                             <a href="{% url 'calculos_estadisticas' %}">
                                 <i class="fas fa-calculator"></i>
@@ -57,7 +62,6 @@
                             </a>
                         </li>
 
-                        <!-- ENLACE CORREGIDO: Control de Inventario -->
                         <li class="nav-item {% if request.resolver_match.url_name == 'control_inventario' %}active{% endif %}">
                             <a href="{% url 'control_inventario' %}">
                                 <i class="fas fa-boxes"></i>
@@ -77,12 +81,11 @@
                                 <span>Reportes Gráficos</span>
                             </a>
                         </li>
-                        <li class="nav-item {% if request.resolver_match.url_name == 'historial_ventas' %}active{% endif %}">
-                            <a href="{% url 'historial_ventas' %}">
-                                <i class="fas fa-history"></i>
-                                <span>Historial de Ventas</span>
-                            </a>
-                        </li>
+                            <li class="nav-item {% if request.resolver_match.url_name == 'historial_cotizaciones' %}active{% endif %}">
+                                <a href="{% url 'historial_cotizaciones' %}">
+                                    <i class="fas fa-history"></i><span>Historial de Cotizaciones</span>
+                                </a>
+                            </li>
                         <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}">
                             <a href="{% url 'cuenta' %}">
                                 <i class="fas fa-user-cog"></i>
@@ -136,42 +139,39 @@
                         <i class="fas fa-eye"></i>
                         Ver Sitio Web
                     </button>
+                    <!-- Notificación dinámica: muestra cotizaciones del mes -->
                     <div class="notification-bell">
                         <i class="fas fa-bell"></i>
-                        <span class="notification-count">3</span>
+                        <span class="notification-count">{{ kpi_cotizaciones_mes|default:0 }}</span>
                     </div>
                 </div>
             </header>
 
             <!-- Content Area -->
             <div class="admin-content">
-                <!-- Stats Cards -->
+                
+                <!-- ===== CAMBIO 2: Stats Cards (Datos Dinámicos) ===== -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon">
-                            <i class="fas fa-dollar-sign"></i>
+                            <i class="fas fa-file-alt"></i> <!-- Ícono cambiado -->
                         </div>
                         <div class="stat-info">
-                            <h3>$ 245,680</h3>
-                            <p>Ventas del Mes</p>
+                            <!-- Dato real -->
+                            <h3>{{ kpi_cotizaciones_mes|default:0 }}</h3>
+                            <p>Cotizaciones del Mes</p> <!-- Texto cambiado -->
                         </div>
-                        <div class="stat-trend up">
-                            <i class="fas fa-arrow-up"></i>
-                            12.5%
-                        </div>
+                        <!-- (Tendencia eliminada por simplicidad) -->
                     </div>
 
                     <div class="stat-card">
                         <div class="stat-icon">
-                            <i class="fas fa-shopping-cart"></i>
+                            <i class="fas fa-boxes"></i> <!-- Ícono cambiado -->
                         </div>
                         <div class="stat-info">
-                            <h3>156</h3>
-                            <p>Órdenes Activas</p>
-                        </div>
-                        <div class="stat-trend up">
-                            <i class="fas fa-arrow-up"></i>
-                            8.2%
+                            <!-- Dato real -->
+                            <h3>{{ kpi_total_productos|default:0 }}</h3>
+                            <p>Productos Registrados</p> <!-- Texto cambiado -->
                         </div>
                     </div>
 
@@ -180,12 +180,9 @@
                             <i class="fas fa-users"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>892</h3>
-                            <p>Clientes Registrados</p>
-                        </div>
-                        <div class="stat-trend down">
-                            <i class="fas fa-arrow-down"></i>
-                            2.1%
+                            <!-- Dato real -->
+                            <h3>{{ kpi_total_clientes|default:0 }}</h3>
+                            <p>Clientes Registrados</p> <!-- Texto sin cambios -->
                         </div>
                     </div>
 
@@ -194,17 +191,15 @@
                             <i class="fas fa-box-open"></i>
                         </div>
                         <div class="stat-info">
-                            <h3>45</h3>
-                            <p>Productos en Stock</p>
-                        </div>
-                        <div class="stat-trend up">
-                            <i class="fas fa-arrow-up"></i>
-                            5.7%
+                            <!-- Dato real (con formateo de 'humanize') -->
+                            <h3>{{ kpi_stock_total|default:0|intcomma }}</h3>
+                            <p>Unidades en Stock</p> <!-- Texto cambiado -->
                         </div>
                     </div>
                 </div>
+                <!-- ==================================================== -->
 
-                <!-- Quick Actions -->
+                <!-- Quick Actions (Enlaces actualizados) -->
                 <div class="actions-grid">
                     <h2>Acciones Rápidas</h2>
                     <div class="actions-cards">
@@ -212,9 +207,9 @@
                             <div class="action-icon">
                                 <i class="fas fa-plus-circle"></i>
                             </div>
-                            <h4>Nueva Factura</h4>
-                            <p>Crear nueva factura electrónica</p>
-                            <button class="btn btn-outline">Crear</button>
+                            <h4>Nueva Cotización</h4>
+                            <p>Ir al listado de cotizaciones</p>
+                            <button class="btn btn-outline" onclick="window.location.href='{% url 'cotizaciones' %}'">Crear</button>
                         </div>
 
                         <div class="action-card">
@@ -222,8 +217,8 @@
                                 <i class="fas fa-chart-line"></i>
                             </div>
                             <h4>Generar Reporte</h4>
-                            <p>Reporte de ventas mensual</p>
-                            <button class="btn btn-outline">Generar</button>
+                            <p>Ver reportes gráficos</p>
+                            <button class="btn btn-outline" onclick="window.location.href='{% url 'reportes_graficos' %}'">Generar</button>
                         </div>
 
                         <div class="action-card">
@@ -246,51 +241,69 @@
                     </div>
                 </div>
 
-                <!-- Recent Activity -->
+                <!-- ===== CAMBIO 3: Recent Activity (Datos Dinámicos) ===== -->
                 <div class="recent-activity">
                     <h2>Actividad Reciente</h2>
                     <div class="activity-list">
+                        
+                        <!-- Loop de Cotizaciones Recientes -->
+                        {% for cot in act_cotizaciones %}
                         <div class="activity-item">
-                            <div class="activity-icon success">
-                                <i class="fas fa-check-circle"></i>
+                            <div class="activity-icon 
+                                {% if cot.estado == 'aprobada' %}success
+                                {% elif cot.estado == 'pendiente' %}warning
+                                {% else %}info{% endif %}">
+                                <i class="fas fa-file-alt"></i>
                             </div>
                             <div class="activity-content">
-                                <p><strong>Factura #00125</strong> generada exitosamente</p>
-                                <span>Hace 2 minutos</span>
+                                <p><strong>{{ cot.cliente.username }}</strong> inició cotización por <strong>{{ cot.producto.nombre }}</strong></p>
+                                <span>{{ cot.fecha_creacion|timesince }} atrás</span>
                             </div>
                         </div>
+                        {% endfor %}
 
-                        <div class="activity-item">
-                            <div class="activity-icon warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
-                            <div class="activity-content">
-                                <p><strong>Stock bajo</strong> en Transformadores 50KVA</p>
-                                <span>Hace 15 minutos</span>
-                            </div>
-                        </div>
-
+                        <!-- Loop de Clientes Nuevos -->
+                        {% for perfil in act_clientes %}
                         <div class="activity-item">
                             <div class="activity-icon info">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p><strong>Nuevo cliente</strong> registrado: {{ perfil.usuario.username }}</p>
+                                <span>{{ perfil.fecha_creacion|timesince }} atrás</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <!-- Loop de Productos Nuevos -->
+                        {% for prod in act_productos %}
+                        <div class="activity-item">
+                            <div class="activity-icon new-item" style="background-color: #0f2b3b; color: #7ad2ff;"> <!-- Estilo 'info' para productos -->
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p><strong>Nuevo producto</strong> agregado: {{ prod.nombre }}</p>
+                                <span>{{ prod.fecha_creacion|timesince }} atrás</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <!-- Mensaje si no hay actividad -->
+                        {% if not act_cotizaciones and not act_clientes and not act_productos %}
+                        <div class="activity-item">
+                            <div class="activity-icon">
                                 <i class="fas fa-info-circle"></i>
                             </div>
                             <div class="activity-content">
-                                <p><strong>Nuevo cliente</strong> registrado: ElectroSur</p>
-                                <span>Hace 1 hora</span>
+                                <p>No hay actividad reciente.</p>
+                                <span>Ahora</span>
                             </div>
                         </div>
+                        {% endif %}
 
-                        <div class="activity-item">
-                            <div class="activity-icon success">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <div class="activity-content">
-                                <p><strong>Cotización #0456</strong> aprobada</p>
-                                <span>Hace 3 horas</span>
-                            </div>
-                        </div>
                     </div>
                 </div>
+                <!-- ======================================================= -->
             </div>
         </main>
     </div>
