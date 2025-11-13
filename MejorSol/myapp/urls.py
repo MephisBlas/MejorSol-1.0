@@ -2,6 +2,10 @@ from django.urls import include, path
 from django.contrib.auth import views as auth_views
 from . import views
 from .views import CustomLoginView
+from django.urls import path, reverse_lazy
+from django.contrib.auth import views as auth_views
+from . import views
+
 
 urlpatterns = [
     # ===========================
@@ -76,4 +80,19 @@ urlpatterns = [
     path('iniciar-chat-cotizacion/<int:producto_id>/', views.iniciar_chat_view, name='iniciar_chat_cotizacion'),
     path('chat-cotizacion/<int:chat_id>/', views.chat_cotizacion_view, name='chat_cotizacion_view'),
     path('api/chat/<int:chat_id>/mensajes/', views.chat_api_view, name='chat_api_view'),
+    path('cambiar-contraseña/', 
+         auth_views.PasswordChangeView.as_view(
+             template_name='cliente/cambiar_password.html',
+             success_url='/ajustes-cuenta/'
+         ),
+         name='password_change'),
+    path(
+    'cambiar-contrasena/',
+    auth_views.PasswordChangeView.as_view(
+        template_name='cliente/cambiar_password.html',
+        success_url=reverse_lazy('client_dashboard'),  # después de cambiar, vuelve al panel
+    ),
+    name='password_change'
+),
+    
 ]

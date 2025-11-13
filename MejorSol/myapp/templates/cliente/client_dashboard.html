@@ -1,16 +1,19 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Cliente - SIEER Chile</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/client_dashboard.css' %}">
     <style>
@@ -27,14 +30,14 @@
             --text-gray: #b0b0b0;
             --danger-color: #ff4757;
             --warning-color: #ffa500;
-            
+
             --ms-panel: var(--card-bg);
             --ms-border: var(--border-glow);
             --ms-text: var(--text-light);
             --ms-muted: var(--text-gray);
-            --ms-accent: var(--accent-green); 
+            --ms-accent: var(--accent-green);
         }
-        
+
         /* Estilos de Product Card (con Neón) */
         .products-grid {
             display: grid;
@@ -42,6 +45,7 @@
             gap: 1.5rem;
             margin-top: 1.5rem;
         }
+
         .product-card {
             background: var(--ms-panel);
             border: 1px solid rgba(41, 255, 154, 0.4);
@@ -55,12 +59,14 @@
             overflow: hidden;
             box-shadow: 0 0 8px rgba(41, 255, 154, 0.2);
         }
+
         .product-card:hover {
             transform: translateY(-5px);
             border-color: rgba(41, 255, 154, 0.8);
-            box-shadow: 0 0 15px rgba(41, 255, 154, 0.6), 
-                        0 0 30px rgba(41, 255, 154, 0.3);
+            box-shadow: 0 0 15px rgba(41, 255, 154, 0.6),
+                0 0 30px rgba(41, 255, 154, 0.3);
         }
+
         .product-image {
             width: 80px;
             height: 80px;
@@ -75,17 +81,20 @@
             border: 2px solid var(--ms-border);
             align-self: center;
         }
+
         .product-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             border-radius: 10px;
         }
+
         .product-info {
             flex: 1;
             min-width: 0;
             text-align: center;
         }
+
         .product-info h3 {
             color: var(--ms-text);
             margin: 0 0 0.5rem 0;
@@ -93,6 +102,7 @@
             font-weight: 600;
             line-height: 1.3;
         }
+
         .product-info p {
             color: var(--ms-muted);
             margin: 0 0 1rem 0;
@@ -101,6 +111,7 @@
             display: -webkit-box;
             overflow: hidden;
         }
+
         .product-specs {
             display: flex;
             flex-wrap: wrap;
@@ -108,6 +119,7 @@
             margin-bottom: 1rem;
             justify-content: center;
         }
+
         .product-specs span {
             display: flex;
             align-items: center;
@@ -120,9 +132,11 @@
             font-weight: 500;
             border: 1px solid rgba(41, 255, 154, 0.2);
         }
+
         .product-specs i {
             font-size: 0.7rem;
         }
+
         .product-meta {
             display: flex;
             flex-direction: column;
@@ -131,17 +145,20 @@
             width: 100%;
             margin-top: auto;
         }
+
         .product-price {
             font-size: 1.2rem;
             font-weight: 700;
             color: var(--ms-accent);
             text-align: center;
         }
+
         .purchase-date {
             font-size: 0.8rem;
             color: var(--ms-muted);
             text-align: center;
         }
+
         .warranty-status {
             display: flex;
             align-items: center;
@@ -151,16 +168,19 @@
             font-size: 0.75rem;
             font-weight: 500;
         }
+
         .warranty-status.active {
             background: rgba(41, 255, 154, 0.2);
             color: var(--ms-accent);
             border: 1px solid rgba(41, 255, 154, 0.3);
         }
+
         .warranty-status.expired {
             background: rgba(255, 68, 68, 0.2);
             color: var(--danger-color);
             border: 1px solid rgba(255, 68, 68, 0.3);
         }
+
         .no-products {
             grid-column: 1 / -1;
             text-align: center;
@@ -170,24 +190,28 @@
             border-radius: 16px;
             color: var(--ms-muted);
         }
+
         .no-products-icon {
             font-size: 4rem;
             color: var(--ms-border);
             margin-bottom: 1.5rem;
             opacity: 0.5;
         }
+
         .no-products h3 {
             color: var(--ms-text);
             margin: 0 0 1rem 0;
             font-size: 1.3rem;
             font-weight: 600;
         }
+
         .no-products p {
             color: var(--ms-muted);
             margin: 0;
             font-size: 1rem;
             line-height: 1.5;
         }
+
         .product-status {
             position: absolute;
             top: 1rem;
@@ -199,13 +223,81 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
         .status-warranty {
             background: rgba(255, 193, 7, 0.2);
             color: var(--warning-color);
             border: 1px solid rgba(255, 193, 7, 0.3);
         }
-        
-        /* Estilos para el Modal de Producto */
+
+        /* ===== AJUSTES DE CUENTA ===== */
+        .settings-card {
+            background: var(--ms-panel);
+            border: var(--ms-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.08);
+        }
+
+        .settings-card h3 {
+            margin: 0 0 1rem 0;
+            color: var(--ms-text);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            color: var(--ms-muted);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            background: #10141f;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 10px;
+            padding: 0.55rem 0.75rem;
+            color: var(--ms-text);
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .form-group textarea {
+            min-height: 70px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--ms-accent);
+            box-shadow: 0 0 8px rgba(0, 255, 136, 0.3);
+        }
+
+        .settings-alert {
+            margin-bottom: 0.75rem;
+            padding: 0.6rem 0.8rem;
+            border-radius: 10px;
+            background: rgba(0, 255, 136, 0.08);
+            border: 1px solid rgba(0, 255, 136, 0.35);
+            font-size: 0.85rem;
+            color: var(--ms-text);
+        }
+
+        /* ===== MODAL DE PRODUCTO ===== */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -213,20 +305,27 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.7);
-            display: none;
+            display: none !important;
+            /* IMPORTANTE: oculto por defecto */
             align-items: center;
             justify-content: center;
             z-index: 1000;
             backdrop-filter: blur(5px);
             animation: fadeIn 0.3s ease;
         }
+
         .modal-overlay.active {
-            display: flex;
+            display: flex !important;
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         .modal-content {
@@ -240,12 +339,6 @@
             overflow-y: auto;
             position: relative;
             box-shadow: var(--neon-glow);
-            animation: slideUp 0.4s ease;
-        }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(50px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .modal-close {
@@ -257,17 +350,6 @@
             color: var(--ms-muted);
             font-size: 2rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            line-height: 1;
-        }
-        .modal-close:hover {
-            color: var(--ms-accent);
-            transform: rotate(90deg);
-        }
-
-        .modal-carousel {
-            width: 100%;
-            margin-bottom: 1.5rem;
         }
 
         .modal-main-image {
@@ -294,46 +376,14 @@
             border-radius: 8px;
             border: 2px solid var(--ms-border);
             cursor: pointer;
-            transition: all 0.3s ease;
             opacity: 0.6;
             flex-shrink: 0;
         }
-        .modal-thumb:hover, .modal-thumb.active {
+
+        .modal-thumb:hover,
+        .modal-thumb.active {
             opacity: 1;
             border-color: var(--ms-accent);
-            transform: scale(1.05);
-        }
-
-        .modal-info h2 {
-            color: var(--ms-accent);
-            margin-top: 0;
-            margin-bottom: 1rem;
-            font-size: 1.8rem;
-        }
-        .modal-info p {
-            color: var(--ms-muted);
-            line-height: 1.6;
-            font-size: 1rem;
-        }
-        .modal-info .product-specs {
-            justify-content: flex-start;
-            margin-top: 1rem;
-        }
-        
-        .modal-footer {
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--ms-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        .modal-price {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--ms-accent);
         }
 
         /* ======================================= */
@@ -355,48 +405,64 @@
             overflow: hidden;
             animation: slideIn 0.4s ease;
         }
+
         .chat-modal-container.active {
             display: flex;
         }
+
         @keyframes slideIn {
-            from { opacity: 0; transform: translateY(50px) translateX(50px); }
-            to { opacity: 1; transform: translateY(0) translateX(0); }
+            from {
+                opacity: 0;
+                transform: translateY(50px) translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) translateX(0);
+            }
         }
+
         .chat-modal-header {
-            display: flex; 
-            justify-content: space-between; 
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            padding: 1rem; 
-            background: #121a26; 
+            padding: 1rem;
+            background: #121a26;
             border-bottom: 1px solid var(--ms-border);
         }
-        .chat-modal-header h3 { 
-            margin: 0; 
-            color: var(--ms-text); 
-            font-size: 1.1rem; 
+
+        .chat-modal-header h3 {
+            margin: 0;
+            color: var(--ms-text);
+            font-size: 1.1rem;
         }
+
         .chat-modal-header button {
-            background: none; 
-            border: none; 
-            color: var(--ms-muted); 
-            font-size: 1.5rem; 
+            background: none;
+            border: none;
+            color: var(--ms-muted);
+            font-size: 1.5rem;
             cursor: pointer;
             transition: color 0.3s ease;
         }
+
         .chat-modal-header button:hover {
-            color: var(--ms-accent); 
+            color: var(--ms-accent);
         }
-        .chat-modal-body { 
-            flex: 1; 
-            overflow: hidden; 
+
+        .chat-modal-body {
+            flex: 1;
+            overflow: hidden;
         }
-        .chat-modal-body iframe { 
-            width: 100%; 
-            height: 100%; 
-            border: none; 
+
+        .chat-modal-body iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
     </style>
 </head>
+
 <body>
     <div class="client-container">
         <header class="client-header">
@@ -448,7 +514,7 @@
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                
+
                 <nav class="mobile-nav-tabs">
                     <button class="mobile-nav-tab active" data-tab="servicios">
                         <i class="fas fa-concierge-bell"></i>
@@ -466,8 +532,12 @@
                         <i class="fas fa-file-alt"></i>
                         <span>Documentos</span>
                     </button>
+                    <button class="mobile-nav-tab" data-tab="ajustes">
+                        <i class="fas fa-user-cog"></i>
+                        <span>Ajustes</span>
+                    </button>
                 </nav>
-                
+
                 <div class="mobile-nav-footer">
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
@@ -499,6 +569,10 @@
                         <i class="fas fa-file-alt"></i>
                         <span class="tab-text">Documentos</span>
                     </button>
+                    <button class="nav-tab" data-tab="ajustes">
+                        <i class="fas fa-user-cog"></i>
+                        <span class="tab-text">Ajustes</span>
+                    </button>
                 </div>
             </nav>
 
@@ -507,7 +581,7 @@
                     <div class="tab-header">
                         <h2>Mis Servicios</h2>
                     </div>
-                     <div class="no-products">
+                    <div class="no-products">
                         <div class="no-products-icon"><i class="fas fa-tools"></i></div>
                         <h3>Aún no tienes servicios</h3>
                         <p>Los servicios de mantención o instalación aparecerán aquí.</p>
@@ -521,89 +595,144 @@
 
                     <div class="products-grid" id="catalogo">
                         {% if productos_disponibles %}
-                            {% for producto in productos_disponibles %}
-                            <div class="product-card">
-                                <div class="product-image">
-                                    {% if producto.imagenes.first.imagen.url %}
-                                        <img src="{{ producto.imagenes.first.imagen.url }}" alt="{{ producto.nombre }}">
-                                    {% else %}
-                                        <i class="fas fa-{{ producto.icono|default:'box' }}"></i>
+                        {% for producto in productos_disponibles %}
+                        <div class="product-card">
+                            <div class="product-image">
+                                {% if producto.imagenes.first.imagen.url %}
+                                <img src="{{ producto.imagenes.first.imagen.url }}" alt="{{ producto.nombre }}">
+                                {% else %}
+                                <i class="fas fa-{{ producto.icono|default:'box' }}"></i>
+                                {% endif %}
+                            </div>
+
+                            <div class="product-info">
+                                <h3>{{ producto.nombre }}</h3>
+                                <p>{{ producto.descripcion|truncatewords:20 }}</p>
+                                <div class="product-specs">
+                                    {% if producto.potencia %}
+                                    <span><i class="fas fa-bolt"></i> {{ producto.potencia }}</span>
+                                    {% endif %}
+                                    {% if producto.voltaje %}
+                                    <span><i class="fas fa-plug"></i> {{ producto.voltaje }}</span>
                                     {% endif %}
                                 </div>
-
-                                <div class="product-info">
-                                    <h3>{{ producto.nombre }}</h3>
-                                    <p>{{ producto.descripcion|truncatewords:20 }}</p>
-                                    <div class="product-specs">
-                                        {% if producto.potencia %}
-                                        <span><i class="fas fa-bolt"></i> {{ producto.potencia }}</span>
-                                        {% endif %}
-                                        {% if producto.voltaje %}
-                                        <span><i class="fas fa-plug"></i> {{ producto.voltaje }}</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-
-                                <div class="product-meta">
-                                    <div class="product-price">${{ producto.precio|floatformat:0 }}</div>
-                                    <div class="purchase-date" style="color: var(--ms-accent);">
-                                        Stock: {{ producto.stock }}
-                                    </div>
-                                    
-                                    <button class="btn btn-outline sm btn-ver-producto" 
-                                            style="margin-top: 10px; width: 100%;"
-                                            data-id="{{ producto.id }}"
-                                            data-nombre="{{ producto.nombre }}"
-                                            data-precio="${{ producto.precio|floatformat:0 }}"
-                                            data-descripcion="{{ producto.descripcion }}"
-                                            data-potencia="{{ producto.potencia|default:'' }}"
-                                            data-voltaje="{{ producto.voltaje|default:'' }}"
-                                            data-dimensiones="{{ producto.dimensiones|default:'' }}"
-                                            data-images="{% for img in producto.imagenes.all %}{{ img.imagen.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
-                                            >
-                                        <i class="fas fa-eye"></i>
-                                        Ver producto
-                                    </button>
-                                </div>
                             </div>
-                            {% endfor %}
+
+                            <div class="product-meta">
+                                <div class="product-price">${{ producto.precio|floatformat:0 }}</div>
+                                <div class="purchase-date" style="color: var(--ms-accent);">
+                                    Stock: {{ producto.stock }}
+                                </div>
+
+                                <button class="btn btn-outline sm btn-ver-producto"
+                                    style="margin-top: 10px; width: 100%;" data-id="{{ producto.id }}"
+                                    data-nombre="{{ producto.nombre }}"
+                                    data-precio="${{ producto.precio|floatformat:0 }}"
+                                    data-descripcion="{{ producto.descripcion }}"
+                                    data-potencia="{{ producto.potencia|default:'' }}"
+                                    data-voltaje="{{ producto.voltaje|default:'' }}"
+                                    data-dimensiones="{{ producto.dimensiones|default:'' }}"
+                                    data-images="{% for img in producto.imagenes.all %}{{ img.imagen.url }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                                    <i class="fas fa-eye"></i>
+                                    Ver producto
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
                         {% else %}
-                            <div class="no-products">
-                                <div class="no-products-icon"><i class="fas fa-store-slash"></i></div>
-                                <h3>No hay productos en el catálogo</h3>
-                                <p>Vuelve a visitarnos pronto, estamos actualizando nuestro inventario.</p>
-                            </div>
+                        <div class="no-products">
+                            <div class="no-products-icon"><i class="fas fa-store-slash"></i></div>
+                            <h3>No hay productos en el catálogo</h3>
+                            <p>Vuelve a visitarnos pronto, estamos actualizando nuestro inventario.</p>
+                        </div>
                         {% endif %}
                     </div>
-                    
+
                     {% if productos_adquiridos %}
-                        <div class="tab-header" style="margin-top: 2.5rem; border-top: 1px solid var(--ms-border); padding-top: 1.5rem;">
-                            <h2>Productos Adquiridos</h2>
+                    <div class="tab-header"
+                        style="margin-top: 2.5rem; border-top: 1px solid var(--ms-border); padding-top: 1.5rem;">
+                        <h2>Productos Adquiridos</h2>
+                    </div>
+                    <div class="products-grid">
+                        {% for producto_adquirido in productos_adquiridos %}
+                        <div class="product-card">
                         </div>
-                        <div class="products-grid">
-                            {% for producto_adquirido in productos_adquiridos %}
-                            <div class="product-card">
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %} 
-                </div> 
-                
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
                 <div class="tab-content" id="cotizaciones-tab">
                     <div class="tab-header">
                         <h2>Mis Cotizaciones</h2>
                     </div>
-                    <iframe id="cotizaciones-iframe" src="{% url 'lista_chats_cotizacion' %}" style="width: 100%; min-height: 60vh; border: none; border-radius: 8px; background: transparent;"></iframe>
+                    <iframe id="cotizaciones-iframe" src="{% url 'lista_chats_cotizacion' %}"
+                        style="width: 100%; min-height: 60vh; border: none; border-radius: 8px; background: transparent;"></iframe>
                 </div>
-                
+
                 <div class="tab-content" id="documentos-tab">
                     <div class="tab-header">
                         <h2>Mis Documentos</h2>
                     </div>
-                     <div class="no-products">
+                    <div class="no-products">
                         <div class="no-products-icon"><i class="fas fa-file-archive"></i></div>
                         <h3>No hay documentos</h3>
                         <p>Tus cotizaciones, facturas y manuales aparecerán aquí.</p>
+                    </div>
+                </div>
+
+                <!-- ==== NUEVO TAB: AJUSTES DE CUENTA ==== -->
+                <div class="tab-content" id="ajustes-tab">
+                    <div class="tab-header">
+                        <h2>Ajustes de Cuenta</h2>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Datos de Perfil</h3>
+
+                        {% if messages %}
+                        {% for message in messages %}
+                        <div class="settings-alert">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        <form method="post" action="">
+                            {% csrf_token %}
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="{{ perfil_form.first_name.id_for_label }}">Nombre</label>
+                                    {{ perfil_form.first_name }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="{{ perfil_form.last_name.id_for_label }}">Apellido</label>
+                                    {{ perfil_form.last_name }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="{{ perfil_form.telefono.id_for_label }}">Teléfono</label>
+                                    {{ perfil_form.telefono }}
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label for="{{ perfil_form.direccion.id_for_label }}">Dirección</label>
+                                    {{ perfil_form.direccion }}
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                                Guardar cambios
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Seguridad</h3>
+                        <p style="font-size: 0.9rem; color: var(--ms-muted); margin-bottom: 0.8rem;">
+                            Desde aquí puedes actualizar tu contraseña para mantener tu cuenta segura.
+                        </p>
+                        <a href="{% url 'password_change' %}" class="btn btn-outline">
+                            <i class="fas fa-lock"></i> Cambiar contraseña
+                        </a>
                     </div>
                 </div>
             </div>
@@ -613,18 +742,19 @@
     <div class="modal-overlay" id="productModal">
         <div class="modal-content">
             <button class="modal-close" id="modalCloseBtn">&times;</button>
-            
+
             <div class="modal-carousel">
-                <img src="{% static 'img/placeholder.png' %}" alt="Imagen principal del producto" class="modal-main-image" id="modalMainImage">
+                <img src="{% static 'img/placeholder.png' %}" alt="Imagen principal del producto"
+                    class="modal-main-image" id="modalMainImage">
                 <div class="modal-thumbnails" id="modalThumbnails">
-                    </div>
+                </div>
             </div>
 
             <div class="modal-info">
                 <h2 id="modalProductName">Nombre del Producto</h2>
                 <p id="modalProductDescription">Descripción del producto...</p>
                 <div class="product-specs" id="modalProductSpecs">
-                    </div>
+                </div>
             </div>
 
             <div class="modal-footer">
@@ -635,7 +765,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="chat-modal-container" id="chatModalContainer">
         <div class="chat-modal-header">
             <h3 id="chatModalTitle">Chat de Cotización</h3>
@@ -647,8 +777,8 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            
+        document.addEventListener('DOMContentLoaded', function () {
+
             // ==================================
             // LÓGICA DE PESTAÑAS
             // ==================================
@@ -661,7 +791,7 @@
 
                 const allTabs = document.querySelectorAll(`[data-tab="${tabName}"]`);
                 const selectedContent = document.getElementById(`${tabName}-tab`);
-                
+
                 if (allTabs.length > 0 && selectedContent) {
                     allTabs.forEach(tab => tab.classList.add('active'));
                     selectedContent.classList.add('active');
@@ -672,7 +802,7 @@
                 tab.addEventListener('click', () => {
                     const tabName = tab.getAttribute('data-tab');
                     switchTab(tabName);
-                    
+
                     const mobileNavOverlay = document.getElementById('mobileNavOverlay');
                     if (mobileNavOverlay && mobileNavOverlay.style.display === 'block') {
                         mobileNavOverlay.style.display = 'none';
@@ -737,10 +867,10 @@
 
                     modalThumbnails.innerHTML = '';
                     const imageUrls = btn.dataset.images.split(',').filter(Boolean);
-                    
+
                     if (imageUrls.length > 0) {
                         modalMainImage.src = imageUrls[0];
-                        
+
                         imageUrls.forEach((imgUrl, index) => {
                             const thumb = document.createElement('img');
                             thumb.src = imgUrl;
@@ -775,10 +905,8 @@
                 const chatModalCloseBtn = document.getElementById('chatModalCloseBtn');
                 const chatModalTitle = document.getElementById('chatModalTitle');
 
-                // FUNCIÓN CORREGIDA (Línea 779 del error)
                 function openChatModal(chatId) {
-                    // FIX: Revertido a la URL hard-coded original que SÍ funcionaba
-                    chatIframe.src = `/chat-cotizacion/${chatId}/`; 
+                    chatIframe.src = `/chat-cotizacion/${chatId}/`;
                     chatModalTitle.textContent = `Cotización #${chatId}`;
                     chatModalContainer.classList.add('active');
                 }
@@ -786,10 +914,10 @@
                 function closeChatModal() {
                     chatIframe.src = 'about:blank';
                     chatModalContainer.classList.remove('active');
-                    
+
                     const cotizacionesIframe = document.getElementById('cotizaciones-iframe');
                     if (cotizacionesIframe) {
-                        cotizacionesIframe.src = cotizacionesIframe.src; 
+                        cotizacionesIframe.src = cotizacionesIframe.src;
                     }
                 }
 
@@ -803,7 +931,6 @@
                     if (!productoId) return;
 
                     try {
-                        // FIX: Revertido a la URL hard-coded original que SÍ funcionaba
                         const response = await fetch(`/iniciar-chat-cotizacion/${productoId}/`);
                         const data = await response.json();
 
@@ -824,7 +951,7 @@
                 // ==================================
                 // ESCUCHAR MENSAJES DEL IFRAME (LISTA DE CHATS)
                 // ==================================
-                window.addEventListener('message', function(event) {
+                window.addEventListener('message', function (event) {
                     const cotizacionesIframe = document.getElementById('cotizaciones-iframe');
                     if (!cotizacionesIframe || event.source !== cotizacionesIframe.contentWindow) {
                         return;
@@ -839,4 +966,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory # ¡Importante!
 from .models import Perfil, Producto, Categoria, ProductoAdquirido, ProductoImagen, Cotizacion # ¡Importamos Cotizacion!
+from django import forms
+from django.contrib.auth import get_user_model
 
 # ===========================
 # FORMULARIOS DE USUARIO Y AUTENTICACIÓN
@@ -308,3 +310,46 @@ class SolicitudCotizacionForm(forms.ModelForm):
                 'placeholder': 'Escríbenos sobre tu proyecto (ej: metros cuadrados, comuna, región, etc.)'
             }),
         }
+
+
+User = get_user_model()
+
+
+class ClienteProfileForm(forms.ModelForm):
+    # Campos extra que NO están en User, sino en Perfil
+    telefono = forms.CharField(label="Teléfono", max_length=15, required=False)
+    direccion = forms.CharField(
+        label="Dirección",
+        required=False,
+        widget=forms.Textarea
+    )
+
+    class Meta:
+        model = User
+        # Solo incluimos campos que SÍ existen en User
+        fields = ["first_name", "last_name", "email"]
+        labels = {
+            "first_name": "Nombre",
+            "last_name": "Apellido",
+            "email": "Correo electrónico",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Si el usuario tiene perfil, precargamos teléfono y dirección
+        if self.instance and hasattr(self.instance, "perfil"):
+            self.fields["telefono"].initial = self.instance.perfil.telefono
+            self.fields["direccion"].initial = self.instance.perfil.direccion
+
+    def save(self, commit=True):
+        # Guardamos datos básicos del usuario
+        user = super().save(commit=commit)
+
+        # Guardamos/creamos el perfil con teléfono y dirección
+        if commit:
+            perfil, created = Perfil.objects.get_or_create(usuario=user)
+            perfil.telefono = self.cleaned_data.get("telefono", "")
+            perfil.direccion = self.cleaned_data.get("direccion", "")
+            perfil.save()
+
+        return user

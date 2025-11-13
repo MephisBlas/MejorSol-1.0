@@ -20,6 +20,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from django.db import transaction
 from django.views.decorators.clickjacking import xframe_options_sameorigin
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .forms import ClienteProfileForm
 
 # --- Formularios ---
 from .forms import (
@@ -823,3 +827,37 @@ def lista_chats_cotizacion_view(request):
         'lista_de_chats': chats
     }
     return render(request, 'cliente/lista_chats_cotizacion.html', context)
+
+
+
+@login_required
+def client_dashboard(request):
+    user = request.user
+
+    # Productos del cliente
+    productos_adquiridos = ProductoAdquirido.objects.filter(
+        cliente=user
+    ).select_related('producto')
+    
+    # Catálogo disponible
+    productos_disponibles = Producto.objects.filter(
+        activo=True
+    ).select_related('categoria').prefetch_related('imagenes')
+
+    # --- LÓGICA DEL FORMULARIO DE AJUSTES (perfil_form) ---
+    if request.method == "POST":
+        perfil_form = ClienteProfileForm(request.POST, instance=user)
+        if perfil_form.is_valid():
+            perfil_form.save()
+            messages.success(request, "Tus datos se actualizaron correctamente.")
+            return redirect("client_dashboard")  # recarga el panel
+    else:
+        perfil_form = ClienteProfileForm(instance=user)
+
+    context = {
+        "user": user,
+        "productos_adquiridos": productos_adquiridos,
+        "productos_disponibles": productos_disponibles,
+        "perfil_form": perfil_form,
+    }
+    return render(request, "cliente/client_dashboard.html", context)
