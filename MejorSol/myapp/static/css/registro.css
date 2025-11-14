@@ -4,7 +4,7 @@
 .register-container {
     position: relative;
     min-height: 100vh;
-    background: url("{% static 'img/panel-fondo.jpg' %}") center/cover no-repeat;
+    background: url('../img/panel-fondo.jpg') center/cover no-repeat;
     display: flex;
     justify-content: center;
     align-items: center;
