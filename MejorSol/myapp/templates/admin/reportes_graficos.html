@@ -1,12 +1,13 @@
 {% load static %}
+{% load humanize %}
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reportes Gráficos - SIEER Chile</title>
+  <title>Reportes Gráficos (BI) - SIEER Chile</title>
 
-  <!-- Estilos e íconos -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
@@ -14,12 +15,210 @@
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* ======================================= */
+    /* CSS para Dashboard de Reportes (Estilo BI) */
+    /* ======================================= */
+    :root {
+        --ms-panel: rgba(25, 25, 35, 0.9);
+        --ms-border: 1px solid rgba(0, 255, 136, 0.3);
+        --ms-accent: #00ffaa;
+        --neon-glow: 0 0 20px rgba(0, 255, 136, 0.5);
+        --ms-text: #ffffff;
+        --ms-muted: #b0b0b0;
+        --ms-info: #3b82f6;
+        --ms-warning: #f59e0b;
+        --ml-color: #00ccff; 
+    }
+    
+    /* --- ¡NUEVO! Panel de Filtros --- */
+    .filter-panel {
+        grid-column: 1 / -1; /* Ocupa toda la fila */
+        background: var(--ms-panel);
+        border: var(--ms-border);
+        border-radius: 16px;
+        padding: 1.5rem 2rem;
+        box-shadow: var(--neon-glow);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    .filter-panel h2 {
+        color: var(--ms-accent);
+        margin: 0;
+        font-size: 1.2rem;
+        font-family: 'Montserrat', sans-serif;
+    }
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    .filter-group label {
+        font-size: 0.8rem;
+        color: var(--ms-muted);
+        font-weight: 500;
+    }
+    .filter-group input[type="date"] {
+        background: #121a26;
+        border: 1px solid rgba(0, 255, 136, 0.2);
+        color: var(--ms-text);
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-family: 'Roboto', sans-serif;
+        color-scheme: dark;
+    }
+    .filter-buttons {
+        margin-left: auto;
+        display: flex;
+        gap: 1rem;
+    }
+    /* ----------------------------- */
+
+    .admin-content {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-auto-rows: minmax(150px, auto);
+        gap: 1.5rem;
+        /* Grid layout actualizado para filtros y ML */
+        grid-template-areas:
+            "filtros filtros filtros filtros"
+            "kpi1 kpi2 kpi3 kpi4"
+            "embudo embudo productos productos"
+            "tendencia tendencia prediccion prediccion";
+    }
+
+    .kpi-card {
+        background: var(--ms-panel);
+        border: var(--ms-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--neon-glow);
+    }
+    .kpi-card .lbl {
+        font-size: 0.9rem;
+        color: var(--ms-muted);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .kpi-card .val {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--ms-text);
+        font-family: 'Montserrat', sans-serif;
+    }
+    .kpi-card .val small {
+        font-size: 1.25rem;
+        color: var(--ms-accent);
+    }
+    
+    #filtros { grid-area: filtros; }
+    #kpi-1 { grid-area: kpi1; }
+    #kpi-2 { grid-area: kpi2; }
+    #kpi-3 { grid-area: kpi3; }
+    #kpi-4 { grid-area: kpi4; }
+
+    .chart-panel {
+        background: var(--ms-panel);
+        border: var(--ms-border);
+        border-radius: 16px;
+        padding: 1.5rem 2rem;
+        box-shadow: var(--neon-glow);
+        height: 450px; /* Altura fija para alinear */
+    }
+    
+    /* --- ¡NUEVO! Cabecera del Gráfico con Toggles --- */
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--ms-border);
+        padding-bottom: 1rem;
+    }
+    .chart-header h3 {
+        color: var(--ms-accent);
+        margin: 0;
+        text-align: left;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.1rem;
+    }
+    .chart-toggles {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .chart-toggle {
+        background: #121a26;
+        border: 1px solid rgba(0, 255, 136, 0.2);
+        color: var(--ms-muted);
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .chart-toggle:hover {
+        color: var(--ms-accent);
+        border-color: var(--ms-accent);
+    }
+    .chart-toggle.active {
+        background: var(--ms-accent);
+        color: #000;
+        border-color: var(--ms-accent);
+    }
+    /* ------------------------------------------- */
+    
+    #chart-embudo { grid-area: embudo; }
+    #chart-tendencia { grid-area: tendencia; }
+    #chart-productos { grid-area: productos; }
+
+    #chart-prediccion {
+        grid-area: prediccion;
+        border: 1px solid var(--ml-color);
+        box-shadow: 0 0 20px rgba(0, 204, 255, 0.3);
+    }
+    #chart-prediccion h3 {
+        color: var(--ml-color); /* Título azul */
+    }
+
+    @media (max-width: 1200px) {
+        .admin-content {
+            grid-template-columns: 1fr 1fr;
+            grid-template-areas:
+                "filtros filtros"
+                "kpi1 kpi2"
+                "kpi3 kpi4"
+                "embudo embudo"
+                "productos productos"
+                "tendencia tendencia"
+                "prediccion prediccion";
+        }
+    }
+    @media (max-width: 768px) {
+        .admin-content {
+            grid-template-columns: 1fr;
+            grid-template-areas:
+                "filtros"
+                "kpi1"
+                "kpi2"
+                "kpi3"
+                "kpi4"
+                "embudo"
+                "productos"
+                "tendencia"
+                "prediccion";
+        }
+        .filter-panel { flex-direction: column; align-items: stretch; }
+        .filter-buttons { margin-left: 0; justify-content: stretch; }
+        .filter-buttons .btn { flex: 1; }
+    }
+  </style>
 </head>
 
 <body>
   <div class="admin-container">
 
-    <!-- Sidebar -->
     <aside class="admin-sidebar">
       <div class="sidebar-header">
         <div class="admin-logo">
@@ -30,17 +229,15 @@
           </div>
         </div>
       </div>
-
       <nav class="sidebar-nav">
         <div class="nav-section">
           <h3>Facturación</h3>
           <ul>
-                      <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
-                            <a href="{% url 'admin_panel' %}">
-                                <i class="fas fa-tachometer-alt"></i> <!-- Ícono cambiado -->
-                                <span>Dashboard</span> <!-- Texto cambiado -->
-                            </a>
-                        </li>
+            <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
+                <a href="{% url 'admin_panel' %}">
+                    <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
+                </a>
+            </li>
             <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}">
               <a href="{% url 'calculos_estadisticas' %}">
                 <i class="fas fa-calculator"></i>
@@ -61,7 +258,6 @@
             </li>
           </ul>
         </div>
-
         <div class="nav-section">
           <h3>Reportes</h3>
           <ul>
@@ -91,7 +287,6 @@
           </ul>
         </div>
       </nav>
-
       <div class="sidebar-footer">
         <div class="user-info">
           <div class="user-avatar">
@@ -111,78 +306,311 @@
       </div>
     </aside>
 
-    <!-- Main content -->
     <main class="admin-main">
       <header class="admin-header">
         <div class="header-left">
           <button class="menu-toggle" id="menuToggle">
             <i class="fas fa-bars"></i>
           </button>
-          <h1>Reportes Gráficos</h1>
+          <h1>Reportes de Inteligencia de Negocios (BI)</h1>
         </div>
         <div class="header-right">
           <a href="{% url 'admin_panel' %}" class="btn btn-primary">
-            <i class="fas fa-arrow-left"></i> Volver al Panel
+            <i class="fas fa-arrow-left"></i> Volver al Dashboard
           </a>
         </div>
       </header>
 
       <div class="admin-content">
-        <div class="chart-section">
-          <h2>Ventas Mensuales</h2>
-          <canvas id="ventasChart"></canvas>
+        
+        <div class="filter-panel" id="filtros">
+            <h2>Filtros</h2>
+            <form method="GET" style="display: contents;">
+                <div class="filter-group">
+                    <label for="id_desde">Desde</label>
+                    <input type="date" name="desde" id="id_desde" value="{{ desde|default:'' }}">
+                </div>
+                <div class="filter-group">
+                    <label for="id_hasta">Hasta</label>
+                    <input type="date" name="hasta" id="id_hasta" value="{{ hasta|default:'' }}">
+                </div>
+                <div class="filter-buttons">
+                    <a href="{% url 'reportes_graficos' %}" class="btn btn-outline">
+                        <i class="fas fa-times"></i> Limpiar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Aplicar
+                    </button>
+                </div>
+            </form>
         </div>
 
-        <div class="chart-section">
-          <h2>Stock de Productos</h2>
-          <canvas id="stockChart"></canvas>
+        <div class="kpi-card" id="kpi-1">
+            <span class="lbl">Tasa de Conversión</span>
+            <span class="val">{{ kpi_tasa_conversion|floatformat:1 }}<small>%</small></span>
         </div>
+        <div class="kpi-card" id="kpi-2">
+            <span class="lbl">Total Cotizaciones (Filtro)</span>
+            <span class="val">{{ kpi_total_cotizaciones|intcomma }}</span>
+        </div>
+        <div class="kpi-card" id="kpi-3">
+            <span class="lbl">Promedio Cotiz./Día (Filtro)</span>
+            <span class="val">{{ kpi_promedio_cot_dia|floatformat:1 }}</span>
+        </div>
+        <div class="kpi-card" id="kpi-4">
+            <span class="lbl">Cotizaciones Aprobadas (Filtro)</span>
+            <span class="val">{{ kpi_aprobadas|intcomma }}</span>
+        </div>
+
+        <div class="chart-panel" id="chart-embudo">
+            <div class="chart-header">
+                <h3>Embudo de Cotizaciones (Filtro)</h3>
+                </div>
+            <canvas id="embudoChart"></canvas>
+        </div>
+
+        <div class="chart-panel" id="chart-productos">
+            <div class="chart-header">
+                <h3>Top 7 Productos (Filtro)</h3>
+                <div class="chart-toggles" data-chart="productosChart">
+                    <button class="chart-toggle active" data-type="bar"><i class="fas fa-chart-bar"></i></button>
+                    <button class="chart-toggle" data-type="doughnut"><i class="fas fa-chart-pie"></i></button>
+                </div>
+            </div>
+            <canvas id="productosChart"></canvas>
+        </div>
+        
+        <div class="chart-panel" id="chart-tendencia">
+            <div class="chart-header">
+                <h3>Tendencia Cotizaciones (Filtro)</h3>
+                <div class="chart-toggles" data-chart="tendenciaChart">
+                    <button class="chart-toggle active" data-type="line"><i class="fas fa-chart-line"></i></button>
+                    <button class="chart-toggle" data-type="bar"><i class="fas fa-chart-bar"></i></button>
+                </div>
+            </div>
+            <canvas id="tendenciaChart"></canvas>
+        </div>
+
+        <div class="chart-panel" id="chart-prediccion">
+            <div class="chart-header">
+                <h3><i class="fas fa-brain"></i> Predicción ML (Próximos 7 Días)</h3>
+            </div>
+            <canvas id="prediccionChart"></canvas>
+        </div>
+
       </div>
     </main>
   </div>
 
-  <!-- Datos en JSON -->
-  <script id="data-meses" type="application/json">{{ meses|safe }}</script>
-  <script id="data-ventas" type="application/json">{{ ventas|safe }}</script>
-  <script id="data-productos" type="application/json">{{ productos|safe }}</script>
-  <script id="data-stock" type="application/json">{{ stock|safe }}</script>
+  <script id="data-embudo-labels" type="application/json">{{ embudo_labels|safe }}</script>
+  <script id="data-embudo-valores" type="application/json">{{ embudo_valores|safe }}</script>
+  <script id="data-tendencia-labels" type="application/json">{{ tendencia_labels|safe }}</script>
+  <script id="data-tendencia-valores" type="application/json">{{ tendencia_valores|safe }}</script>
+  <script id="data-productos-labels" type="application/json">{{ productos_labels|safe }}</script>
+  <script id="data-productos-valores" type="application/json">{{ productos_valores|safe }}</script>
+  <script id="data-prediccion-labels" type="application/json">{{ prediccion_labels|safe }}</script>
+  <script id="data-prediccion-valores" type="application/json">{{ prediccion_valores|safe }}</script>
+
 
   <script>
-    // Cargar datos de Django
-    const meses = JSON.parse(document.getElementById('data-meses').textContent);
-    const ventas = JSON.parse(document.getElementById('data-ventas').textContent);
-    const productos = JSON.parse(document.getElementById('data-productos').textContent);
-    const stock = JSON.parse(document.getElementById('data-stock').textContent);
+    // Guardamos las instancias de los gráficos en un scope global
+    let embudoChart, tendenciaChart, productosChart, prediccionChart;
 
-    // Gráfico de Ventas
-    new Chart(document.getElementById('ventasChart'), {
-      type: 'line',
-      data: {
-        labels: meses,
-        datasets: [{
-          label: 'Ventas ($)',
-          data: ventas,
-          borderColor: '#00ff88',
-          backgroundColor: 'rgba(0,255,136,0.1)',
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: { responsive: true, scales: { y: { beginAtZero: true } } }
-    });
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Configuración Global de Gráficos (Estilo Neón) ---
+        Chart.defaults.color = '#b0b0b0';
+        Chart.defaults.borderColor = 'rgba(0, 255, 136, 0.1)';
+        Chart.defaults.plugins.legend.labels.color = '#ffffff';
 
-    // Gráfico de Stock
-    new Chart(document.getElementById('stockChart'), {
-      type: 'bar',
-      data: {
-        labels: productos,
-        datasets: [{
-          label: 'Stock Disponible',
-          data: stock,
-          backgroundColor: ['#00ff88', '#00ccff', '#ffaa00', '#ff4477']
-        }]
-      },
-      options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        // --- Función Segura para Cargar Datos ---
+        function parseJsonData(id) {
+            try {
+                const element = document.getElementById(id);
+                if (!element) {
+                    console.warn(`Elemento con ID "${id}" no encontrado.`);
+                    return [];
+                }
+                return JSON.parse(element.textContent);
+            } catch (e) {
+                console.error(`Error al parsear JSON de "${id}":`, e, element.textContent);
+                return []; 
+            }
+        }
+
+        // --- Cargar todos los datos ---
+        const embudoLabels = parseJsonData('data-embudo-labels');
+        const embudoValores = parseJsonData('data-embudo-valores');
+        const tendenciaLabels = parseJsonData('data-tendencia-labels');
+        const tendenciaValores = parseJsonData('data-tendencia-valores');
+        const productosLabels = parseJsonData('data-productos-labels');
+        const productosValores = parseJsonData('data-productos-valores');
+        const prediccionLabels = parseJsonData('data-prediccion-labels');
+        const prediccionValores = parseJsonData('data-prediccion-valores');
+
+        // Colores Neón
+        const neonColors = ['#00ffaa', '#3b82f6', '#f59e0b', '#ff4757', '#a855f7', '#33ff99'];
+        const neonColorsRGBA = [
+            'rgba(0, 255, 170, 0.7)',
+            'rgba(59, 130, 246, 0.7)',
+            'rgba(245, 158, 11, 0.7)',
+            'rgba(255, 71, 87, 0.7)',
+            'rgba(168, 85, 247, 0.7)',
+            'rgba(51, 255, 153, 0.7)',
+        ];
+
+        // 1. Gráfico de Embudo (Dona)
+        const ctxEmbudo = document.getElementById('embudoChart');
+        if (ctxEmbudo && embudoValores.length > 0) {
+            embudoChart = new Chart(ctxEmbudo, {
+                type: 'doughnut',
+                data: {
+                    labels: embudoLabels,
+                    datasets: [{
+                        label: 'Cotizaciones',
+                        data: embudoValores,
+                        backgroundColor: neonColorsRGBA,
+                        borderColor: neonColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { padding: 15 } } 
+                    } 
+                }
+            });
+        }
+
+        // 2. Gráfico de Productos (Barras)
+        const ctxProductos = document.getElementById('productosChart');
+        if (ctxProductos && productosValores.length > 0) {
+            productosChart = new Chart(ctxProductos, {
+                type: 'bar', // Tipo inicial
+                data: {
+                    labels: productosLabels,
+                    datasets: [{
+                        label: 'N° de Cotizaciones',
+                        data: productosValores,
+                        backgroundColor: neonColorsRGBA,
+                        borderColor: neonColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    indexAxis: 'y', // Empieza como barras horizontales
+                    scales: { x: { beginAtZero: true } }, 
+                    plugins: { legend: { display: false } } 
+                }
+            });
+        }
+
+        // 3. Gráfico de Tendencia (Línea)
+        const ctxTendencia = document.getElementById('tendenciaChart');
+        if (ctxTendencia && tendenciaValores.length > 0) {
+            tendenciaChart = new Chart(ctxTendencia, {
+                type: 'line', // Tipo inicial
+                data: {
+                    labels: tendenciaLabels,
+                    datasets: [{
+                        label: 'Cotizaciones Reales',
+                        data: tendenciaValores,
+                        borderColor: '#00ffaa',
+                        backgroundColor: 'rgba(0, 255, 170, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#00ffaa'
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { 
+                        y: { beginAtZero: true },
+                        x: { ticks: { maxTicksLimit: 10 } }
+                    }, 
+                    plugins: { legend: { display: false } } 
+                }
+            });
+        }
+        
+        // 4. Gráfico de Predicción (Línea)
+        const ctxPrediccion = document.getElementById('prediccionChart');
+        if (ctxPrediccion && prediccionValores.length > 0) {
+            prediccionChart = new Chart(ctxPrediccion, {
+                type: 'line',
+                data: {
+                    labels: prediccionLabels, 
+                    datasets: [{
+                        label: 'Predicción de Cotizaciones',
+                        data: prediccionValores, 
+                        borderColor: '#00ccff', // Azul ML
+                        backgroundColor: 'rgba(0, 204, 255, 0.1)',
+                        borderDash: [5, 5], 
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#00ccff'
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { y: { beginAtZero: true } }, 
+                    plugins: { 
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Modelo ARIMA(1,1,1)',
+                            color: '#00ccff',
+                            font: { style: 'italic' }
+                        }
+                    } 
+                }
+            });
+        } else if (ctxPrediccion) {
+            ctxPrediccion.parentElement.innerHTML = '<h3><i class="fas fa-brain"></i> Predicción de ML (Próximos 7 Días)</h3><p style="color: var(--ms-muted); text-align: center; margin-top: 4rem; padding: 0 1rem;">Se necesitan más datos históricos (al menos 11 días de cotizaciones) para generar una predicción.</p>';
+        }
+
+        // --- ¡NUEVO! Lógica para los Toggles de Gráficos ---
+        document.querySelectorAll('.chart-toggles').forEach(toggleGroup => {
+            toggleGroup.addEventListener('click', function(e) {
+                const button = e.target.closest('.chart-toggle');
+                if (!button) return;
+
+                // 1. Obtener el gráfico y el nuevo tipo
+                const chartName = toggleGroup.dataset.chart;
+                const newType = button.dataset.type;
+                let chartInstance;
+
+                if (chartName === 'tendenciaChart') chartInstance = tendenciaChart;
+                if (chartName === 'productosChart') chartInstance = productosChart;
+
+                if (!chartInstance) return;
+
+                // 2. Actualizar botones (activo/inactivo)
+                toggleGroup.querySelectorAll('.chart-toggle').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                // 3. Cambiar el tipo de gráfico
+                chartInstance.config.type = newType;
+                
+                // 4. Ajustes especiales
+                if (newType === 'bar' && chartName === 'productosChart') {
+                    // Si vuelve a ser 'bar', necesita ser horizontal
+                    chartInstance.config.options.indexAxis = 'y';
+                } else {
+                    chartInstance.config.options.indexAxis = 'x';
+                }
+
+                // 5. Actualizar el gráfico
+                chartInstance.update();
+            });
+        });
     });
   </script>
 </body>

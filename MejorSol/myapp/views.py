@@ -2,7 +2,7 @@ import csv
 import re
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta # IMPORT CORREGIDO
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, update_session_auth_hash
@@ -11,8 +11,8 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
-from django.db.models import Q, F, Sum, Count, ProtectedError
-from django.db.models.functions import TruncMonth
+from django.db.models import Q, F, Sum, Count, ProtectedError, Avg # IMPORT CORREGIDO
+from django.db.models.functions import TruncMonth, TruncDay # IMPORT CORREGIDO
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -23,7 +23,7 @@ from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import ClienteProfileForm
+from .forms import ClienteProfileForm # Import limpio
 
 # --- Formularios ---
 from .forms import (
@@ -38,6 +38,11 @@ from .models import (
 )
 # --- Servicios ---
 from .services import ChatBotService 
+
+# --- ¡LIBRERÍAS DE MACHINE LEARNING! ---
+import pandas as pd
+from statsmodels.tsa.arima.model import ARIMA
+# ---------------------------------------
 
 
 # ===========================
@@ -447,26 +452,116 @@ def calculos_estadisticas_view(request):
     return render(request, 'admin/calculos_estadisticas.html', context)
 
 
+# ================================================================
+# VISTA DE REPORTES GRÁFICOS (BI + ML) - ¡¡AQUÍ ESTÁ LA ACTUALIZACIÓN!!
+# ================================================================
 @login_required
 @user_passes_test(is_admin)
 def reportes_graficos_view(request):
-    ventas_data = ProductoAdquirido.objects.annotate(
-        mes=TruncMonth('fecha_compra')
-    ).values('mes').annotate(
-        total_ventas=Sum('precio_adquisicion')
-    ).order_by('mes')
-
-    meses = [v['mes'].strftime('%B %Y') for v in ventas_data]
-    ventas_mensuales = [float(v['total_ventas']) for v in ventas_data]
+    """
+    NUEVA VISTA TIPO POWER BI
+    Calcula KPIs de BI y una predicción de ML.
+    """
     
-    productos_stock_data = Producto.objects.filter(activo=True).order_by('-stock')[:10]
-    productos_stock = {p.nombre: p.stock for p in productos_stock_data}
+    # --- 1. KPIs de BI (Tus datos reales) ---
+    total_cotizaciones = ChatCotizacion.objects.count()
+    aprobadas = ChatCotizacion.objects.filter(estado='aprobada').count()
+    
+    # Tasa de Conversión
+    tasa_conversion = (aprobadas / total_cotizaciones * 100) if total_cotizaciones > 0 else 0
+    
+    # Promedio de cotizaciones por día (últimos 30 días)
+    hace_30_dias = timezone.now() - timedelta(days=30)
+    cotizaciones_30_dias = ChatCotizacion.objects.filter(fecha_creacion__gte=hace_30_dias).count()
+    promedio_cot_dia = cotizaciones_30_dias / 30.0
 
+    # --- 2. Datos para Gráficos de BI (Tus datos reales) ---
+    
+    # Gráfico Embudo (Dona)
+    embudo_data = ChatCotizacion.objects.values('estado').annotate(total=Count('estado')).order_by('-total')
+    # Usamos el display name de tus CHOICES en el modelo para que sea legible
+    embudo_labels = [dict(ChatCotizacion.ESTADO_CHOICES).get(item['estado'], 'N/A') for item in embudo_data]
+    embudo_valores = [item['total'] for item in embudo_data]
+
+    # Gráfico Productos (Barras)
+    productos_data = ChatCotizacion.objects.values('producto__nombre').annotate(total=Count('id')).order_by('-total')[:7]
+    productos_labels = [item['producto__nombre'] for item in productos_data if item['producto__nombre']]
+    productos_valores = [item['total'] for item in productos_data if item['producto__nombre']]
+
+    # --- 3. ¡¡INICIO DE MACHINE LEARNING!! (Predicción de Demanda) ---
+    
+    # 3.1. Obtener datos históricos (los últimos 90 días para entrenar)
+    hace_90_dias = timezone.now() - timedelta(days=90)
+    tendencia_data_historica = ChatCotizacion.objects.filter(
+        fecha_creacion__gte=hace_90_dias
+    ).annotate(
+        dia=TruncDay('fecha_creacion')
+    ).values('dia').annotate(
+        total=Count('id')
+    ).order_by('dia')
+
+    prediccion_labels = []
+    prediccion_valores = []
+
+    # 3.2. Solo si tenemos suficientes datos para entrenar (ej: más de 10 días)
+    if len(tendencia_data_historica) > 10:
+        
+        # 3.3. Preparar datos con Pandas (fácil)
+        df = pd.DataFrame(list(tendencia_data_historica))
+        df['dia'] = pd.to_datetime(df['dia'])
+        # Rellena días sin cotizaciones con 0 (clave para Time Series)
+        df = df.set_index('dia').asfreq('D', fill_value=0) 
+        
+        try:
+            # 3.4. Entrenar el modelo ARIMA (¡Esto es ML!)
+            # (order=(1,1,1) es una configuración simple, no te compliques con esto)
+            modelo = ARIMA(df['total'], order=(1, 1, 1))
+            modelo_fit = modelo.fit()
+            
+            # 3.5. Predecir los próximos 7 días
+            prediccion = modelo_fit.forecast(steps=7)
+            
+            # 3.6. Preparar datos de predicción para el gráfico
+            ultimo_dia = df.index[-1]
+            for i in range(7):
+                dia_futuro = (ultimo_dia + timedelta(days=i+1)).strftime('%d-%b')
+                prediccion_labels.append(dia_futuro)
+                # Nos aseguramos que la predicción no sea negativa
+                prediccion_valores.append(max(0, round(prediccion.iloc[i], 1))) 
+                
+        except Exception as e:
+            # Si el modelo falla (pasa a veces con pocos datos), no hacemos nada
+            print(f"Error al entrenar modelo ML: {e}")
+            pass # Los arrays de predicción quedarán vacíos
+
+    # 3.7. Preparar datos históricos (los últimos 30 días) para el gráfico de tendencia
+    tendencia_reciente_data = tendencia_data_historica.filter(dia__gte=hace_30_dias)
+    tendencia_labels = [item['dia'].strftime('%d-%b') for item in tendencia_reciente_data]
+    tendencia_valores = [item['total'] for item in tendencia_reciente_data]
+    
+    # --- 4. Enviar todo al contexto ---
     context = {
-        "meses": meses,
-        "ventas": ventas_mensuales,
-        "productos": list(productos_stock.keys()),
-        "stock": list(productos_stock.values())
+        # KPIs
+        'kpi_tasa_conversion': tasa_conversion,
+        'kpi_total_cotizaciones': total_cotizaciones,
+        'kpi_promedio_cot_dia': promedio_cot_dia,
+        'kpi_aprobadas': aprobadas,
+        
+        # Gráfico Embudo (JSON)
+        'embudo_labels': json.dumps(embudo_labels),
+        'embudo_valores': json.dumps(embudo_valores),
+        
+        # Gráfico Tendencia Histórica (JSON)
+        'tendencia_labels': json.dumps(tendencia_labels),
+        'tendencia_valores': json.dumps(tendencia_valores),
+        
+        # Gráfico Productos (JSON)
+        'productos_labels': json.dumps(productos_labels),
+        'productos_valores': json.dumps(productos_valores),
+        
+        # ¡¡DATOS NUEVOS DE ML!! (JSON)
+        'prediccion_labels': json.dumps(prediccion_labels),
+        'prediccion_valores': json.dumps(prediccion_valores),
     }
     return render(request, "admin/reportes_graficos.html", context)
 
@@ -635,20 +730,35 @@ def handler_500(request):
 
 @login_required
 def client_dashboard(request):
-    productos_adquiridos = ProductoAdquirido.objects.filter(cliente=request.user).select_related('producto')
+    user = request.user
+
+    # Productos del cliente
+    productos_adquiridos = ProductoAdquirido.objects.filter(
+        cliente=user
+    ).select_related('producto')
     
-    # FIX: El error indica que el related_name es 'imagenes', no 'productoimagen_set'.
-    # Usamos 'imagenes' para el prefetch, que es el nombre correcto.
+    # Catálogo disponible
     productos_disponibles = Producto.objects.filter(
         activo=True
-    ).select_related('categoria').prefetch_related('imagenes') 
-    
+    ).select_related('categoria').prefetch_related('imagenes')
+
+    # --- LÓGICA DEL FORMULARIO DE AJUSTES (perfil_form) ---
+    if request.method == "POST":
+        perfil_form = ClienteProfileForm(request.POST, instance=user)
+        if perfil_form.is_valid():
+            perfil_form.save()
+            messages.success(request, "Tus datos se actualizaron correctamente.")
+            return redirect("client_dashboard")  # recarga el panel
+    else:
+        perfil_form = ClienteProfileForm(instance=user)
+
     context = {
-        'user': request.user,
-        'productos_adquiridos': productos_adquiridos,
-        'productos_disponibles': productos_disponibles,
+        "user": user,
+        "productos_adquiridos": productos_adquiridos,
+        "productos_disponibles": productos_disponibles,
+        "perfil_form": perfil_form,
     }
-    return render(request, 'cliente/client_dashboard.html', context)
+    return render(request, "cliente/client_dashboard.html", context)
 
 
 # ===========================
@@ -827,37 +937,3 @@ def lista_chats_cotizacion_view(request):
         'lista_de_chats': chats
     }
     return render(request, 'cliente/lista_chats_cotizacion.html', context)
-
-
-
-@login_required
-def client_dashboard(request):
-    user = request.user
-
-    # Productos del cliente
-    productos_adquiridos = ProductoAdquirido.objects.filter(
-        cliente=user
-    ).select_related('producto')
-    
-    # Catálogo disponible
-    productos_disponibles = Producto.objects.filter(
-        activo=True
-    ).select_related('categoria').prefetch_related('imagenes')
-
-    # --- LÓGICA DEL FORMULARIO DE AJUSTES (perfil_form) ---
-    if request.method == "POST":
-        perfil_form = ClienteProfileForm(request.POST, instance=user)
-        if perfil_form.is_valid():
-            perfil_form.save()
-            messages.success(request, "Tus datos se actualizaron correctamente.")
-            return redirect("client_dashboard")  # recarga el panel
-    else:
-        perfil_form = ClienteProfileForm(instance=user)
-
-    context = {
-        "user": user,
-        "productos_adquiridos": productos_adquiridos,
-        "productos_disponibles": productos_disponibles,
-        "perfil_form": perfil_form,
-    }
-    return render(request, "cliente/client_dashboard.html", context)
