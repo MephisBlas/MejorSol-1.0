@@ -12,383 +12,477 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
-
   <style>
-    /* ===== Layout header / toolbar ===== */
-    .content-header { display:flex; gap:.75rem; align-items:center; justify-content:space-between; margin-bottom:1rem; }
-    .toolbar { display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; }
-
-    /* ===== Controles de búsqueda / filtros (modo oscuro) ===== */
-    .search{
-      display:flex; align-items:center; gap:.45rem;
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      padding:.45rem .6rem; border-radius:10px;
+    /* ======================================= */
+    /* 1. VARIABLES Y RESET (NEÓN OSCURO)
+    /* ======================================= */
+    :root {
+        --neon-green: #00ff88;
+        --neon-hover: #00cc6a;
+        --bg-dark: #050505;
+        --bg-panel: #0f0f0f;
+        --glass-bg: rgba(15, 15, 15, 0.95);
+        --border-neon: 1px solid rgba(0, 255, 136, 0.2);
+        --text-white: #ffffff;
+        --text-gray: #b0b0b0;
+        
+        /* Estados */
+        --status-aprobada: #00ff88;
+        --status-pendiente: #ffa502;
+        --status-rechazada: #ff4757;
+        --status-info: #1e90ff;
     }
-    .search i{ color:#cbd5e1; }
-    .search input{ border:none; outline:none; background:transparent; min-width:220px; color:#e5e7eb; }
 
-    /* Select base (oscuro) */
-    :root { color-scheme: dark; }
-    .filter-select{
-      -webkit-appearance:none; -moz-appearance:none; appearance:none;
-      background: rgba(15,23,42,.85); color:#e5e7eb;
-      border:1px solid rgba(255,255,255,.12); border-radius:10px;
-      padding:.45rem 2.2rem .45rem .6rem;
-      box-shadow: 0 6px 16px rgba(0,0,0,.25) inset, 0 6px 18px rgba(0,0,0,.25);
-      height:40px; line-height:40px;
-      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-      background-repeat:no-repeat; background-position:right .6rem center; background-size:16px;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+        margin: 0 !important; padding: 0 !important;
+        width: 100%; height: 100%;
+        background-color: var(--bg-dark);
+        font-family: 'Roboto', sans-serif;
+        color: var(--text-white);
+        overflow: hidden; /* Evita scroll en contenedor padre */
     }
-    .filter-select:hover{ border-color:rgba(16,185,129,.45); }
-    .filter-select:focus{ outline:2px solid rgba(16,185,129,.55); outline-offset:2px; }
-    .filter-select::-ms-expand{ display:none; }
-    .filter-select option{ background-color:#0b1220; color:#e5e7eb; }
-    .filter-select option:checked, .filter-select option:hover{ background-color:rgba(16,185,129,.25); color:#e5e7eb; }
 
-    /* ===== Card contenedor de la tabla (oscuro translúcido) ===== */
-    .table-card{
-      background: rgba(17,24,39,.65);
-      border-radius:16px;
-      box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.06);
-      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    /* Estructura Principal */
+    .admin-container {
+        display: flex;
+        width: 100vw; height: 100vh;
+        background-color: var(--bg-dark);
     }
-    .table-card .card-head{
-      padding:.9rem 1rem; display:flex; align-items:center; gap:.5rem; justify-content:space-between;
-      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0));
-      color:#e2e8f0; border-bottom:1px solid rgba(255,255,255,.07);
-    }
-    .table-responsive{ overflow-x:auto; }
-
-    /* ===== Tabla ===== */
-    .styled-table{ width:100%; border-collapse:collapse; font-size:.95rem; color:#e5e7eb; }
-    .styled-table thead th{
-      position:sticky; top:0; z-index:1; text-align:left; padding:.9rem 1rem;
-      background:transparent; border-bottom:1px solid rgba(255,255,255,.08);
-      font-weight:600; color:#a7b1c2;
-    }
-    .styled-table tbody td{ padding:.85rem 1rem; border-bottom:1px dashed rgba(255,255,255,.07); color:#e5e7eb; }
-    .styled-table tbody tr:hover{ background: rgba(16,185,129,.08); }
-
-    /* ===== Badges (estado) ===== */
-    .badge{
-      display:inline-flex; align-items:center; justify-content:center;
-      gap:.35rem; padding:.35rem .7rem; min-width:108px; line-height:1;
-      border-radius:999px; color:#fff; font-size:.82rem; font-weight:600;
-      box-shadow:0 0 8px rgba(16,185,129,.18);
-    }
-    .badge-success{ background:#10b981; }
-    .badge-warning{ background:#f59e0b; box-shadow:0 0 10px rgba(245,158,11,.25); }
-    .badge-info{ background:#3b82f6; box-shadow:0 0 10px rgba(59,130,246,.25); }
-    .badge-secondary{ background:#64748b; box-shadow:none; }
-
-    /* Botones acciones */
-    .table-actions{ display:flex; gap:.4rem; justify-content:center; align-items:center; }
-    .btn-sm{ padding:.35rem .55rem; font-size:.85rem; border-radius:8px; }
-    .btn-outline{ background:transparent; color:#e5e7eb; border:1px solid rgba(255,255,255,.12); }
-    .btn-outline:hover{ background:rgba(255,255,255,.06); }
-    .btn-danger{ background:#ef4444; color:#fff; border:none; }
-    .btn-danger:hover{ filter:brightness(.95); }
-
-    .table-card .card-head span:last-child{ color:#94a3b8 !important; }
-    .empty-state{ padding:2rem; text-align:center; color:#94a3b8; }
-    .empty-state i{ color:#94a3b8; }
-
-    /* === Fijar alturas/anchos para cuadrar columnas === */
-    .styled-table th, .styled-table td{ vertical-align:middle; height:56px; }
-    .styled-table th:nth-child(1), .styled-table td:nth-child(1){ width:100px; }   /* ID */
-    .styled-table th:nth-child(2), .styled-table td:nth-child(2){ width:25%; }     /* Cliente */
-    .styled-table th:nth-child(3), .styled-table td:nth-child(3){ width:120px; }     /* Fecha */
-    .styled-table th:nth-child(4), .styled-table td:nth-child(4){ width:100px; }     /* Monto */
-    .styled-table th:nth-child(5), .styled-table td:nth-child(5){ width:140px; text-align:center; } /* Estado */
-    .styled-table th:nth-child(6), .styled-table td:nth-child(6){ width:180px; text-align:center; } /* Acciones */
 
     /* ======================================= */
-    /* ESTILOS DE CHAT MODAL FLOTANTE (Admin)  */
+    /* 2. SIDEBAR (COPIADO DEL DASHBOARD)
+    /* ======================================= */
+    .admin-sidebar {
+        width: 280px; height: 100%;
+        background: var(--bg-panel);
+        border-right: var(--border-neon);
+        display: flex; flex-direction: column;
+        flex-shrink: 0; z-index: 1000;
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .admin-logo { display: flex; align-items: center; gap: 1rem; }
+    .admin-logo img { height: 45px; filter: drop-shadow(0 0 5px rgba(0,255,136,0.4)); }
+    .logo-text h2 { margin: 0; color: #fff; font-size: 1.3rem; font-family: 'Montserrat', sans-serif; text-transform: uppercase; }
+    .logo-text span { color: var(--neon-green); font-size: 0.75rem; letter-spacing: 1px; }
+
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 1rem; }
+    .nav-section h3 { color: #666; font-size: 0.8rem; text-transform: uppercase; margin: 1.5rem 0 0.5rem 0.5rem; letter-spacing: 1px; }
+    
+    .nav-item { list-style: none; margin-bottom: 0.5rem; }
+    .nav-item a {
+        display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+        color: #b0b0b0; text-decoration: none; border-radius: 8px;
+        transition: 0.3s; font-size: 0.95rem; font-weight: 500;
+    }
+    .nav-item a:hover, .nav-item.active a { background: rgba(0, 255, 136, 0.08); color: var(--neon-green); }
+    .nav-item.active a { border-left: 3px solid var(--neon-green); }
+    .nav-item a i { width: 20px; text-align: center; }
+
+    .sidebar-footer { padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); }
+    .user-info { display: flex; gap: 10px; align-items: center; margin-bottom: 1rem; }
+    .user-avatar { width: 40px; height: 40px; background: var(--neon-green); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .user-details strong { color: #fff; display: block; font-size: 0.9rem; }
+    .user-details span { color: #666; font-size: 0.8rem; }
+    
+    .logout-btn {
+        width: 100%; padding: 12px; background: rgba(255, 71, 87, 0.1); color: #ff4757;
+        border: 1px solid rgba(255, 71, 87, 0.3); border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: 600;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .logout-btn:hover { background: #ff4757; color: #fff; }
+
+    /* ======================================= */
+    /* 3. MAIN CONTENT
+    /* ======================================= */
+    .admin-main {
+        flex-grow: 1; height: 100%; background: var(--bg-dark);
+        display: flex; flex-direction: column; overflow-y: auto; position: relative;
+    }
+
+    .admin-header {
+        padding: 1rem 2rem; background: var(--bg-panel); border-bottom: var(--border-neon);
+        display: flex; justify-content: space-between; align-items: center;
+        position: sticky; top: 0; z-index: 500; margin-top: 0 !important;
+    }
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .header-left h1 { margin: 0; color: #fff; font-family: 'Montserrat', sans-serif; font-size: 1.5rem; }
+    .menu-toggle { display: none; color: var(--neon-green); background: none; border: 1px solid #333; padding: 8px; border-radius: 8px; font-size: 1.2rem; cursor: pointer; }
+    
+    .btn-back {
+        background: var(--neon-green); color: #000; padding: 10px 25px; border-radius: 50px;
+        text-decoration: none; font-weight: 700; font-family: 'Montserrat', sans-serif; font-size: 0.9rem;
+        display: flex; align-items: center; gap: 8px; transition: 0.3s; box-shadow: 0 0 10px rgba(0,255,136,0.2);
+    }
+    .btn-back:hover { background: var(--neon-hover); transform: translateY(-2px); }
+
+    /* ======================================= */
+    /* 4. CONTENIDO COTIZACIONES
+    /* ======================================= */
+    .admin-content { padding: 2rem; }
+
+    /* Toolbar Superior */
+    .content-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+    }
+    .content-header h2 {
+        color: var(--neon-green); font-family: 'Montserrat', sans-serif; font-size: 1.5rem;
+    }
+
+    .toolbar { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    /* Buscador */
+    .search {
+        display: flex; align-items: center; gap: 10px;
+        background: #0f0f0f; border: 1px solid #333;
+        padding: 10px 15px; border-radius: 10px;
+    }
+    .search i { color: var(--neon-green); }
+    .search input {
+        background: transparent; border: none; color: #fff; outline: none; width: 200px;
+    }
+
+    /* Filtro Select */
+    .filter-select {
+        background: #0f0f0f; color: #fff; border: 1px solid #333;
+        padding: 10px 15px; border-radius: 10px; cursor: pointer; outline: none;
+    }
+    .filter-select:focus { border-color: var(--neon-green); }
+
+    /* Tabla Estilizada */
+    .table-card {
+        background: var(--bg-panel); border: var(--border-neon);
+        border-radius: 16px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    
+    .card-head {
+        padding: 1rem 1.5rem; background: rgba(255,255,255,0.02);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        display: flex; justify-content: space-between; color: #888; font-size: 0.9rem;
+    }
+
+    .table-responsive { overflow-x: auto; }
+    
+    .styled-table { width: 100%; border-collapse: collapse; }
+    
+    .styled-table th {
+        text-align: left; padding: 1rem 1.5rem;
+        background: rgba(0, 255, 136, 0.05); color: var(--neon-green);
+        font-weight: 600; font-size: 0.9rem; text-transform: uppercase;
+        white-space: nowrap;
+    }
+    
+    .styled-table td {
+        padding: 1rem 1.5rem; color: #e0e0e0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        font-size: 0.95rem; vertical-align: middle;
+    }
+    .styled-table tr:last-child td { border-bottom: none; }
+    .styled-table tr:hover { background: rgba(255,255,255,0.02); }
+
+    /* Badges de Estado */
+    .badge {
+        padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;
+    }
+    .badge-success { background: rgba(0, 255, 136, 0.15); color: var(--status-aprobada); border: 1px solid var(--status-aprobada); }
+    .badge-warning { background: rgba(255, 165, 2, 0.15); color: var(--status-pendiente); border: 1px solid var(--status-pendiente); }
+    .badge-info { background: rgba(30, 144, 255, 0.15); color: var(--status-info); border: 1px solid var(--status-info); }
+    .badge-secondary { background: rgba(255, 71, 87, 0.15); color: var(--status-rechazada); border: 1px solid var(--status-rechazada); }
+
+    /* Botones de Acción */
+    .table-actions { display: flex; gap: 8px; }
+    
+    .btn-sm {
+        padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;
+        text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: 0.3s;
+    }
+    
+    .btn-chat {
+        background: transparent; color: var(--neon-green); border: 1px solid var(--neon-green);
+    }
+    .btn-chat:hover { background: var(--neon-green); color: #000; }
+    
+    .btn-danger {
+        background: transparent; color: #ff4757; border: 1px solid #ff4757;
+    }
+    .btn-danger:hover { background: #ff4757; color: #fff; }
+
+    /* Empty State */
+    .empty-state { text-align: center; padding: 3rem; color: #666; }
+    .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+
+    /* ======================================= */
+    /* 5. CHAT MODAL FLOTANTE
     /* ======================================= */
     .chat-modal-container {
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        width: 400px;
-        height: 600px;
-        background: var(--ms-panel);
-        border: 1px solid #10b981; /* Color diferente al del cliente para distinguir */
-        border-radius: 16px;
-        box-shadow: 0 10px 40px rgba(16, 185, 129, 0.2);
-        z-index: 2000;
-        display: none;
-        flex-direction: column;
-        overflow: hidden;
-        animation: slideIn 0.4s ease;
+        position: fixed; bottom: 80px; right: 20px;
+        width: 400px; height: 600px;
+        background: var(--bg-panel); border: 1px solid var(--neon-green);
+        border-radius: 16px; box-shadow: 0 10px 50px rgba(0,0,0,0.8);
+        z-index: 2000; display: none; flex-direction: column;
+        animation: slideUp 0.3s ease;
     }
-    .chat-modal-container.active {
-        display: flex;
-    }
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateY(50px) translateX(50px); }
-        to { opacity: 1; transform: translateY(0) translateX(0); }
-    }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
     .chat-modal-header {
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center;
-        padding: 1rem; 
-        background: #121a26; 
-        border-bottom: 1px solid var(--ms-border);
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 1rem; background: #000; border-bottom: 1px solid #333;
+        border-radius: 16px 16px 0 0;
     }
-    .chat-modal-header h3 { 
-        margin: 0; 
-        color: var(--ms-text); 
-        font-size: 1.1rem; 
+    .chat-modal-header h3 { margin: 0; color: #fff; font-size: 1rem; }
+    .chat-modal-header button { background: none; border: none; color: #888; font-size: 1.2rem; cursor: pointer; }
+    .chat-modal-header button:hover { color: #fff; }
+    
+    .chat-modal-body { flex: 1; overflow: hidden; background: #121212; }
+    .chat-modal-body iframe { width: 100%; height: 100%; border: none; }
+
+    /* ======================================= */
+    /* 6. RESPONSIVE MÓVIL
+    /* ======================================= */
+    .sidebar-overlay {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8); z-index: 999; backdrop-filter: blur(3px);
     }
-    .chat-modal-header button {
-        background: none; 
-        border: none; 
-        color: var(--ms-muted); 
-        font-size: 1.5rem; 
-        cursor: pointer;
-    }
-    .chat-modal-body { 
-        flex: 1; 
-        overflow: hidden; 
-    }
-    .chat-modal-body iframe { 
-        width: 100%; 
-        height: 100%; 
-        border: none; 
+
+    @media (max-width: 992px) {
+        .admin-sidebar { position: fixed; left: -280px; box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
+        .admin-sidebar.active { left: 0; }
+        .sidebar-overlay.active { display: block; }
+        .menu-toggle { display: block; }
+        
+        .admin-content { padding: 1rem; }
+        .content-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        .toolbar { width: 100%; flex-direction: column; }
+        .search { width: 100%; }
+        .search input { width: 100%; }
+        .filter-select { width: 100%; }
+        
+        /* Chat en móvil: pantalla completa */
+        .chat-modal-container {
+            width: 100%; height: 100%; bottom: 0; right: 0; border-radius: 0;
+        }
+        .chat-modal-header { border-radius: 0; }
+        
+        /* Ocultar columnas menos importantes en móvil */
+        .styled-table th:nth-child(1), .styled-table td:nth-child(1) { display: none; } /* Ocultar ID */
+        .styled-table th:nth-child(3), .styled-table td:nth-child(3) { display: none; } /* Ocultar Fecha */
     }
   </style>
 </head>
 
 <body>
-  <div class="admin-container">
-    <aside class="admin-sidebar">
-      <div class="sidebar-header">
+<div class="admin-container">
+
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
         <div class="admin-logo">
-          <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo">
-          <div class="logo-text">
-            <h2>SIEER Chile</h2>
-            <span>Panel Administrativo</span>
-          </div>
+            <img src="{% static 'img/logo.png' %}" alt="SIEER">
+            <div class="logo-text"><h2>SIEER Chile</h2><span>Panel Admin</span></div>
         </div>
-      </div>
-
-      <nav class="sidebar-nav">
+    </div>
+    <nav class="sidebar-nav">
         <div class="nav-section">
-          <h3>Facturación</h3>
-          <ul>
-                      <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
-                            <a href="{% url 'admin_panel' %}">
-                                <i class="fas fa-tachometer-alt"></i> <!-- Ícono cambiado -->
-                                <span>Dashboard</span> <!-- Texto cambiado -->
-                            </a>
-                        </li>
-
-            <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}">
-              <a href="{% url 'calculos_estadisticas' %}">
-                <i class="fas fa-calculator"></i><span>Cálculos y Estadísticas</span>
-              </a>
-            </li>
-
-            <li class="nav-item {% if request.resolver_match.url_name == 'cotizaciones' %}active{% endif %}">
-              <a href="{% url 'cotizaciones' %}">
-                <i class="fas fa-file-alt"></i><span>Cotizaciones</span>
-              </a>
-            </li>
-
-            <li class="nav-item {% if request.resolver_match.url_name == 'control_inventario' %}active{% endif %}">
-              <a href="{% url 'control_inventario' %}">
-                <i class="fas fa-boxes"></i><span>Control de Inventario</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <div class="nav-section">
-          <h3>Reportes</h3>
-          <ul>
-            <li class="nav-item {% if request.resolver_match.url_name == 'reportes_graficos' %}active{% endif %}">
-              <a href="{% url 'reportes_graficos' %}">
-                <i class="fas fa-chart-bar"></i><span>Reportes Gráficos</span>
-              </a>
-            </li>
-                <li class="nav-item {% if request.resolver_match.url_name == 'historial_cotizaciones' %}active{% endif %}">
-                    <a href="{% url 'historial_cotizaciones' %}">
-                        <i class="fas fa-history"></i><span>Historial de Cotizaciones</span>
-                    </a>
+            <h3>Facturación</h3>
+            <ul>
+                <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
+                    <a href="{% url 'admin_panel' %}"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
                 </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}">
-              <a href="{% url 'cuenta' %}">
-                <i class="fas fa-user-cog"></i><span>Cuenta</span>
-              </a>
-            </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'configuracion' %}active{% endif %}">
-              <a href="{% url 'configuracion' %}">
-                <i class="fas fa-cogs"></i><span>Configuración</span>
-              </a>
-            </li>
-          </ul>
+                <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}">
+                    <a href="{% url 'calculos_estadisticas' %}"><i class="fas fa-calculator"></i><span>Cálculos</span></a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'cotizaciones' %}active{% endif %}">
+                    <a href="{% url 'cotizaciones' %}"><i class="fas fa-file-invoice-dollar"></i><span>Cotizaciones</span></a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'control_inventario' %}active{% endif %}">
+                    <a href="{% url 'control_inventario' %}"><i class="fas fa-boxes"></i><span>Inventario</span></a>
+                </li>
+            </ul>
         </div>
-      </nav>
-
-      <div class="sidebar-footer">
+        <div class="nav-section">
+            <h3>Reportes</h3>
+            <ul>
+                <li class="nav-item {% if request.resolver_match.url_name == 'reportes_graficos' %}active{% endif %}">
+                    <a href="{% url 'reportes_graficos' %}"><i class="fas fa-chart-bar"></i><span>Gráficos</span></a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'historial_cotizaciones' %}active{% endif %}">
+                    <a href="{% url 'historial_cotizaciones' %}"><i class="fas fa-history"></i><span>Historial</span></a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}">
+                    <a href="{% url 'cuenta' %}"><i class="fas fa-user-cog"></i><span>Cuenta</span></a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'configuracion' %}active{% endif %}">
+                    <a href="{% url 'configuracion' %}"><i class="fas fa-cogs"></i><span>Configuración</span></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="sidebar-footer">
         <div class="user-info">
-          <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
-          <div class="user-details"><strong>Administrador</strong><span>{{ user.username }}</span></div>
+            <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+            <div class="user-details"><strong>{{ user.username }}</strong><span>Administrador</span></div>
         </div>
         <form method="post" action="{% url 'logout' %}" class="logout-form">
-          {% csrf_token %}
-          <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+            {% csrf_token %}
+            <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
         </form>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <main class="admin-main">
+    <header class="admin-header">
+      <div class="header-left">
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <h1>Cotizaciones</h1>
       </div>
-    </aside>
+      <div class="header-right">
+        <a class="btn-back" href="{% url 'admin_panel' %}">
+          <i class="fas fa-arrow-left"></i> <span>Volver</span>
+        </a>
+      </div>
+    </header>
 
-    <main class="admin-main">
-      <header class="admin-header">
-        <div class="header-left">
-          <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
-          <h1>Cotizaciones</h1>
-        </div>
-        <div class="header-right">
-          <a class="btn btn-primary" href="/"><i class="fas fa-eye"></i> Ver Sitio Web</a>
-        </div>
-      </header>
+    <div class="admin-content">
+      <div class="content-header">
+        <h2>Gestión de Solicitudes</h2>
 
-      <div class="admin-content">
-        <div class="content-header">
-          <h2>Gestión de Cotizaciones</h2>
+        <div class="toolbar">
+          <form method="get" action="{% url 'cotizaciones' %}" class="search">
+            <i class="fas fa-search"></i>
+            <input type="text" name="q" placeholder="Buscar cliente..." value="{{ request.GET.q }}">
+          </form>
 
-          <div class="toolbar">
-            <form method="get" action="{% url 'cotizaciones' %}" class="search">
-              <i class="fas fa-search"></i>
-              <input type="text" name="q" placeholder="Buscar cliente o #ID" value="{{ request.GET.q }}">
-            </form>
-
-            <form method="get" action="{% url 'cotizaciones' %}">
-              <select name="estado" class="filter-select" onchange="this.form.submit()">
-                <option value="">Todos los estados</option>
-                <option value="pendiente" {% if request.GET.estado|default:'' == 'pendiente' %}selected{% endif %}>Pendiente de Admin</option>
-                <option value="en_proceso"  {% if request.GET.estado|default:'' == 'en_proceso'  %}selected{% endif %}>En Proceso</option>
-                <option value="aprobada"  {% if request.GET.estado|default:'' == 'aprobada'  %}selected{% endif %}>Aprobada</option>
-                <option value="rechazada" {% if request.GET.estado|default:'' == 'rechazada' %}selected{% endif %}>Rechazada</option>
-              </select>
-            </form>
-
-          </div>
-        </div>
-
-        <div class="table-card">
-          <div class="card-head">
-            <span><i class="fas fa-table"></i> Listado</span>
-            <span>Total: {{ chats_cotizacion|length }}</span> 
-          </div>
-
-          {% if chats_cotizacion %}
-          <div class="table-responsive">
-            <table class="styled-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Cliente</th>
-                  <th>Fecha</th>
-                  <th>Producto</th>
-                  <th>Estado</th>
-                  <th style="width:180px;">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for cot in chats_cotizacion %}
-                <tr>
-                  <td>#{{ cot.id }}</td>
-                  <td>{{ cot.cliente.get_full_name|default:cot.cliente.username }}</td>
-                  <td>{{ cot.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
-                  <td>{{ cot.producto.nombre }}</td>
-                  <td>
-                    <span class="badge 
-                      {% if cot.estado == 'aprobada' %}badge-success
-                      {% elif cot.estado == 'pendiente' %}badge-warning
-                      {% elif cot.estado == 'en_proceso' %}badge-info
-                      {% else %}badge-secondary{% endif %}">
-                      {{ cot.get_estado_display }}
-                    </span>
-                  </td>
-                  <td>
-                    <div class="table-actions">
-                      <a href="{% url 'admin_chat_cotizacion' chat_id=cot.id %}" class="btn btn-primary btn-sm btn-chat" title="Chat"><i class="fas fa-comments"></i> Chat</a>
-                      <a href="{% url 'eliminar_cotizacion' cot.id %}" class="btn btn-danger btn-sm" title="Eliminar"><i class="fas fa-trash"></i></a>
-                    </div>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          {% else %}
-          <div class="empty-state">
-            <i class="fas fa-file-invoice" style="font-size: 3rem; margin-bottom: .6rem;"></i>
-            <h3>No hay cotizaciones registradas</h3>
-            <p>Comienza agregando una nueva cotización.</p>
-          </div>
-          {% endif %}
+          <form method="get" action="{% url 'cotizaciones' %}">
+            <select name="estado" class="filter-select" onchange="this.form.submit()">
+              <option value="">Todos los estados</option>
+              <option value="pendiente" {% if request.GET.estado == 'pendiente' %}selected{% endif %}>Pendientes</option>
+              <option value="en_proceso" {% if request.GET.estado == 'en_proceso' %}selected{% endif %}>En Proceso</option>
+              <option value="aprobada" {% if request.GET.estado == 'aprobada' %}selected{% endif %}>Aprobadas</option>
+              <option value="rechazada" {% if request.GET.estado == 'rechazada' %}selected{% endif %}>Rechazadas</option>
+            </select>
+          </form>
         </div>
       </div>
-    </main>
-  </div>
 
-  <div class="chat-modal-container" id="adminChatModalContainer">
-      <div class="chat-modal-header">
-          <h3 id="adminChatModalTitle">Chat de Cotización</h3>
-          <button id="adminChatModalCloseBtn">&times;</button>
+      <div class="table-card">
+        <div class="card-head">
+          <span><i class="fas fa-list"></i> Listado Reciente</span>
+          <span>Total: {{ chats_cotizacion|length }}</span> 
+        </div>
+
+        {% if chats_cotizacion %}
+        <div class="table-responsive">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Fecha</th>
+                <th>Producto</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cot in chats_cotizacion %}
+              <tr>
+                <td>#{{ cot.id }}</td>
+                <td>{{ cot.cliente.get_full_name|default:cot.cliente.username }}</td>
+                <td>{{ cot.fecha_actualizacion|date:"d/m/Y" }}</td>
+                <td>{{ cot.producto.nombre }}</td>
+                <td>
+                  <span class="badge 
+                    {% if cot.estado == 'aprobada' %}badge-success
+                    {% elif cot.estado == 'pendiente' %}badge-warning
+                    {% elif cot.estado == 'en_proceso' %}badge-info
+                    {% else %}badge-secondary{% endif %}">
+                    {{ cot.get_estado_display }}
+                  </span>
+                </td>
+                <td>
+                  <div class="table-actions">
+                    <button onclick="openChatModal('{{ cot.id }}')" class="btn-sm btn-chat" title="Chat">
+                        <i class="fas fa-comments"></i> Chat
+                    </button>
+                    <a href="{% url 'eliminar_cotizacion' cot.id %}" class="btn-sm btn-danger" title="Eliminar" onclick="return confirm('¿Seguro que deseas eliminar esta cotización?');">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <i class="fas fa-folder-open"></i>
+          <h3>No hay cotizaciones</h3>
+          <p>Las nuevas solicitudes aparecerán aquí.</p>
+        </div>
+        {% endif %}
       </div>
-      <div class="chat-modal-body">
-          <iframe id="admin-chat-iframe" src="about:blank" frameborder="0"></iframe>
-      </div>
-  </div>
-  <script>
-      document.addEventListener('DOMContentLoaded', function() {
-          const chatModalContainer = document.getElementById('adminChatModalContainer');
-          const chatIframe = document.getElementById('admin-chat-iframe');
-          const chatModalCloseBtn = document.getElementById('adminChatModalCloseBtn');
-          const chatModalTitle = document.getElementById('adminChatModalTitle');
+    </div>
+  </main>
+</div>
 
-          // 1. Función para abrir el chat flotante
-          function openChatModal(chatId) {
-              // Cargamos la vista de chat del admin en el iframe
-              // Reemplazamos '0' por el ID real para construir la URL de admin_chat_cotizacion
-              chatIframe.src = `{% url 'admin_chat_cotizacion' chat_id=0 %}`.replace('0', chatId);
-              chatModalTitle.textContent = `Cotización #${chatId}`;
-              chatModalContainer.classList.add('active');
-          }
+<div class="chat-modal-container" id="adminChatModalContainer">
+    <div class="chat-modal-header">
+        <h3 id="adminChatModalTitle">Chat</h3>
+        <button id="adminChatModalCloseBtn">&times;</button>
+    </div>
+    <div class="chat-modal-body">
+        <iframe id="admin-chat-iframe" src="about:blank" frameborder="0"></iframe>
+    </div>
+</div>
 
-          // 2. Función para cerrar el chat flotante
-          function closeChatModal() {
-              chatIframe.src = 'about:blank'; // Limpiar iframe
-              chatModalContainer.classList.remove('active');
-              // Opcional: Recargar la página principal para actualizar estados si es necesario
-              // window.location.reload(); 
-          }
+<script>
+    // --- Lógica Menú Móvil ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('adminSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
 
-          chatModalCloseBtn.addEventListener('click', closeChatModal);
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        }
+    });
 
-          // 3. Interceptar clics en el botón de CHAT
-          document.querySelectorAll('.btn-chat').forEach(button => {
-              button.addEventListener('click', function(e) {
-                  e.preventDefault(); // Detener la navegación por defecto
-                  
-                  const url = new URL(this.href);
-                  // Extraer el ID del chat/cotización de la URL (asumiendo que es el último segmento)
-                  const parts = url.pathname.split('/').filter(p => p);
-                  const chatId = parts[parts.length - 1]; 
-                  
-                  openChatModal(chatId);
-              });
-          });
-      });
-  </script>
+    // --- Lógica Chat Modal ---
+    const chatModalContainer = document.getElementById('adminChatModalContainer');
+    const chatIframe = document.getElementById('admin-chat-iframe');
+    const chatModalCloseBtn = document.getElementById('adminChatModalCloseBtn');
+    const chatModalTitle = document.getElementById('adminChatModalTitle');
+
+    // Esta variable URL base se procesa en el template Django antes de que cargue el JS
+    const chatBaseUrl = "{% url 'admin_chat_cotizacion' chat_id=0 %}".slice(0, -2); // Quitamos el '0/' del final
+
+    function openChatModal(chatId) {
+        // Construimos la URL dinámica
+        chatIframe.src = chatBaseUrl + chatId + '/';
+        chatModalTitle.textContent = `Cotización #${chatId}`;
+        chatModalContainer.style.display = 'flex';
+    }
+
+    function closeChatModal() {
+        chatIframe.src = 'about:blank';
+        chatModalContainer.style.display = 'none';
+    }
+
+    chatModalCloseBtn.addEventListener('click', closeChatModal);
+</script>
+
 </body>
 </html>

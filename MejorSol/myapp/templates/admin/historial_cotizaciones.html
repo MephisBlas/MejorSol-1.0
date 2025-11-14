@@ -2,192 +2,439 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Historial de Cotizaciones - SIEER Chile</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Cotizaciones - SIEER Chile</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
+    <!-- 1. FUENTES E ICONOS (Directos, sin base.css) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <style>
-    .filters{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:.75rem;margin-bottom:1rem}
-    .filters input,.filters select{background:#14161a;color:#e7f5ef;border:1px solid #2a2f36;border-radius:.6rem;padding:.55rem .7rem}
-    .filters .btn{height:42px}
-    .table{width:100%;border-collapse:collapse;background:#121417;border-radius:.8rem;overflow:hidden}
-    .table th,.table td{padding:.75rem 1rem;border-bottom:1px solid #222831}
-    .table th{background:#0f1115;color:#8ef3c5;text-align:left;font-weight:600}
-    .table tr:hover{background:#151821}
-    .badge{padding:.2rem .5rem;border-radius:.5rem;font-size:.82rem}
-    .badge.ok{background:#103b2b;color:#7dffb8} /* Aprobada */
-    .badge.warn{background:#3a2f10;color:#ffd66b} /* Pendiente */
-    .badge.info{background:#102a3b;color:#6bc2ff} /* En Proceso */
-    .badge.err{background:#3b1010;color:#ffa1a1} /* Rechazada */
-    .pagination{display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem}
-    .pagination a,.pagination span{padding:.4rem .7rem;border:1px solid #2a2f36;border-radius:.5rem;text-decoration:none;color:#e7f5ef}
-    .pagination .active{background:#0acf83;border-color:#0acf83;color:#0a0e12}
-  </style>
+    <style>
+        /* ======================================= */
+        /* 1. RESET TOTAL (INDEPENDIENTE)
+        /* ======================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%; height: 100%;
+            background-color: #050505 !important; /* Negro Puro */
+            font-family: 'Roboto', sans-serif;
+            color: #ffffff;
+            overflow: hidden; /* Evita scroll en body principal */
+        }
+
+        /* Variables Neón */
+        :root {
+            --neon-green: #00ff88; 
+            --neon-hover: #00cc6a;
+            --bg-panel: #0f0f0f; 
+            --border-neon: 1px solid rgba(0, 255, 136, 0.2);
+            --text-gray: #b0b0b0;
+            --danger: #ff4757;
+            --warning: #ffa500;
+            --info: #1e90ff;
+        }
+
+        /* Contenedor Flex Principal */
+        .admin-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* ======================================= */
+        /* 2. SIDEBAR (MENÚ LATERAL)
+        /* ======================================= */
+        .admin-sidebar {
+            width: 280px; height: 100%;
+            background: var(--bg-panel);
+            border-right: var(--border-neon);
+            display: flex; flex-direction: column;
+            flex-shrink: 0; z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .admin-logo { display: flex; align-items: center; gap: 1rem; }
+        .admin-logo img { height: 45px; filter: drop-shadow(0 0 5px rgba(0,255,136,0.4)); }
+        .logo-text h2 { margin: 0; color: #fff; font-size: 1.3rem; font-family: 'Montserrat', sans-serif; }
+        .logo-text span { color: var(--neon-green); font-size: 0.75rem; letter-spacing: 1px; }
+
+        .sidebar-nav { flex: 1; overflow-y: auto; padding: 1rem; }
+        .nav-section h3 { color: #666; font-size: 0.8rem; text-transform: uppercase; margin: 1.5rem 0 0.5rem 0.5rem; font-weight: 700; }
+        
+        .nav-item { list-style: none; margin-bottom: 0.5rem; }
+        .nav-item a {
+            display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+            color: #b0b0b0; text-decoration: none; border-radius: 8px;
+            transition: 0.3s; font-size: 0.95rem; font-weight: 500;
+        }
+        .nav-item a:hover, .nav-item.active a { background: rgba(0, 255, 136, 0.08); color: var(--neon-green); }
+        .nav-item.active a { border-left: 3px solid var(--neon-green); }
+        .nav-item a i { width: 20px; text-align: center; }
+
+        .sidebar-footer { padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); }
+        .user-info { display: flex; gap: 10px; align-items: center; margin-bottom: 1rem; }
+        .user-avatar { 
+            color: var(--neon-green); font-size: 1.2rem; width: 40px; height: 40px; 
+            background: rgba(0,255,136,0.1); border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; 
+        }
+        .user-details strong { display: block; font-size: 0.9rem; }
+        .user-details span { color: #666; font-size: 0.8rem; }
+        
+        .logout-btn {
+            width: 100%; padding: 12px; background: rgba(255, 71, 87, 0.1); color: #ff4757;
+            border: 1px solid rgba(255, 71, 87, 0.3); border-radius: 8px; cursor: pointer;
+            font-weight: 600; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .logout-btn:hover { background: #ff4757; color: #fff; }
+
+        /* ======================================= */
+        /* 3. CONTENIDO PRINCIPAL
+        /* ======================================= */
+        .admin-main {
+            flex-grow: 1; height: 100vh; background: #050505;
+            display: flex; flex-direction: column; overflow-y: auto; position: relative;
+        }
+
+        .admin-header {
+            padding: 1rem 2rem; background: var(--bg-panel); border-bottom: var(--border-neon);
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 500;
+        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header-left h1 { margin: 0; font-family: 'Montserrat', sans-serif; font-size: 1.5rem; color: #fff; }
+        .menu-toggle { display: none; color: var(--neon-green); background: none; border: 1px solid #333; padding: 8px; border-radius: 5px; font-size: 1.2rem; cursor: pointer; }
+        
+        .btn-primary {
+            background: var(--neon-green); color: #000; padding: 10px 20px; border-radius: 50px;
+            text-decoration: none; font-weight: 700; font-size: 0.9rem; border: none; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;
+        }
+        .btn-primary:hover { background: var(--neon-hover); box-shadow: 0 0 15px rgba(0,255,136,0.3); transform: translateY(-2px); }
+
+        .btn-outline {
+            background: transparent; border: 1px solid var(--neon-green); color: var(--neon-green);
+            padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;
+        }
+        .btn-outline:hover { background: rgba(0,255,136,0.1); color: #fff; }
+        
+        /* Botón Gris Sutil */
+        .btn-subtle {
+            background: #222; border: 1px solid #333; color: #999;
+            padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;
+        }
+        .btn-subtle:hover { color: #fff; border-color: #555; }
+
+        /* ======================================= */
+        /* 4. PÁGINA HISTORIAL
+        /* ======================================= */
+        .admin-content { padding: 2rem; padding-bottom: 5rem; }
+
+        /* Panel de Filtros */
+        .filter-panel {
+            background: var(--bg-panel); border: var(--border-neon); border-radius: 16px;
+            padding: 1.5rem; margin-bottom: 2rem;
+            display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;
+        }
+        
+        .search-wrapper {
+            position: relative; flex: 1; min-width: 250px;
+        }
+        .search-icon {
+            position: absolute; left: 15px; top: 50%;
+            transform: translateY(-50%); color: #666;
+        }
+        .search-input {
+            width: 100%; padding: 12px 15px 12px 45px;
+            background: #111; border: 1px solid #333;
+            border-radius: 12px; color: #fff; font-size: 0.95rem;
+            outline: none; transition: 0.3s;
+        }
+        .search-input:focus { border-color: var(--neon-green); box-shadow: 0 0 0 4px rgba(0, 255, 136, 0.1); }
+        .search-input:focus + .search-icon { color: var(--neon-green); }
+
+        /* Selects */
+        .input-group { display: flex; gap: 1rem; }
+        
+        .custom-select {
+            appearance: none; -webkit-appearance: none;
+            padding: 12px 40px 12px 15px;
+            background: #111; border: 1px solid #333;
+            border-radius: 12px; color: #fff; font-size: 0.95rem;
+            cursor: pointer; outline: none; transition: 0.3s;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+        }
+        .custom-select:focus { border-color: var(--neon-green); }
+
+        .filter-buttons { margin-left: auto; display: flex; gap: 10px; }
+
+        /* Tabla */
+        .table-card {
+            background: var(--bg-panel); border: var(--border-neon);
+            border-radius: 16px; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .table-responsive { overflow-x: auto; }
+        
+        .styled-table { width: 100%; border-collapse: collapse; }
+        .styled-table th {
+            text-align: left; padding: 1rem 1.5rem; background: rgba(0,255,136,0.05);
+            color: var(--neon-green); font-weight: 700; text-transform: uppercase;
+            font-size: 0.8rem; white-space: nowrap;
+        }
+        .styled-table td {
+            padding: 1rem 1.5rem; border-bottom: 1px solid #222;
+            color: #ddd; vertical-align: middle; font-size: 0.95rem;
+        }
+        .styled-table tr:hover { background: rgba(255,255,255,0.02); }
+
+        /* Badges de Estado */
+        .badge {
+            padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; display: inline-block;
+        }
+        .badge.ok { color: var(--neon-green); border: 1px solid var(--neon-green); background: rgba(0,255,136,0.1); }
+        .badge.warn { color: var(--warning); border: 1px solid var(--warning); background: rgba(255,165,0,0.1); }
+        .badge.info { color: var(--info); border: 1px solid var(--info); background: rgba(30,144,255,0.1); }
+        .badge.err { color: var(--danger); border: 1px solid var(--danger); background: rgba(255,71,87,0.1); }
+
+        /* Botón de acción en tabla */
+        .btn-action {
+            background: #222; border: 1px solid #333; color: #999;
+            padding: 8px 12px; border-radius: 8px; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;
+        }
+        .btn-action:hover { color: #fff; border-color: #555; }
+        .btn-action.chat:hover { color: var(--neon-green); border-color: var(--neon-green); }
+
+        /* Paginador */
+        .pagination {
+            display: flex; gap: 0.5rem; justify-content: center;
+            margin-top: 2rem; padding: 1.5rem;
+            border-top: 1px solid #222;
+        }
+        .pagination a, .pagination span {
+            padding: 8px 14px; border: 1px solid #333;
+            border-radius: 8px; text-decoration: none; color: var(--text-gray);
+        }
+        .pagination a:hover {
+            border-color: var(--neon-green); color: var(--neon-green);
+        }
+        .pagination .active {
+            background: var(--neon-green);
+            border-color: var(--neon-green);
+            color: #000; font-weight: 700;
+        }
+
+        /* ======================================= */
+        /* 5. RESPONSIVE MÓVIL
+        /* ======================================= */
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; backdrop-filter: blur(5px); }
+
+        @media (max-width: 992px) {
+            .admin-sidebar { position: fixed; left: -280px; }
+            .admin-sidebar.active { left: 0; box-shadow: 10px 0 30px rgba(0,0,0,0.8); }
+            .sidebar-overlay.active { display: block; }
+            
+            .menu-toggle { display: block; }
+            .header-left { display: flex; align-items: center; }
+            
+            .admin-content { padding: 1rem; padding-bottom: 6rem; }
+            
+            .filter-panel { flex-direction: column; align-items: stretch; gap: 1rem; }
+            .input-group { flex-direction: column; gap: 1rem; }
+            .filter-buttons { flex-direction: column; }
+            .btn-primary, .btn-outline { justify-content: center; }
+            
+            .table-responsive { overflow-x: auto; }
+            
+            .header-right .btn-primary span { display: none; }
+        }
+    </style>
 </head>
 
 <body>
 <div class="admin-container">
 
-  <aside class="admin-sidebar">
-    <div class="sidebar-header">
-      <div class="admin-logo">
-        <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo">
-        <div class="logo-text"><h2>SIEER Chile</h2><span>Panel Administrativo</span></div>
-      </div>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section">
-        <h3>Facturación</h3>
-        <ul>
-                      <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
-                            <a href="{% url 'admin_panel' %}">
-                                <i class="fas fa-tachometer-alt"></i> <!-- Ícono cambiado -->
-                                <span>Dashboard</span> <!-- Texto cambiado -->
-                            </a>
-                        </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}">
-            <a href="{% url 'calculos_estadisticas' %}"><i class="fas fa-calculator"></i><span>Cálculos y Estadísticas</span></a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'cotizaciones' %}active{% endif %}">
-            <a href="{% url 'cotizaciones' %}"><i class="fas fa-file-alt"></i><span>Cotizaciones</span></a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'control_inventario' %}active{% endif %}">
-            <a href="{% url 'control_inventario' %}"><i class="fas fa-boxes"></i><span>Control de Inventario</span></a>
-          </li>
-        </ul>
-      </div>
-      <div class="nav-section">
-        <h3>Reportes</h3>
-        <ul>
-          <li class="nav-item {% if request.resolver_match.url_name == 'reportes_graficos' %}active{% endif %}">
-            <a href="{% url 'reportes_graficos' %}"><i class="fas fa-chart-bar"></i><span>Reportes Gráficos</span></a>
-          </li>
-          
-              <li class="nav-item {% if request.resolver_match.url_name == 'historial_cotizaciones' %}active{% endif %}">
-                  <a href="{% url 'historial_cotizaciones' %}">
-                      <i class="fas fa-history"></i><span>Historial de Cotizaciones</span>
-                  </a>
-              </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}">
-            <a href="{% url 'cuenta' %}"><i class="fas fa-user-cog"></i><span>Cuenta</span></a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'configuracion' %}active{% endif %}">
-            <a href="{% url 'configuracion' %}"><i class="fas fa-cogs"></i><span>Configuración</span></a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
-        <div class="user-details"><strong>Administrador</strong><span>{{ user.username }}</span></div>
-      </div>
-      <form method="post" action="{% url 'logout' %}" class="logout-form">
-        {% csrf_token %}
-        <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
-      </form>
-    </div>
-  </aside>
-
-  <main class="admin-main">
-    <header class="admin-header">
-      <div class="header-left">
-        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
-        <h1>Historial de Cotizaciones</h1>
-      </div>
-      <div class="header-right">
-        <a class="btn btn-primary" href="{% url 'admin_panel' %}"><i class="fas fa-arrow-left"></i> Volver al Panel</a>
-      </div>
-    </header>
-
-    <div class="admin-content">
-      <form class="filters" method="get">
-        <input type="text" name="q" placeholder="Buscar ID, cliente, producto…" value="{{ q }}">
-        
-        <select name="estado">
-          <option value="">Estado (todos)</option>
-          <option value="pendiente"  {% if estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
-          <option value="en_proceso" {% if estado == 'en_proceso' %}selected{% endif %}>En Proceso</option>
-          <option value="aprobada"   {% if estado == 'aprobada' %}selected{% endif %}>Aprobada</option>
-          <option value="rechazada"  {% if estado == 'rechazada' %}selected{% endif %}>Rechazada</option>
-        </select>
-        
-        <input type="date" name="desde" value="{{ desde }}">
-        <input type="date" name="hasta" value="{{ hasta }}">
-        
-        <button class="btn btn-primary" type="submit"><i class="fas fa-filter"></i> Filtrar</button>
-        <a class="btn btn-outline" href="{% url 'historial_cotizaciones' %}"><i class="fas fa-rotate"></i> Limpiar</a>
-      </form>
-
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Fecha Actualiz.</th>
-            <th>ID</th>
-            <th>Cliente</th>
-            <th>Producto</th>
-            <th>Estado</th>
-            <th>Admin Asignado</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% if cotizaciones %}
-            {% for cot in cotizaciones %}
-              <tr>
-                <td>{{ cot.fecha_actualizacion|date:"Y-m-d H:i" }}</td>
-                <td>#{{ cot.id }}</td>
-                <td>{{ cot.cliente.get_full_name|default:cot.cliente.username }}</td>
-                <td>{{ cot.producto.nombre }}</td>
-                <td>
-                  {% if cot.estado == "aprobada" %}<span class="badge ok">Aprobada</span>
-                  {% elif cot.estado == "pendiente" %}<span class="badge warn">Pendiente</span>
-                  {% elif cot.estado == "en_proceso" %}<span class="badge info">En Proceso</span>
-                  {% elif cot.estado == "rechazada" %}<span class="badge err">Rechazada</span>
-                  {% else %}<span class="badge">{{ cot.get_estado_display }}</span>
-                  {% endif %}
-                </td>
-                <td>{{ cot.admin_asignado.username|default:"N/A" }}</td>
-                <td>
-                    <a href="{% url 'admin_chat_cotizacion' chat_id=cot.id %}" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.2rem 0.5rem;">
-                        <i class="fas fa-comments"></i> Ver Chat
-                    </a>
-                </td>
-              </tr>
-            {% endfor %}
-          {% else %}
-            <tr><td colspan="7">No se encontraron cotizaciones con esos filtros.</td></tr>
-          {% endif %}
-        </tbody>
-      </table>
-
-      {% if page_obj and page_obj.has_other_pages %}
-        <div class="pagination">
-          {% if page_obj.has_previous %}
-            <a href="?page=1&q={{ q }}&estado={{ estado }}&desde={{ desde }}&hasta={{ hasta }}">« Primero</a>
-            <a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&estado={{ estado }}&desde={{ desde }}&hasta={{ hasta }}">‹ Anterior</a>
-          {% endif %}
-          
-          <span class="active">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-          
-          {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}&q={{ q }}&estado={{ estado }}&desde={{ desde }}&hasta={{ hasta }}">Siguiente ›</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}&q={{ q }}&estado={{ estado }}&desde={{ desde }}&hasta={{ hasta }}">Última »</a>
-          {% endif %}
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <div class="admin-logo">
+                <img src="{% static 'img/logo.png' %}" alt="SIEER">
+                <div class="logo-text"><h2>SIEER Chile</h2><span>Panel Admin</span></div>
+            </div>
         </div>
-      {% endif %}
-      
-    </div>
-  </main>
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <h3>Facturación</h3>
+                <ul>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}"><a href="{% url 'admin_panel' %}"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}"><a href="{% url 'calculos_estadisticas' %}"><i class="fas fa-calculator"></i><span>Cálculos</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'cotizaciones' %}active{% endif %}"><a href="{% url 'cotizaciones' %}"><i class="fas fa-file-invoice-dollar"></i><span>Cotizaciones</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'control_inventario' %}active{% endif %}"><a href="{% url 'control_inventario' %}"><i class="fas fa-boxes"></i><span>Inventario</span></a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <h3>Reportes</h3>
+                <ul>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'reportes_graficos' %}active{% endif %}"><a href="{% url 'reportes_graficos' %}"><i class="fas fa-chart-bar"></i><span>Gráficos</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'historial_cotizaciones' %}active{% endif %}"><a href="{% url 'historial_cotizaciones' %}"><i class="fas fa-history"></i><span>Historial</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}"><a href="{% url 'cuenta' %}"><i class="fas fa-user-cog"></i><span>Cuenta</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'configuracion' %}active{% endif %}"><a href="{% url 'configuracion' %}"><i class="fas fa-cogs"></i><span>Configuración</span></a></li>
+                </ul>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+                <div class="user-details"><strong>{{ user.username }}</strong><span>Administrador</span></div>
+            </div>
+            <form method="post" action="{% url 'logout' %}" class="logout-form">{% csrf_token %}<button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button></form>
+        </div>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Contenido Principal -->
+    <main class="admin-main">
+        <header class="admin-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+                <h1>Historial de Cotizaciones</h1>
+            </div>
+            <div class="header-right">
+                <a class="btn-primary" href="{% url 'admin_panel' %}"><i class="fas fa-arrow-left"></i> <span>Volver</span></a>
+            </div>
+        </header>
+
+        <div class="admin-content">
+            <!-- Panel de Filtros -->
+            <form class="filter-panel" method="get">
+                <div class="search-wrapper">
+                    <input type="text" name="q" placeholder="Buscar ID, cliente, producto…" value="{{ q }}" class="search-input">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                
+                <div class="input-group">
+                    <div class="select-wrapper">
+                        <select name="estado" class="custom-select">
+                            <option value="">Estado (todos)</option>
+                            <option value="pendiente"  {% if estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                            <option value="en_proceso" {% if estado == 'en_proceso' %}selected{% endif %}>En Proceso</option>
+                            <option value="aprobada"   {% if estado == 'aprobada' %}selected{% endif %}>Aprobada</option>
+                            <option value="rechazada"  {% if estado == 'rechazada' %}selected{% endif %}>Rechazada</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                    
+                    <input type="date" name="desde" value="{{ desde }}" class="custom-select" style="padding:10px 15px;">
+                    <input type="date" name="hasta" value="{{ hasta }}" class="custom-select" style="padding:10px 15px;">
+                </div>
+
+                <div class="filter-buttons">
+                    <button class="btn-primary" type="submit"><i class="fas fa-filter"></i> Filtrar</button>
+                    <a class="btn-subtle" href="{% url 'historial_cotizaciones' %}"><i class="fas fa-times"></i> Limpiar</a>
+                </div>
+            </form>
+
+            <!-- Tabla de Resultados -->
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Producto</th>
+                                <th>Estado</th>
+                                <th>Admin</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if page_obj %}
+                                {% for cot in page_obj %}
+                                <tr>
+                                    <td>{{ cot.fecha_actualizacion|date:"d M Y" }}</td>
+                                    <td>#{{ cot.id }}</td>
+                                    <td>{{ cot.cliente.get_full_name|default:cot.cliente.username }}</td>
+                                    <td>{{ cot.producto.nombre }}</td>
+                                    <td>
+                                        {% if cot.estado == "aprobada" %}<span class="badge ok">Aprobada</span>
+                                        {% elif cot.estado == "pendiente" %}<span class="badge warn">Pendiente</span>
+                                        {% elif cot.estado == "en_proceso" %}<span class="badge info">En Proceso</span>
+                                        {% elif cot.estado == "rechazada" %}<span class="badge err">Rechazada</span>
+                                        {% else %}<span class="badge">{{ cot.get_estado_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ cot.admin_asignado.username|default:"N/A" }}</td>
+                                    <td>
+                                        <a href="{% url 'admin_chat_cotizacion' chat_id=cot.id %}" class="btn-action chat">
+                                            <i class="fas fa-comments"></i> Ver Chat
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="7" style="text-align:center; padding:3rem; color:#666;">No se encontraron cotizaciones con esos filtros.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if page_obj and page_obj.has_other_pages %}
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1&q={{ q }}&estado={{ estado }}&desde={{ desde }}&hasta={{ hasta }}">«</a>
+                        <a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&estado={{ estado }}&desde={{ desde }}&hasta={{ hasta }}">‹</a>
+                    {% endif %}
+                    
+                    <span class="active">Pág. {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}&q={{ q }}&estado={{ estado }}&desde={{ desde }}&hasta={{ hasta }}">›</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}&q={{ q }}&estado={{ estado }}&desde={{ desde }}&hasta={{ hasta }}">»</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+        </div>
+    </main>
 </div>
 
-<script src="{% static 'js/admin_panel.js' %}"></script>
+<script>
+    // Lógica del Menú Móvil
+    document.addEventListener('DOMContentLoaded', () => {
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('adminSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        }
+    });
+</script>
 </body>
 </html>

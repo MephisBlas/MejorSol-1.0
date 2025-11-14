@@ -2,325 +2,410 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Configuración - SIEER Chile</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Configuración - SIEER Chile</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
-  
-  <style>
-    /* ======================================= */
-    /* ¡CSS ESTÉTICO PARA CONFIGURACIÓN!       */
-    /* ======================================= */
-
-    /* 1. Variables de Estilo (Consistentes) */
-    :root {
-        --ms-panel: rgba(25, 25, 35, 0.9);
-        --ms-border: 1px solid rgba(0, 255, 136, 0.3);
-        --ms-accent: #00ffaa;
-        --neon-glow: 0 0 20px rgba(0, 255, 136, 0.5);
-        --ms-text: #ffffff;
-        --ms-muted: #b0b0b0;
-        --danger-color: #ff4757;
-        --danger-border: 1px solid rgba(255, 71, 87, 0.4);
-        --danger-glow: 0 0 20px rgba(255, 71, 87, 0.3);
-    }
-
-    /* 2. Layout en Grid (Más organizado) */
-    .admin-content {
-        display: grid;
-        grid-template-columns: 2fr 1fr; /* Columna principal más ancha */
-        gap: 2rem;
-    }
-
-    /* 3. Tarjeta de Configuración (Estilo Neón) */
-    .config-card {
-        background: var(--ms-panel);
-        border: var(--ms-border);
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: var(--neon-glow);
-        height: fit-content; /* Para que se ajuste al contenido */
-    }
-
-    .config-card h2 {
-        color: var(--ms-accent);
-        margin-top: 0;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: var(--ms-border);
-        font-family: 'Montserrat', sans-serif;
-    }
-
-    /* 4. Estilos de Formulario (Como en Inventario) */
-    .config-form {
-        display: grid;
-        grid-template-columns: 1fr 1fr; /* Dos columnas para el form principal */
-        gap: 1.5rem;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .form-group.full-width {
-        grid-column: 1 / -1; /* Ocupa todo el ancho */
-    }
-
-    .form-group label {
-        color: var(--ms-text);
-        font-weight: 500;
-        font-size: 0.9rem;
-    }
-
-    .form-group input,
-    .form-group select {
-        padding: 0.75rem;
-        border: 1px solid rgba(0, 255, 136, 0.2);
-        border-radius: 12px;
-        background: #121a26;
-        color: var(--ms-text);
-        font-size: 1rem;
-        transition: all 0.3s ease;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus {
-        outline: none;
-        border-color: var(--ms-accent);
-        box-shadow: 0 0 0 2px rgba(41, 255, 154, 0.3);
-    }
-
-    /* 5. ¡NUEVO! Interruptor (Toggle Switch) Estético */
-    .switch-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        padding: 1rem;
-        background: #121a26;
-        border-radius: 12px;
-        border: 1px solid rgba(0, 255, 136, 0.2);
-    }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    .switch-label {
-        color: var(--ms-text);
-        font-weight: 500;
-        margin: 0;
-    }
+    <style>
+        /* ======================================= */
+        /* 1. RESET & BASE
+        /* ======================================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    .toggle-checkbox {
-        display: none; /* Oculta el checkbox feo */
-    }
+        html, body {
+            width: 100%; height: 100%;
+            background-color: #050505;
+            font-family: 'Roboto', sans-serif;
+            color: #ffffff;
+            overflow: hidden;
+        }
 
-    .toggle-switch {
-        position: relative;
-        display: inline-block;
-        width: 44px; /* Ancho del interruptor */
-        height: 24px; /* Alto del interruptor */
-        background-color: #334155;
-        border-radius: 34px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
+        .admin-container { display: flex; width: 100vw; height: 100vh; }
 
-    /* El círculo (thumb) */
-    .toggle-switch::after {
-        content: '';
-        position: absolute;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        background-color: white;
-        top: 3px;
-        left: 4px;
-        transition: transform 0.3s ease;
-    }
+        /* Variables Neón */
+        :root {
+            --neon-green: #00ff88; 
+            --neon-hover: #00cc6a;
+            --bg-panel: #0f0f0f; 
+            --border-neon: 1px solid rgba(0, 255, 136, 0.2);
+            --text-gray: #b0b0b0;
+            --danger: #ff4757;
+            --warning: #ffa500;
+            --info: #3b82f6;
+        }
 
-    /* Estado "Encendido" */
-    .toggle-checkbox:checked + .toggle-switch {
-        background-color: var(--ms-accent);
-    }
+        /* ======================================= */
+        /* 2. SIDEBAR (Igual al resto)
+        /* ======================================= */
+        .admin-sidebar {
+            width: 280px; height: 100%;
+            background: var(--bg-panel);
+            border-right: var(--border-neon);
+            display: flex; flex-direction: column;
+            flex-shrink: 0; z-index: 1000;
+            transition: transform 0.3s ease;
+        }
 
-    .toggle-checkbox:checked + .toggle-switch::after {
-        transform: translateX(20px); /* Mueve el círculo */
-    }
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .admin-logo { display: flex; align-items: center; gap: 1rem; }
+        .admin-logo img { height: 45px; filter: drop-shadow(0 0 5px rgba(0,255,136,0.4)); }
+        .logo-text h2 { margin: 0; color: #fff; font-size: 1.3rem; font-family: 'Montserrat', sans-serif; }
+        .logo-text span { color: var(--neon-green); font-size: 0.75rem; letter-spacing: 1px; }
 
-    /* 6. Zona de Peligro (Restablecer) */
-    .danger-zone {
-        border: var(--danger-border);
-        box-shadow: var(--danger-glow);
-    }
-    .danger-zone h2 {
-        color: var(--danger-color);
-        border-bottom: var(--danger-border);
-    }
-    .danger-zone p {
-        color: var(--ms-muted);
-        font-size: 0.9rem;
-        line-height: 1.5;
-    }
-    
-    /* Botón de peligro */
-    .btn-danger-outline {
-        background: transparent;
-        border: 1px solid var(--danger-color);
-        color: var(--danger-color);
-    }
-    .btn-danger-outline:hover {
-        background: rgba(255, 71, 87, 0.1);
-        color: #ff8f8f;
-        box-shadow: 0 0 10px rgba(255, 71, 87, 0.3);
-    }
+        .sidebar-nav { flex: 1; overflow-y: auto; padding: 1.5rem 1rem; }
+        .nav-section h3 { 
+            color: #666; font-size: 0.75rem; font-weight: 700; 
+            text-transform: uppercase; margin: 0 0 0.8rem 0.5rem; letter-spacing: 1px;
+        }
+        
+        .nav-item { list-style: none; margin-bottom: 0.5rem; }
+        .nav-item a {
+            display: flex; align-items: center; gap: 12px; padding: 10px 15px;
+            color: #888; text-decoration: none; border-radius: 8px;
+            transition: 0.3s; font-size: 0.9rem; font-weight: 500;
+            border-left: 3px solid transparent;
+        }
+        .nav-item a:hover { background: rgba(255, 255, 255, 0.03); color: #fff; }
+        .nav-item.active a { 
+            background: rgba(0, 255, 136, 0.1); color: var(--neon-green); font-weight: 600;
+            border-left: 3px solid var(--neon-green);
+        }
+        .nav-item a i { width: 20px; text-align: center; font-size: 1.1rem; }
+        .nav-item.active a i { color: var(--neon-green); }
 
-    /* 7. Contenedor de Acciones (Botones) */
-    .form-actions {
-        display: flex;
-        gap: 1rem;
-        justify-content: flex-end;
-        margin-top: 2rem;
-        padding-top: 1.5rem;
-        border-top: var(--ms-border);
-    }
+        .sidebar-footer { padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); }
+        .user-info { display: flex; gap: 12px; align-items: center; margin-bottom: 1.2rem; }
+        .user-avatar { 
+            width: 40px; height: 40px; background: var(--neon-green); color: #000; 
+            border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem;
+        }
+        .user-details strong { display: block; font-size: 0.95rem; color: #fff; }
+        .user-details span { color: #666; font-size: 0.8rem; }
+        
+        .logout-btn {
+            width: 100%; padding: 10px; background: rgba(255, 71, 87, 0.1); color: #ff4757;
+            border: 1px solid rgba(255, 71, 87, 0.3); border-radius: 8px; cursor: pointer;
+            font-weight: 600; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 0.9rem;
+        }
+        .logout-btn:hover { background: #ff4757; color: #fff; box-shadow: 0 0 15px rgba(255, 71, 87, 0.4); }
 
-    /* 8. Media Query para pantallas pequeñas */
-    @media (max-width: 992px) {
+        /* ======================================= */
+        /* 3. CONTENIDO PRINCIPAL
+        /* ======================================= */
+        .admin-main {
+            flex-grow: 1; height: 100vh; background: #050505;
+            display: flex; flex-direction: column; overflow-y: auto; position: relative;
+        }
+
+        /* HEADER RESPONSIVE FIX */
+        .admin-header {
+            padding: 1rem 1.5rem; background: var(--bg-panel); border-bottom: var(--border-neon);
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 500; height: 70px;
+        }
+        
+        .header-left { display: flex; align-items: center; gap: 15px; flex: 1; }
+        /* Título se ajusta o se oculta en pantallas muy pequeñas */
+        .header-left h1 { 
+            margin: 0; color: #fff; font-family: 'Montserrat', sans-serif; font-size: 1.4rem; 
+            display: flex; align-items: center; gap: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        
+        .menu-toggle { 
+            display: none; color: var(--neon-green); background: none; 
+            border: 1px solid #333; padding: 8px; border-radius: 5px; 
+            font-size: 1.2rem; cursor: pointer; flex-shrink: 0;
+        }
+
+        /* Botones Generales */
+        .btn {
+            padding: 10px 20px; border-radius: 50px; font-weight: 700; font-size: 0.9rem;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+            transition: 0.3s; cursor: pointer; border: none;
+        }
+        
+        .btn-primary { background: var(--neon-green); color: #000; }
+        .btn-primary:hover { background: var(--neon-hover); box-shadow: 0 0 15px rgba(0,255,136,0.3); transform: translateY(-2px); }
+        
+        .btn-outline { background: transparent; border: 1px solid var(--neon-green); color: var(--neon-green); }
+        .btn-outline:hover { background: rgba(0,255,136,0.1); color: #fff; }
+
+        .btn-danger-outline { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
+        .btn-danger-outline:hover { background: rgba(255,71,87,0.1); color: #fff; }
+        
+        /* Botón Info (Azul) para Django Admin */
+        .btn-info { background: rgba(59, 130, 246, 0.2); border: 1px solid var(--info); color: var(--info); }
+        .btn-info:hover { background: var(--info); color: #fff; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+
+        /* Badges de Rol */
+        .role-badge {
+            padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; vertical-align: middle; border: 1px solid transparent;
+        }
+        .badge-super { color: var(--warning); border-color: var(--warning); background: rgba(255,165,0,0.1); }
+        .badge-staff { color: var(--info); border-color: var(--info); background: rgba(59,130,246,0.1); }
+
+        /* ======================================= */
+        /* 4. PÁGINA CONFIGURACIÓN (CONTENIDO)
+        /* ======================================= */
         .admin-content {
-            grid-template-columns: 1fr; /* Apila las columnas */
+            padding: 2rem; padding-bottom: 5rem;
+            display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;
         }
-        .config-form {
-            grid-template-columns: 1fr; /* Apila los campos del formulario */
+
+        /* Tarjetas */
+        .config-card {
+            background: var(--bg-panel); border: var(--border-neon); border-radius: 16px;
+            padding: 2rem; box-shadow: 0 0 20px rgba(0,255,136,0.05); height: fit-content;
         }
-    }
-  </style>
+        .config-card h2 { 
+            margin-top: 0; color: var(--neon-green); font-family: 'Montserrat', sans-serif; font-size: 1.2rem;
+            border-bottom: 1px solid #333; padding-bottom: 1rem; margin-bottom: 1.5rem; 
+        }
+        .config-card p { color: #888; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem; }
+
+        /* Formularios */
+        .config-form { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        
+        .form-group label { color: #fff; font-size: 0.9rem; font-weight: 600; }
+        .form-group input {
+            width: 100%; padding: 12px; background: #050505; border: 1px solid #333;
+            border-radius: 10px; color: #fff; outline: none; font-family: 'Roboto', sans-serif;
+            transition: 0.3s;
+        }
+        .form-group input:focus { border-color: var(--neon-green); box-shadow: 0 0 8px rgba(0,255,136,0.15); }
+        
+        .form-actions {
+            grid-column: 1 / -1; display: flex; justify-content: flex-end;
+            border-top: 1px solid #333; padding-top: 1.5rem; margin-top: 0.5rem;
+        }
+
+        /* Zona Peligro */
+        .danger-zone { border-color: var(--danger); box-shadow: 0 0 20px rgba(255,71,87,0.1); }
+        .danger-zone h2 { color: var(--danger); border-bottom-color: rgba(255,71,87,0.3); }
+
+        /* Zona Info (SuperAdmin) */
+        .info-zone { border-color: var(--info); box-shadow: 0 0 20px rgba(59, 130, 246, 0.1); }
+        .info-zone h2 { color: var(--info); border-bottom-color: rgba(59, 130, 246, 0.3); }
+
+        /* Detalles */
+        .user-details-list { margin-top: 1rem; border-top: 1px solid #333; padding-top: 1rem; font-size: 0.9rem; color: #aaa; }
+        .user-details-list div { margin-bottom: 8px; display: flex; justify-content: space-between; }
+        .user-details-list strong { color: #fff; }
+
+        /* ======================================= */
+        /* 5. RESPONSIVE MÓVIL (FIXES CRÍTICOS)
+        /* ======================================= */
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; backdrop-filter: blur(5px); }
+
+        @media (max-width: 992px) {
+            .admin-sidebar { position: fixed; left: -280px; }
+            .admin-sidebar.active { left: 0; box-shadow: 10px 0 30px rgba(0,0,0,0.8); }
+            .sidebar-overlay.active { display: block; }
+            
+            .menu-toggle { display: block; margin-right: 10px; }
+            
+            /* HEADER FIX: Evitar superposición */
+            .admin-header { padding: 0.8rem 1rem; }
+            .header-left h1 { font-size: 1.1rem; } /* Título más pequeño */
+            .header-left h1 .role-badge { display: none; } /* Ocultar badge en móvil para ahorrar espacio */
+            
+            /* Botón "Volver": Solo icono */
+            .header-right .btn-primary { 
+                padding: 8px 12px; 
+                font-size: 1rem; 
+                border-radius: 8px; 
+                width: 40px; height: 40px;
+                display: flex; justify-content: center;
+            }
+            .header-right .btn-primary span { display: none; } /* Ocultar texto "Volver" */
+            .header-right .btn-outline { display: none; } /* Ocultar botón Admin Django en header móvil */
+
+            /* CONTENIDO: Una columna */
+            .admin-content { 
+                grid-template-columns: 1fr; 
+                padding: 1rem; padding-bottom: 6rem; gap: 1.5rem;
+            }
+            
+            /* Formularios: Inputs full width */
+            .config-form { grid-template-columns: 1fr; }
+            
+            /* Botones de acción full width en móvil */
+            .form-actions button { width: 100%; justify-content: center; }
+            
+            .config-card { padding: 1.5rem; }
+        }
+    </style>
 </head>
+
 <body>
 <div class="admin-container">
 
-  <aside class="admin-sidebar">
-    <div class="sidebar-header">
-      <div class="admin-logo">
-        <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo">
-        <div class="logo-text"><h2>SIEER Chile</h2><span>Panel Administrativo</span></div>
-      </div>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="nav-section">
-        <h3>Facturación</h3>
-        <ul>
-                      <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
-                            <a href="{% url 'admin_panel' %}">
-                                <i class="fas fa-tachometer-alt"></i> <!-- Ícono cambiado -->
-                                <span>Dashboard</span> <!-- Texto cambiado -->
-                            </a>
-                        </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}">
-            <a href="{% url 'calculos_estadisticas' %}"><i class="fas fa-calculator"></i><span>Cálculos y Estadísticas</span></a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'cotizaciones' %}active{% endif %}">
-            <a href="{% url 'cotizaciones' %}"><i class="fas fa-file-alt"></i><span>Cotizaciones</span></a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'control_inventario' %}active{% endif %}">
-            <a href="{% url 'control_inventario' %}"><i class="fas fa-boxes"></i><span>Control de Inventario</span></a>
-          </li>
-        </ul>
-      </div>
-      <div class="nav-section">
-        <h3>Reportes</h3>
-        <ul>
-          <li class="nav-item {% if request.resolver_match.url_name == 'reportes_graficos' %}active{% endif %}">
-            <a href="{% url 'reportes_graficos' %}"><i class="fas fa-chart-bar"></i><span>Reportes Gráficos</span></a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'historial_cotizaciones' %}active{% endif %}">
-              <a href="{% url 'historial_cotizaciones' %}"><i class="fas fa-history"></i><span>Historial de Cotizaciones</span></a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}">
-            <a href="{% url 'cuenta' %}"><i class="fas fa-user-cog"></i><span>Cuenta</span></a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'configuracion' %}active{% endif %}">
-            <a href="{% url 'configuracion' %}"><i class="fas fa-cogs"></i><span>Configuración</span></a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
-        <div class="user-details"><strong>Administrador</strong><span>{{ user.username }}</span></div>
-      </div>
-      <form method="post" action="{% url 'logout' %}" class="logout-form">
-        {% csrf_token %}
-        <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
-      </form>
-    </div>
-  </aside>
-
-  <main class="admin-main">
-    <header class="admin-header">
-      <div class="header-left">
-        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
-        <h1>Configuración</h1>
-      </div>
-      <div class="header-right">
-        <a class="btn btn-primary" href="{% url 'admin_panel' %}">
-          <i class="fas fa-arrow-left"></i> Volver al Panel
-        </a>
-      </div>
-    </header>
-
-    <div class="admin-content">
-
-      <div class="config-card">
-        <h2>Información del Sistema</h2>
-        <form method="post" class="config-form">
-          {% csrf_token %}
-          
-          <div class="form-group">
-            <label for="system_name">Nombre del sistema</label>
-            <input type="text" id="system_name" name="system_name" value="{{ config.system_name|default:'SIEER Chile' }}">
-          </div>
-          
-          <div class="form-group">
-            <label for="email">Correo de contacto</label>
-            <input type="email" id="email" name="email" value="{{ config.email|default:'contacto@sieer.cl' }}">
-          </div>
-
-          <div class="form-group full-width">
-            <label for="telefono">Teléfono</label>
-            <input type="tel" id="telefono" name="telefono" value="{{ config.telefono|default:'+56 9 8152 0994' }}">
-          </div>
-          
-          <div class="form-actions full-width">
-            <button class="btn btn-primary" type="submit">
-              <i class="fas fa-save"></i> Guardar cambios
-            </button>
-          </div>
-        </form>
-      </div>
-
-        <div class="config-card danger-zone">
-          <h2>Restablecer Sistema</h2>
-          <p>Esta acción eliminará configuraciones personalizadas y restablecerá los valores predeterminados. Úsala con precaución.</p>
-          <div class="form-actions">
-            <button class="btn btn-danger-outline">
-              <i class="fas fa-undo"></i> Restablecer valores
-            </button>
-          </div>
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <div class="admin-logo">
+                <img src="{% static 'img/logo.png' %}" alt="SIEER">
+                <div class="logo-text"><h2>SIEER Chile</h2><span>Panel Admin</span></div>
+            </div>
         </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <h3>Facturación</h3>
+                <ul>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}"><a href="{% url 'admin_panel' %}"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}"><a href="{% url 'calculos_estadisticas' %}"><i class="fas fa-calculator"></i><span>Cálculos</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'cotizaciones' %}active{% endif %}"><a href="{% url 'cotizaciones' %}"><i class="fas fa-file-invoice-dollar"></i><span>Cotizaciones</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'control_inventario' %}active{% endif %}"><a href="{% url 'control_inventario' %}"><i class="fas fa-boxes"></i><span>Inventario</span></a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <h3>Reportes</h3>
+                <ul>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'reportes_graficos' %}active{% endif %}"><a href="{% url 'reportes_graficos' %}"><i class="fas fa-chart-bar"></i><span>Gráficos</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'historial_cotizaciones' %}active{% endif %}"><a href="{% url 'historial_cotizaciones' %}"><i class="fas fa-history"></i><span>Historial</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}"><a href="{% url 'cuenta' %}"><i class="fas fa-user-cog"></i><span>Cuenta</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'configuracion' %}active{% endif %}"><a href="{% url 'configuracion' %}"><i class="fas fa-cogs"></i><span>Configuración</span></a></li>
+                </ul>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+                <div class="user-details"><strong>{{ user.username }}</strong><span>Administrador</span></div>
+            </div>
+            <form method="post" action="{% url 'logout' %}" class="logout-form">{% csrf_token %}<button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button></form>
+        </div>
+    </aside>
 
-      </div>
-    </div>
-  </main>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <main class="admin-main">
+        <header class="admin-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+                <h1>
+                    Configuración
+                    {% if user.is_superuser %}<span class="role-badge badge-super">Superusuario</span>
+                    {% elif user.is_staff %}<span class="role-badge badge-staff">Staff</span>{% endif %}
+                </h1>
+            </div>
+            <div class="header-right">
+                <a class="btn-primary" href="{% url 'admin_panel' %}">
+                    <i class="fas fa-arrow-left"></i> <span>Volver</span>
+                </a>
+                {% if user.is_superuser %}
+                <a class="btn-outline" href="/admin/" style="margin-left:10px;" title="Django Admin"><i class="fas fa-shield-alt"></i> <span>Admin</span></a>
+                {% endif %}
+            </div>
+        </header>
+
+        <div class="admin-content">
+            
+            {% if messages %}
+            <div class="messages-container" style="grid-column: 1 / -1; margin-bottom: 0;">
+                {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                    <i class="fas fa-info-circle"></i> {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                
+                <div class="config-card">
+                    <h2>Información del Sistema</h2>
+                    <form method="post" class="config-form">
+                        {% csrf_token %}
+                        <div class="form-group full-width">
+                            <label>Nombre del sistema</label>
+                            <input type="text" name="system_name" value="{{ config.system_name|default:'SIEER Chile' }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Correo de contacto</label>
+                            <input type="email" name="email" value="{{ config.email|default:'contacto@sieer.cl' }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="tel" name="telefono" value="{{ config.telefono|default:'+56 9 8152 0994' }}">
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-primary" type="submit" name="update_config"><i class="fas fa-save"></i> Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                
+                {% if user.is_superuser %}
+                <div class="config-card info-zone">
+                    <h2>Herramientas SuperAdmin</h2>
+                    <p>Gestiona usuarios, permisos y datos maestros desde el panel de Django.</p>
+                    
+                    <div class="user-details-list">
+                        <div><strong>Usuario:</strong> <span>{{ user.username }}</span></div>
+                        <div><strong>Correo:</strong> <span>{{ user.email|default:"—" }}</span></div>
+                        <div><strong>Último acceso:</strong> <span>{{ user.last_login|date:"d/m/Y H:i" }}</span></div>
+                    </div>
+
+                    <div class="form-actions" style="border:none; padding-top: 0; margin-top: 1rem;">
+                        <a class="btn btn-info" href="/admin/" style="width:100%; justify-content:center; text-decoration:none;">
+                            <i class="fas fa-user-shield"></i> Ir al Django Admin
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if user.is_superuser %}
+                <div class="config-card danger-zone">
+                    <h2>Restablecer Sistema</h2>
+                    <p>Esta acción eliminará configuraciones personalizadas y restablecerá los valores predeterminados. Úsala con precaución.</p>
+                    <div class="form-actions" style="border:none; padding-top: 0;">
+                        <button class="btn btn-danger-outline" style="width:100%; justify-content:center;">
+                            <i class="fas fa-undo"></i> Restablecer valores
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+    </main>
 </div>
 
-<script src="{% static 'js/admin_panel.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Menú Móvil
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('adminSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+        }
+        
+        // Auto-ocultar alertas
+        setTimeout(() => {
+            const msgs = document.querySelector('.messages-container');
+            if(msgs) msgs.style.display = 'none';
+        }, 5000);
+    });
+</script>
 </body>
 </html>

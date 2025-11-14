@@ -1,5 +1,5 @@
 {% load static %}
-{% load humanize %} <!-- Carga humanize para formatear números -->
+{% load humanize %}
 
 <!DOCTYPE html>
 <html lang="es">
@@ -9,28 +9,309 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - SIEER Chile</title>
 
-    <!-- Mismas dependencias -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
+    <style>
+        /* =========================================
+           1. RESET & FIX PANTALLA COMPLETA
+           ========================================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            width: 100%; height: 100%;
+            background-color: #050505; /* Fondo Negro Puro */
+            font-family: 'Roboto', sans-serif;
+            color: #ffffff;
+            overflow: hidden; /* Evita scroll en body principal */
+        }
+
+        .admin-container { display: flex; width: 100vw; height: 100vh; }
+
+        /* Variables Neón */
+        :root {
+            --neon-green: #00ff88; 
+            --neon-hover: #00cc6a;
+            --bg-panel: #0f0f0f; 
+            --border-neon: 1px solid rgba(0, 255, 136, 0.2);
+            --text-gray: #b0b0b0;
+            
+            /* Colores de Estado */
+            --status-aprobada: #00ff88;
+            --status-info: #1e90ff;
+            --status-pendiente: #ffa502;
+            --status-new: #7ad2ff;
+        }
+
+        /* =========================================
+           2. SIDEBAR (DISEÑO DE REFERENCIA)
+           ========================================= */
+        .admin-sidebar {
+            width: 280px; height: 100%;
+            background: var(--bg-panel);
+            border-right: var(--border-neon);
+            display: flex; flex-direction: column;
+            flex-shrink: 0; z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .admin-logo { display: flex; align-items: center; gap: 1rem; }
+        .admin-logo img { height: 45px; filter: drop-shadow(0 0 5px rgba(0,255,136,0.4)); }
+        .logo-text h2 { margin: 0; color: #fff; font-size: 1.3rem; font-family: 'Montserrat', sans-serif; }
+        .logo-text span { color: var(--neon-green); font-size: 0.75rem; letter-spacing: 1px; }
+
+        .sidebar-nav { flex: 1; overflow-y: auto; padding: 1.5rem 1rem; }
+
+        /* Títulos de Sección (Estilo Referencia) */
+        .nav-section h3 { 
+            color: #666; 
+            font-size: 0.75rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            margin: 0 0 0.8rem 0.5rem; 
+            letter-spacing: 1px;
+        }
+
+        .nav-item { list-style: none; margin-bottom: 0.5rem; }
+
+        /* Enlaces del Menú */
+        .nav-item a {
+            display: flex; align-items: center; gap: 12px; padding: 10px 15px;
+            color: #888; text-decoration: none; border-radius: 8px;
+            transition: 0.3s; font-size: 0.9rem; font-weight: 500;
+            border-left: 3px solid transparent; /* Preparado para activo */
+        }
+
+        .nav-item a:hover { 
+            background: rgba(255, 255, 255, 0.03); 
+            color: #fff; 
+        }
+        
+        /* ESTADO ACTIVO (Estilo Pill con Borde Izquierdo) */
+        .nav-item.active a { 
+            background: rgba(0, 255, 136, 0.1); /* Fondo verde transparente */
+            color: var(--neon-green); /* Texto verde brillante */
+            font-weight: 600;
+            border-left: 3px solid var(--neon-green); /* Borde izquierdo neón */
+        }
+
+        .nav-item a i { width: 20px; text-align: center; font-size: 1.1rem; }
+        .nav-item.active a i { color: var(--neon-green); }
+
+        /* Footer del Sidebar */
+        .sidebar-footer { padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); }
+        .user-info { display: flex; gap: 12px; align-items: center; margin-bottom: 1.2rem; }
+        
+        /* Avatar (Círculo verde sólido) */
+        .user-avatar { 
+            width: 40px; height: 40px; 
+            background: var(--neon-green); 
+            color: #000; 
+            border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; 
+            font-size: 1.2rem;
+        }
+        
+        .user-details strong { display: block; font-size: 0.95rem; color: #fff; }
+        .user-details span { color: #666; font-size: 0.8rem; }
+
+        /* Botón Cerrar Sesión (Rojo Vino) */
+        .logout-btn {
+            width: 100%; padding: 10px; 
+            background: rgba(255, 71, 87, 0.1); /* Fondo rojo suave */
+            color: #ff4757; /* Texto rojo brillante */
+            border: 1px solid rgba(255, 71, 87, 0.3); 
+            border-radius: 8px; cursor: pointer;
+            font-weight: 600; transition: 0.3s; 
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            font-size: 0.9rem;
+        }
+        .logout-btn:hover { 
+            background: #ff4757; 
+            color: #fff; 
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.4);
+        }
+
+        /* =========================================
+           3. CONTENIDO PRINCIPAL
+           ========================================= */
+        .admin-main {
+            flex-grow: 1; height: 100vh; background: #050505;
+            display: flex; flex-direction: column; overflow-y: auto; position: relative;
+        }
+
+        .admin-header {
+            padding: 1rem 2rem; background: var(--bg-panel); border-bottom: var(--border-neon);
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 900;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 1rem; }
+        .admin-header h1 {
+            font-size: 1.8rem; font-family: 'Montserrat', sans-serif;
+            color: #fff; margin: 0;
+        }
+
+        .menu-toggle { 
+            display: none; color: var(--neon-green); background: none; 
+            border: 1px solid #333; padding: 8px; border-radius: 5px; 
+            font-size: 1.2rem; cursor: pointer; 
+        }
+
+        .header-right { display: flex; align-items: center; gap: 1.5rem; }
+
+        /* Botones Header */
+        .btn {
+            padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600;
+            cursor: pointer; transition: 0.3s; font-family: 'Montserrat', sans-serif;
+            border: 1px solid var(--neon-green);
+            display: flex; align-items: center; gap: 8px; text-decoration: none;
+        }
+
+        .btn-primary { background: var(--neon-green); color: #000; }
+        .btn-primary:hover {
+            background: var(--neon-hover); box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline { background: transparent; color: var(--neon-green); }
+        .btn-outline:hover {
+            background: rgba(0, 255, 136, 0.1); box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+
+        .notification-bell { position: relative; font-size: 1.5rem; color: var(--text-gray); cursor: pointer; }
+        .notification-count {
+            position: absolute; top: -5px; right: -8px;
+            background: #ff4757; color: #fff;
+            border-radius: 50%; width: 18px; height: 18px;
+            font-size: 0.7rem; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid var(--bg-panel);
+        }
+
+        /* =========================================
+           4. CONTENIDO (STATS & ACTIONS)
+           ========================================= */
+        .admin-content { padding: 2rem; padding-bottom: 5rem; }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem; margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-panel); border: var(--border-neon);
+            border-radius: 16px; padding: 1.5rem;
+            display: flex; align-items: center; gap: 1.5rem;
+            transition: 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px); border-color: var(--neon-green);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
+        }
+
+        .stat-icon {
+            width: 60px; height: 60px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--border-neon);
+            color: var(--neon-green); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; flex-shrink: 0;
+        }
+
+        .stat-info h3 { font-size: 2rem; color: #fff; margin: 0 0 5px 0; }
+        .stat-info p { color: var(--text-gray); font-size: 0.9rem; margin: 0; }
+
+        /* Acciones Rápidas */
+        .actions-grid { margin-bottom: 2.5rem; }
+        .actions-grid h2 { font-size: 1.5rem; color: #fff; margin-bottom: 1.5rem; }
+
+        .actions-cards {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .action-card {
+            background: var(--bg-panel); border: var(--border-neon);
+            border-radius: 16px; padding: 1.5rem; text-align: center;
+            transition: 0.3s;
+        }
+        .action-card:hover {
+            transform: translateY(-5px); border-color: var(--neon-green);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
+        }
+
+        .action-icon { font-size: 2.5rem; color: var(--neon-green); margin-bottom: 1rem; }
+        .action-card h4 { font-size: 1.1rem; color: #fff; margin: 0 0 0.5rem 0; }
+        .action-card p { color: var(--text-gray); font-size: 0.9rem; margin: 0 0 1.5rem 0; }
+        .action-card .btn-outline { width: 100%; justify-content: center; }
+
+        /* Actividad Reciente */
+        .recent-activity h2 { font-size: 1.5rem; color: #fff; margin-bottom: 1.5rem; }
+        .activity-list {
+            background: var(--bg-panel); border: var(--border-neon);
+            border-radius: 16px; padding: 1rem;
+        }
+        .activity-item {
+            display: flex; align-items: center; gap: 1rem;
+            padding: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .activity-item:last-child { border: none; }
+
+        .activity-icon {
+            width: 45px; height: 45px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; flex-shrink: 0;
+        }
+        .activity-content p { color: #fff; margin: 0 0 5px 0; font-size: 0.95rem; }
+        .activity-content span { color: #666; font-size: 0.8rem; }
+
+        /* Iconos Actividad */
+        .activity-icon.status-info { background: rgba(30, 144, 255, 0.1); color: var(--status-info); }
+        .activity-icon.status-new { background: rgba(122, 210, 255, 0.1); color: var(--status-new); }
+        .activity-icon.status-aprobada { background: rgba(0, 255, 136, 0.1); color: var(--neon-green); }
+        .activity-icon.status-pendiente { background: rgba(255, 165, 2, 0.1); color: var(--status-pendiente); }
+
+        /* =========================================
+           5. RESPONSIVE (MÓVIL)
+           ========================================= */
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 999; backdrop-filter: blur(5px);
+        }
+
+        @media (max-width: 992px) {
+            .admin-sidebar { position: fixed; left: -280px; }
+            .admin-sidebar.active { left: 0; box-shadow: 10px 0 30px rgba(0,0,0,0.8); }
+            .sidebar-overlay.active { display: block; }
+            
+            .menu-toggle { display: block; margin-right: 10px; }
+            .header-left { display: flex; align-items: center; }
+            
+            .admin-content { padding: 1rem; padding-bottom: 6rem; }
+            
+            .stats-grid, .actions-cards { grid-template-columns: 1fr; }
+            .header-right .btn span { display: none; } 
+        }
+        @media (max-width: 576px) {
+            .admin-header h1 { font-size: 1.2rem; }
+        }
+    </style>
 </head>
 
 <body>
     <div class="admin-container">
-        <!-- Sidebar -->
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar" id="adminSidebar">
             <div class="sidebar-header">
                 <div class="admin-logo">
-                    <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo">
+                    <img src="{% static 'img/logo.png' %}" alt="SIEER">
                     <div class="logo-text">
                         <h2>SIEER Chile</h2>
-                        <span>Panel Administrativo</span>
+                        <span>Panel Admin</span>
                     </div>
                 </div>
             </div>
@@ -39,36 +320,30 @@
                 <div class="nav-section">
                     <h3>Facturación</h3>
                     <ul>
-                        <!-- ===== CAMBIO 1: Nombre del enlace ===== -->
                         <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
                             <a href="{% url 'admin_panel' %}">
-                                <i class="fas fa-tachometer-alt"></i> <!-- Ícono cambiado -->
-                                <span>Dashboard</span> <!-- Texto cambiado -->
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Dashboard</span>
                             </a>
                         </li>
-                        <!-- ======================================== -->
-
                         <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}">
                             <a href="{% url 'calculos_estadisticas' %}">
                                 <i class="fas fa-calculator"></i>
-                                <span>Cálculos y Estadísticas</span>
+                                <span>Cálculos</span>
                             </a>
                         </li>
-
                         <li class="nav-item {% if request.resolver_match.url_name == 'cotizaciones' %}active{% endif %}">
                             <a href="{% url 'cotizaciones' %}">
-                                <i class="fas fa-file-alt"></i>
+                                <i class="fas fa-file-invoice-dollar"></i>
                                 <span>Cotizaciones</span>
                             </a>
                         </li>
-
                         <li class="nav-item {% if request.resolver_match.url_name == 'control_inventario' %}active{% endif %}">
                             <a href="{% url 'control_inventario' %}">
                                 <i class="fas fa-boxes"></i>
-                                <span>Control de Inventario</span>
+                                <span>Inventario</span>
                             </a>
                         </li>
-
                     </ul>
                 </div>
 
@@ -78,28 +353,26 @@
                         <li class="nav-item {% if request.resolver_match.url_name == 'reportes_graficos' %}active{% endif %}">
                             <a href="{% url 'reportes_graficos' %}">
                                 <i class="fas fa-chart-bar"></i>
-                                <span>Reportes Gráficos</span>
+                                <span>Gráficos</span>
                             </a>
                         </li>
-                            <li class="nav-item {% if request.resolver_match.url_name == 'historial_cotizaciones' %}active{% endif %}">
-                                <a href="{% url 'historial_cotizaciones' %}">
-                                    <i class="fas fa-history"></i><span>Historial de Cotizaciones</span>
-                                </a>
-                            </li>
+                        <li class="nav-item {% if request.resolver_match.url_name == 'historial_cotizaciones' %}active{% endif %}">
+                            <a href="{% url 'historial_cotizaciones' %}">
+                                <i class="fas fa-history"></i><span>Historial</span>
+                            </a>
+                        </li>
                         <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}">
                             <a href="{% url 'cuenta' %}">
                                 <i class="fas fa-user-cog"></i>
                                 <span>Cuenta</span>
                             </a>
                         </li>
-
                         <li class="nav-item {% if request.resolver_match.url_name == 'configuracion' %}active{% endif %}">
                             <a href="{% url 'configuracion' %}">
                                 <i class="fas fa-cogs"></i>
                                 <span>Configuración</span>
                             </a>
                         </li>
-
                     </ul>
                 </div>
             </nav>
@@ -110,8 +383,8 @@
                         <i class="fas fa-user-shield"></i>
                     </div>
                     <div class="user-details">
-                        <strong>Administrador</strong>
-                        <span>{{ user.username }}</span>
+                        <strong>{{ user.username }}</strong>
+                        <span>Administrador</span>
                     </div>
                 </div>
                 <form method="post" action="{% url 'logout' %}" class="logout-form">
@@ -124,9 +397,9 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
         <main class="admin-main">
-            <!-- Header -->
             <header class="admin-header">
                 <div class="header-left">
                     <button class="menu-toggle" id="menuToggle">
@@ -137,9 +410,8 @@
                 <div class="header-right">
                     <button class="btn btn-primary" onclick="window.location.href='/'">
                         <i class="fas fa-eye"></i>
-                        Ver Sitio Web
+                        <span>Ver Sitio</span>
                     </button>
-                    <!-- Notificación dinámica: muestra cotizaciones del mes -->
                     <div class="notification-bell">
                         <i class="fas fa-bell"></i>
                         <span class="notification-count">{{ kpi_cotizaciones_mes|default:0 }}</span>
@@ -147,31 +419,26 @@
                 </div>
             </header>
 
-            <!-- Content Area -->
             <div class="admin-content">
                 
-                <!-- ===== CAMBIO 2: Stats Cards (Datos Dinámicos) ===== -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon">
-                            <i class="fas fa-file-alt"></i> <!-- Ícono cambiado -->
+                            <i class="fas fa-file-alt"></i>
                         </div>
                         <div class="stat-info">
-                            <!-- Dato real -->
                             <h3>{{ kpi_cotizaciones_mes|default:0 }}</h3>
-                            <p>Cotizaciones del Mes</p> <!-- Texto cambiado -->
+                            <p>Cotizaciones Mes</p>
                         </div>
-                        <!-- (Tendencia eliminada por simplicidad) -->
                     </div>
 
                     <div class="stat-card">
                         <div class="stat-icon">
-                            <i class="fas fa-boxes"></i> <!-- Ícono cambiado -->
+                            <i class="fas fa-boxes"></i>
                         </div>
                         <div class="stat-info">
-                            <!-- Dato real -->
                             <h3>{{ kpi_total_productos|default:0 }}</h3>
-                            <p>Productos Registrados</p> <!-- Texto cambiado -->
+                            <p>Productos</p>
                         </div>
                     </div>
 
@@ -180,26 +447,22 @@
                             <i class="fas fa-users"></i>
                         </div>
                         <div class="stat-info">
-                            <!-- Dato real -->
                             <h3>{{ kpi_total_clientes|default:0 }}</h3>
-                            <p>Clientes Registrados</p> <!-- Texto sin cambios -->
+                            <p>Clientes</p>
                         </div>
                     </div>
 
                     <div class="stat-card">
                         <div class="stat-icon">
-                            <i class="fas fa-box-open"></i>
+                            <i class="fas fa-cubes"></i>
                         </div>
                         <div class="stat-info">
-                            <!-- Dato real (con formateo de 'humanize') -->
                             <h3>{{ kpi_stock_total|default:0|intcomma }}</h3>
-                            <p>Unidades en Stock</p> <!-- Texto cambiado -->
+                            <p>Stock Total</p>
                         </div>
                     </div>
                 </div>
-                <!-- ==================================================== -->
 
-                <!-- Quick Actions (Enlaces actualizados) -->
                 <div class="actions-grid">
                     <h2>Acciones Rápidas</h2>
                     <div class="actions-cards">
@@ -208,107 +471,102 @@
                                 <i class="fas fa-plus-circle"></i>
                             </div>
                             <h4>Nueva Cotización</h4>
-                            <p>Ir al listado de cotizaciones</p>
+                            <p>Crear manualmente</p>
                             <button class="btn btn-outline" onclick="window.location.href='{% url 'cotizaciones' %}'">Crear</button>
                         </div>
 
                         <div class="action-card">
                             <div class="action-icon">
-                                <i class="fas fa-chart-line"></i>
+                                <i class="fas fa-chart-pie"></i>
                             </div>
-                            <h4>Generar Reporte</h4>
-                            <p>Ver reportes gráficos</p>
-                            <button class="btn btn-outline" onclick="window.location.href='{% url 'reportes_graficos' %}'">Generar</button>
+                            <h4>Reportes</h4>
+                            <p>Ver estadísticas</p>
+                            <button class="btn btn-outline" onclick="window.location.href='{% url 'reportes_graficos' %}'">Ver</button>
                         </div>
 
                         <div class="action-card">
                             <div class="action-icon">
-                                <i class="fas fa-box"></i>
+                                <i class="fas fa-clipboard-list"></i>
                             </div>
-                            <h4>Gestionar Inventario</h4>
-                            <p>Actualizar stock de productos</p>
+                            <h4>Inventario</h4>
+                            <p>Gestionar stock</p>
                             <button class="btn btn-outline" onclick="window.location.href='{% url 'control_inventario' %}'">Gestionar</button>
                         </div>
 
                         <div class="action-card">
                             <div class="action-icon">
-                                <i class="fas fa-cog"></i>
+                                <i class="fas fa-sliders-h"></i>
                             </div>
                             <h4>Configuración</h4>
-                            <p>Ajustes del sistema</p>
-                            <button class="btn btn-outline" onclick="window.location.href='{% url 'configuracion' %}'">Configurar</button>
+                            <p>Sistema global</p>
+                            <button class="btn btn-outline" onclick="window.location.href='{% url 'configuracion' %}'">Ajustes</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- ===== CAMBIO 3: Recent Activity (Datos Dinámicos) ===== -->
                 <div class="recent-activity">
                     <h2>Actividad Reciente</h2>
                     <div class="activity-list">
                         
-                        <!-- Loop de Cotizaciones Recientes -->
                         {% for cot in act_cotizaciones %}
                         <div class="activity-item">
-                            <div class="activity-icon 
-                                {% if cot.estado == 'aprobada' %}success
-                                {% elif cot.estado == 'pendiente' %}warning
-                                {% else %}info{% endif %}">
-                                <i class="fas fa-file-alt"></i>
+                            <div class="activity-icon status-{{ cot.estado|default:'pendiente' }}">
+                                <i class="fas fa-file-invoice"></i>
                             </div>
                             <div class="activity-content">
-                                <p><strong>{{ cot.cliente.username }}</strong> inició cotización por <strong>{{ cot.producto.nombre }}</strong></p>
-                                <span>{{ cot.fecha_creacion|timesince }} atrás</span>
+                                <p><strong>{{ cot.cliente.username }}</strong> cotizó <strong>{{ cot.producto.nombre }}</strong></p>
+                                <span>Hace {{ cot.fecha_creacion|timesince }}</span>
                             </div>
                         </div>
                         {% endfor %}
 
-                        <!-- Loop de Clientes Nuevos -->
                         {% for perfil in act_clientes %}
                         <div class="activity-item">
-                            <div class="activity-icon info">
-                                <i class="fas fa-user-plus"></i>
+                            <div class="activity-icon status-info">
+                                <i class="fas fa-user-check"></i>
                             </div>
                             <div class="activity-content">
-                                <p><strong>Nuevo cliente</strong> registrado: {{ perfil.usuario.username }}</p>
-                                <span>{{ perfil.fecha_creacion|timesince }} atrás</span>
+                                <p>Nuevo cliente: <strong>{{ perfil.usuario.username }}</strong></p>
+                                <span>Hace {{ perfil.fecha_creacion|timesince }}</span>
                             </div>
                         </div>
                         {% endfor %}
 
-                        <!-- Loop de Productos Nuevos -->
-                        {% for prod in act_productos %}
-                        <div class="activity-item">
-                            <div class="activity-icon new-item" style="background-color: #0f2b3b; color: #7ad2ff;"> <!-- Estilo 'info' para productos -->
-                                <i class="fas fa-box"></i>
-                            </div>
-                            <div class="activity-content">
-                                <p><strong>Nuevo producto</strong> agregado: {{ prod.nombre }}</p>
-                                <span>{{ prod.fecha_creacion|timesince }} atrás</span>
-                            </div>
-                        </div>
-                        {% endfor %}
-
-                        <!-- Mensaje si no hay actividad -->
-                        {% if not act_cotizaciones and not act_clientes and not act_productos %}
+                        {% if not act_cotizaciones and not act_clientes %}
                         <div class="activity-item">
                             <div class="activity-icon">
                                 <i class="fas fa-info-circle"></i>
                             </div>
                             <div class="activity-content">
                                 <p>No hay actividad reciente.</p>
-                                <span>Ahora</span>
                             </div>
                         </div>
                         {% endif %}
 
                     </div>
                 </div>
-                <!-- ======================================================= -->
             </div>
         </main>
     </div>
 
-    <script src="{% static 'js/admin_panel.js' %}"></script>
-</body>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('adminSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
 
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                });
+
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
+        });
+    </script>
+</body>
 </html>

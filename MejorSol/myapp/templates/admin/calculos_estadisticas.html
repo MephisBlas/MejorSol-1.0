@@ -1,4 +1,6 @@
 {% load static %}
+{% load humanize %}
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,211 +13,255 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
-  
   <style>
     /* ======================================= */
-    /* ¡CSS ESTÉTICO PARA CÁLCULOS!            */
+    /* 1. RESET Y ESTILOS BASE (Reemplazo de base.css)
     /* ======================================= */
-
-    /* 1. Variables de Estilo */
     :root {
-        --ms-panel: rgba(25, 25, 35, 0.9);
-        --ms-border: 1px solid rgba(0, 255, 136, 0.3);
-        --ms-accent: #00ffaa;
-        --neon-glow: 0 0 20px rgba(0, 255, 136, 0.5);
-        --ms-text: #ffffff;
-        --ms-muted: #b0b0b0;
+        --neon-green: #00ff88;
+        --neon-hover: #00cc6a;
+        --bg-dark: #050505;
+        --bg-panel: #0f0f0f;
+        --border-neon: 1px solid rgba(0, 255, 136, 0.2);
+        --text-white: #ffffff;
+        --text-gray: #b0b0b0;
     }
 
-    /* 2. Layout Principal (Grid) */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100%;
+        height: 100%;
+        background-color: var(--bg-dark);
+        font-family: 'Roboto', sans-serif;
+        color: var(--text-white);
+        overflow: hidden; /* Evita scroll en el contenedor padre */
+    }
+
+    /* ======================================= */
+    /* 2. ESTRUCTURA DEL DASHBOARD
+    /* ======================================= */
+    .admin-container {
+        display: flex;
+        width: 100vw;
+        height: 100vh;
+        background-color: var(--bg-dark);
+    }
+
+    /* --- SIDEBAR (Barra Lateral) --- */
+    .admin-sidebar {
+        width: 280px;
+        height: 100%;
+        background: var(--bg-panel);
+        border-right: var(--border-neon);
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        z-index: 1000;
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .admin-logo { display: flex; align-items: center; gap: 1rem; }
+    .admin-logo img { height: 45px; filter: drop-shadow(0 0 5px rgba(0,255,136,0.4)); }
+    .logo-text h2 { margin: 0; color: #fff; font-size: 1.3rem; font-family: 'Montserrat', sans-serif; text-transform: uppercase; }
+    .logo-text span { color: var(--neon-green); font-size: 0.75rem; letter-spacing: 1px; }
+
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 1rem; }
+    
+    .nav-section h3 {
+        color: #666; font-size: 0.8rem; text-transform: uppercase; margin: 1.5rem 0 0.5rem 0.5rem; letter-spacing: 1px;
+    }
+
+    .nav-item { list-style: none; margin-bottom: 0.5rem; }
+    .nav-item a {
+        display: flex; align-items: center; gap: 12px;
+        padding: 12px 15px;
+        color: #b0b0b0; text-decoration: none;
+        border-radius: 8px; transition: 0.3s;
+        font-size: 0.95rem; font-weight: 500;
+    }
+    .nav-item a:hover, .nav-item.active a {
+        background: rgba(0, 255, 136, 0.08);
+        color: var(--neon-green);
+    }
+    .nav-item.active a { border-left: 3px solid var(--neon-green); }
+    .nav-item a i { width: 20px; text-align: center; }
+
+    .sidebar-footer { padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); }
+    .user-info { display: flex; gap: 10px; align-items: center; margin-bottom: 1rem; }
+    .user-avatar { 
+        width: 40px; height: 40px; background: var(--neon-green); color: #000; 
+        border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    }
+    .user-details strong { color: #fff; display: block; font-size: 0.9rem; }
+    .user-details span { color: #666; font-size: 0.8rem; }
+    
+    .logout-btn {
+        width: 100%; padding: 12px;
+        background: rgba(255, 71, 87, 0.1); color: #ff4757;
+        border: 1px solid rgba(255, 71, 87, 0.3);
+        border-radius: 8px; cursor: pointer; transition: 0.3s;
+        font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .logout-btn:hover { background: #ff4757; color: #fff; }
+
+    /* --- MAIN CONTENT --- */
+    .admin-main {
+        flex-grow: 1;
+        height: 100%;
+        background: var(--bg-dark);
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto; /* Scroll interno */
+        position: relative;
+    }
+
+    .admin-header {
+        padding: 1rem 2rem;
+        background: var(--bg-panel);
+        border-bottom: var(--border-neon);
+        display: flex; justify-content: space-between; align-items: center;
+        position: sticky; top: 0; z-index: 500;
+    }
+    
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .header-left h1 { margin: 0; color: #fff; font-family: 'Montserrat', sans-serif; font-size: 1.5rem; }
+    
+    .menu-toggle { 
+        display: none; color: var(--neon-green); background: none; 
+        border: 1px solid #333; padding: 8px; border-radius: 8px; 
+        font-size: 1.2rem; cursor: pointer; 
+    }
+
+    .btn-back {
+        background: var(--neon-green); color: #000;
+        padding: 10px 25px; border-radius: 50px;
+        text-decoration: none; font-weight: 700;
+        font-family: 'Montserrat', sans-serif; font-size: 0.9rem;
+        display: flex; align-items: center; gap: 8px;
+        transition: 0.3s; box-shadow: 0 0 10px rgba(0,255,136,0.2);
+    }
+    .btn-back:hover { background: var(--neon-hover); transform: translateY(-2px); }
+
+    /* ======================================= */
+    /* 3. CONTENIDO ESPECÍFICO (CÁLCULOS)
+    /* ======================================= */
     .admin-content {
+        padding: 2rem;
         display: grid;
-        grid-template-columns: 1fr 1fr; /* Dos columnas principales */
+        grid-template-columns: 1fr 1fr;
         grid-template-areas:
             "header header"
             "simulador resultados"
             "grafico1 grafico2";
-        gap: 2rem;
-    }
-    
-    .header-left h1 { /* Para el título de la página */
-        font-family: 'Montserrat', sans-serif;
-    }
-
-    /* 3. Tarjetas Superiores (Estilo Neón) */
-    .calc-tiles {
-        grid-area: header;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-    }
-    .calc-tile {
-        background: var(--ms-panel);
-        border: var(--ms-border);
-        border-radius: 16px;
-        padding: 1.5rem 2rem;
-        box-shadow: var(--neon-glow);
-        display: flex;
-        align-items: center;
         gap: 1.5rem;
     }
-    .calc-tile .icon {
-        font-size: 2.5rem;
-        color: var(--ms-accent);
-        opacity: 0.8;
-    }
-    .calc-tile .val {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--ms-text);
-        font-family: 'Montserrat', sans-serif;
-    }
-    .calc-tile .lbl {
-        font-size: 0.9rem;
-        color: var(--ms-muted);
-    }
 
-    /* 4. Tarjeta Simulador (Estilo Neón) */
+    /* Tarjetas KPI */
+    .calc-tiles { grid-area: header; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    
+    .calc-tile {
+        background: var(--bg-panel); border: var(--border-neon);
+        border-radius: 16px; padding: 1.5rem 2rem;
+        display: flex; align-items: center; gap: 1.5rem;
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.05);
+        transition: 0.3s;
+    }
+    .calc-tile:hover { transform: translateY(-5px); border-color: var(--neon-green); }
+    .calc-tile .icon { font-size: 2.5rem; color: var(--neon-green); }
+    .calc-tile .val { font-size: 2.2rem; font-weight: 700; color: #fff; font-family: 'Montserrat', sans-serif; }
+    .calc-tile .lbl { color: #888; font-size: 0.9rem; }
+
+    /* Tarjeta Simulador */
     .calc-card {
         grid-area: simulador;
-        background: var(--ms-panel);
-        border: var(--ms-border);
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: var(--neon-glow);
+        background: var(--bg-panel); border: var(--border-neon);
+        border-radius: 16px; padding: 2rem;
+    }
+    .calc-card h2 { 
+        margin-top: 0; color: var(--neon-green); 
+        font-family: 'Montserrat', sans-serif; 
+        border-bottom: 1px solid #333; 
+        padding-bottom: 1rem; margin-bottom: 1.5rem; 
     }
     
-    .calc-card h2 {
-        color: var(--ms-accent);
-        margin-top: 0;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: var(--ms-border);
-        font-family: 'Montserrat', sans-serif;
-    }
-
-    /* 5. Formulario del Simulador (Estilo Consistente) */
-    .calc-form {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-    }
-    
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .form-group label {
-        color: var(--ms-text);
-        font-weight: 500;
-        font-size: 0.9rem;
-    }
-
+    .calc-form { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .form-group label { display: block; color: #e0e0e0; margin-bottom: 8px; font-size: 0.9rem; font-weight: 500; }
     .form-group input {
-        padding: 0.75rem;
-        border: 1px solid rgba(0, 255, 136, 0.2);
-        border-radius: 12px;
-        background: #121a26;
-        color: var(--ms-text);
-        font-size: 1rem;
-        transition: all 0.3s ease;
+        width: 100%; padding: 12px; background: #050505;
+        border: 1px solid #333; border-radius: 10px; color: #fff; font-family: 'Roboto', sans-serif;
     }
+    .form-group input:focus { border-color: var(--neon-green); outline: none; box-shadow: 0 0 8px rgba(0,255,136,0.2); }
+    
+    .btn-calc {
+        grid-column: 1 / -1; width: 100%; padding: 14px; margin-top: 10px;
+        background: var(--neon-green); color: #000; border: none; border-radius: 10px;
+        font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 1rem;
+        transition: 0.3s;
+    }
+    .btn-calc:hover { background: var(--neon-hover); box-shadow: 0 0 20px rgba(0,255,136,0.4); }
 
-    .form-group input:focus {
-        outline: none;
-        border-color: var(--ms-accent);
-        box-shadow: 0 0 0 2px rgba(41, 255, 154, 0.3);
-    }
-    
-    /* Botón de calcular */
-    .calc-form .btn {
-        grid-column: 1 / -1; /* Ocupa todo el ancho */
-        margin-top: 1rem;
-        padding: 0.75rem;
-        font-size: 1rem;
-        font-weight: 600;
-        font-family: 'Montserrat', sans-serif;
-    }
-    
-    /* 6. Tarjeta de Resultados (Estilo Neón) */
+    /* Tarjeta Resultados */
     .calc-results {
         grid-area: resultados;
-        background: var(--ms-panel);
-        border: var(--ms-border);
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: var(--neon-glow);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+        background: var(--bg-panel); border: var(--border-neon);
+        border-radius: 16px; padding: 2rem;
+        display: flex; flex-direction: column; justify-content: center;
     }
-    
-    .calc-results h2 {
-        color: var(--ms-accent);
-        margin-top: 0;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: var(--ms-border);
-        font-family: 'Montserrat', sans-serif;
+    .calc-results h2 { 
+        margin-top: 0; color: var(--neon-green); 
+        font-family: 'Montserrat', sans-serif; 
+        border-bottom: 1px solid #333; 
+        padding-bottom: 1rem; margin-bottom: 1.5rem; 
     }
+    .result-item { display: flex; justify-content: space-between; align-items: baseline; padding: 15px 0; border-bottom: 1px solid #222; }
+    .result-item:last-child { border-bottom: none; }
+    .result-item span { color: #888; font-size: 1rem; }
+    .result-item strong { color: #fff; font-size: 1.6rem; font-family: 'Montserrat', sans-serif; }
+    .result-item small { font-size: 0.9rem; color: #666; }
 
-    .calc-results .item {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        padding: 1.25rem 0;
-        border-bottom: 1px solid rgba(0, 255, 136, 0.1);
-    }
-    .calc-results .item:last-child {
-        border-bottom: none;
-    }
-    
-    .calc-results .item span {
-        font-size: 1rem;
-        color: var(--ms-muted);
-    }
-    
-    .calc-results .item strong {
-        font-size: 1.75rem;
-        font-weight: 600;
-        color: var(--ms-text);
-        font-family: 'Montserrat', sans-serif;
-    }
-    
-    .calc-results .item small {
-        font-size: 1rem;
-        color: var(--ms-muted);
-        margin-left: 0.25rem;
-    }
-
-    /* 7. Paneles de Gráficos (Estilo Neón) */
+    /* Gráficos */
     .calc-panel {
-        background: var(--ms-panel);
-        border: var(--ms-border);
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: var(--neon-glow);
+        background: var(--bg-panel); border: var(--border-neon);
+        border-radius: 16px; padding: 2rem;
     }
-    
-    .calc-panel h3 {
-        color: var(--ms-accent);
-        margin-top: 0;
-        margin-bottom: 1.5rem;
-        text-align: center;
-        font-family: 'Montserrat', sans-serif;
+    .calc-panel h3 { 
+        margin-top: 0; color: var(--neon-green); text-align: center; 
+        margin-bottom: 1.5rem; font-family: 'Montserrat', sans-serif; 
     }
     
     #graficoGeneracion { grid-area: grafico1; }
     #graficoAhorro { grid-area: grafico2; }
 
-    /* 8. Media Query para pantallas pequeñas */
+    /* ======================================= */
+    /* 4. RESPONSIVE MÓVIL
+    /* ======================================= */
+    .sidebar-overlay {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8); z-index: 999; backdrop-filter: blur(3px);
+    }
+
     @media (max-width: 992px) {
+        .admin-sidebar { position: fixed; left: -280px; box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
+        .admin-sidebar.active { left: 0; }
+        .sidebar-overlay.active { display: block; }
+
+        .menu-toggle { display: block; }
+        
         .admin-content {
-            grid-template-columns: 1fr; /* Apila todo */
+            padding: 1.5rem;
+            grid-template-columns: 1fr;
             grid-template-areas:
                 "header"
                 "simulador"
@@ -223,12 +269,9 @@
                 "grafico1"
                 "grafico2";
         }
-        .calc-tiles {
-            grid-template-columns: 1fr; /* Apila las tarjetas */
-        }
-        .calc-form {
-            grid-template-columns: 1fr; /* Apila los campos del form */
-        }
+        .calc-tiles { grid-template-columns: 1fr; }
+        .calc-form { grid-template-columns: 1fr; }
+        .header-right span { display: none; } /* Ocultar texto "Volver" */
     }
   </style>
 </head>
@@ -236,63 +279,62 @@
 <body>
 <div class="admin-container">
 
-  <aside class="admin-sidebar">
+  <aside class="admin-sidebar" id="adminSidebar">
     <div class="sidebar-header">
-      <div class="admin-logo">
-        <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo">
-        <div class="logo-text"><h2>SIEER Chile</h2><span>Panel Administrativo</span></div>
-      </div>
+        <div class="admin-logo">
+            <img src="{% static 'img/logo.png' %}" alt="SIEER">
+            <div class="logo-text"><h2>SIEER Chile</h2><span>Panel Admin</span></div>
+        </div>
     </div>
     <nav class="sidebar-nav">
-      <div class="nav-section">
-        <h3>Facturación</h3>
-        <ul>
-                      <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
-                            <a href="{% url 'admin_panel' %}">
-                                <i class="fas fa-tachometer-alt"></i> <!-- Ícono cambiado -->
-                                <span>Dashboard</span> <!-- Texto cambiado -->
-                            </a>
-                        </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}">
-            <a href="{% url 'calculos_estadisticas' %}"><i class="fas fa-calculator"></i><span>Cálculos y Estadísticas</span></a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'cotizaciones' %}active{% endif %}">
-            <a href="{% url 'cotizaciones' %}"><i class="fas fa-file-alt"></i><span>Cotizaciones</span></a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'control_inventario' %}active{% endif %}">
-            <a href="{% url 'control_inventario' %}"><i class="fas fa-boxes"></i><span>Control de Inventario</span></a>
-          </li>
-        </ul>
-      </div>
-      <div class="nav-section">
-        <h3>Reportes</h3>
-        <ul>
-          <li class="nav-item {% if request.resolver_match.url_name == 'reportes_graficos' %}active{% endif %}">
-            <a href="{% url 'reportes_graficos' %}"><i class="fas fa-chart-bar"></i><span>Reportes Gráficos</span></a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'historial_cotizaciones' %}active{% endif %}">
-              <a href="{% url 'historial_cotizaciones' %}"><i class="fas fa-history"></i><span>Historial de Cotizaciones</span></a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}">
-            <a href="{% url 'cuenta' %}"><i class="fas fa-user-cog"></i><span>Cuenta</span></a>
-          </li>
-          <li class="nav-item {% if request.resolver_match.url_name == 'configuracion' %}active{% endif %}">
-            <a href="{% url 'configuracion' %}"><i class="fas fa-cogs"></i><span>Configuración</span></a>
-          </li>
-        </ul>
-      </div>
+        <div class="nav-section">
+            <h3>Facturación</h3>
+            <ul>
+                <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
+                    <a href="{% url 'admin_panel' %}"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}">
+                    <a href="{% url 'calculos_estadisticas' %}"><i class="fas fa-calculator"></i><span>Cálculos</span></a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'cotizaciones' %}active{% endif %}">
+                    <a href="{% url 'cotizaciones' %}"><i class="fas fa-file-invoice-dollar"></i><span>Cotizaciones</span></a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'control_inventario' %}active{% endif %}">
+                    <a href="{% url 'control_inventario' %}"><i class="fas fa-boxes"></i><span>Inventario</span></a>
+                </li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Reportes</h3>
+            <ul>
+                <li class="nav-item {% if request.resolver_match.url_name == 'reportes_graficos' %}active{% endif %}">
+                    <a href="{% url 'reportes_graficos' %}"><i class="fas fa-chart-bar"></i><span>Gráficos</span></a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'historial_cotizaciones' %}active{% endif %}">
+                    <a href="{% url 'historial_cotizaciones' %}"><i class="fas fa-history"></i><span>Historial</span></a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}">
+                    <a href="{% url 'cuenta' %}"><i class="fas fa-user-cog"></i><span>Cuenta</span></a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'configuracion' %}active{% endif %}">
+                    <a href="{% url 'configuracion' %}"><i class="fas fa-cogs"></i><span>Configuración</span></a>
+                </li>
+            </ul>
+        </div>
     </nav>
     <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
-        <div class="user-details"><strong>Administrador</strong><span>{{ user.username }}</span></div>
-      </div>
-      <form method="post" action="{% url 'logout' %}" class="logout-form">
-        {% csrf_token %}
-        <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
-      </form>
+        <div class="user-info">
+            <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+            <div class="user-details"><strong>{{ user.username }}</strong><span>Administrador</span></div>
+        </div>
+        <form method="post" action="{% url 'logout' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+        </form>
     </div>
   </aside>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <main class="admin-main">
     <header class="admin-header">
@@ -301,8 +343,8 @@
         <h1>Cálculos y Estadísticas</h1>
       </div>
       <div class="header-right">
-        <a class="btn btn-primary" href="{% url 'admin_panel' %}">
-          <i class="fas fa-arrow-left"></i> Volver al Panel
+        <a class="btn-back" href="{% url 'admin_panel' %}">
+          <i class="fas fa-arrow-left"></i> <span>Volver al Panel</span>
         </a>
       </div>
     </header>
@@ -314,14 +356,14 @@
           <div class="icon"><i class="fas fa-solar-panel"></i></div>
           <div>
             <div class="val" id="kwhMes">0 kWh</div>
-            <div class="lbl">Generación mensual estimada</div>
+            <div class="lbl">Generación Mensual</div>
           </div>
         </div>
         <div class="calc-tile">
           <div class="icon"><i class="fas fa-dollar-sign"></i></div>
           <div>
             <div class="val" id="ahorroMes">$0</div>
-            <div class="lbl">Ahorro mensual</div>
+            <div class="lbl">Ahorro Estimado</div>
           </div>
         </div>
       </section>
@@ -329,38 +371,31 @@
       <section class="calc-card">
         <h2>Simulador de Consumo</h2>
         <form id="formCalculo" class="calc-form">
-          
           <div class="form-group">
-            <label for="consumoDiario">Consumo diario (kWh)</label>
+            <label>Consumo diario (kWh)</label>
             <input type="number" step="0.01" id="consumoDiario" placeholder="Ej: 12.5" required>
           </div>
-
           <div class="form-group">
-            <label for="irradiacion">Irradiación promedio (kWh/m²·día)</label>
+            <label>Irradiación (kWh/m²·día)</label>
             <input type="number" step="0.01" id="irradiacion" placeholder="Ej: 5.2" required>
           </div>
-
           <div class="form-group">
-            <label for="potenciaPanel">Potencia de panel (W)</label>
+            <label>Potencia de panel (W)</label>
             <input type="number" id="potenciaPanel" value="450" required>
           </div>
-
           <div class="form-group">
-            <label for="numPaneles">N° de paneles</label>
+            <label>N° de paneles</label>
             <input type="number" id="numPaneles" value="8" required>
           </div>
-
           <div class="form-group">
-            <label for="eficiencia">Eficiencia global (%)</label>
+            <label>Eficiencia global (%)</label>
             <input type="number" id="eficiencia" value="80" required>
           </div>
-
           <div class="form-group">
-            <label for="precioKwh">Precio energía ($/kWh)</label>
+            <label>Precio energía ($/kWh)</label>
             <input type="number" id="precioKwh" value="150" required>
           </div>
-
-          <button class="btn btn-primary" type="submit">
+          <button class="btn-calc" type="submit">
             <i class="fas fa-calculator"></i> Calcular
           </button>
         </form>
@@ -368,19 +403,19 @@
 
       <section class="calc-results">
         <h2>Resultados</h2>
-        <div class="item"><span>Generación diaria</span><strong><span id="genDia">0</span> <small>kWh</small></strong></div>
-        <div class="item"><span>Generación mensual</span><strong><span id="genMes">0</span> <small>kWh</small></strong></div>
-        <div class="item"><span>Cobertura del consumo</span><strong><span id="cobertura">0</span> <small>%</small></strong></div>
-        <div class="item"><span>Ahorro mensual estimado</span><strong id="ahorro">$0</strong></div>
+        <div class="result-item"><span>Gen. Diaria</span><strong><span id="genDia">0</span> <small>kWh</small></strong></div>
+        <div class="result-item"><span>Gen. Mensual</span><strong><span id="genMes">0</span> <small>kWh</small></strong></div>
+        <div class="result-item"><span>Cobertura</span><strong><span id="cobertura">0</span> <small>%</small></strong></div>
+        <div class="result-item"><span>Ahorro Mes</span><strong id="ahorro" style="color:#00ff88">$0</strong></div>
       </section>
 
       <section class="calc-panel" id="graficoGeneracion">
-        <h3>Generación vs Consumo (Mensual)</h3>
+        <h3>Generación vs Consumo</h3>
         <canvas id="chartGeneracion"></canvas>
       </section>
       
       <section class="calc-panel" id="graficoAhorro">
-        <h3>Proyección de Ahorro (Anual)</h3>
+        <h3>Proyección Anual</h3>
         <canvas id="chartAhorro"></canvas>
       </section>
       
@@ -389,175 +424,100 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-// --- INICIO: Script de 'calculos.js' adaptado ---
-// He pegado y adaptado el script aquí para que coincida con el nuevo HTML
-// y use el estilo neón.
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Referencias a elementos del DOM
-    const form = document.getElementById('formCalculo');
-    
-    // Tarjetas superiores
-    const kwhMesEl = document.getElementById('kwhMes');
-    const ahorroMesEl = document.getElementById('ahorroMes');
-    
-    // Resultados
-    const genDiaEl = document.getElementById('genDia');
-    const genMesEl = document.getElementById('genMes');
-    const coberturaEl = document.getElementById('cobertura');
-    const ahorroEl = document.getElementById('ahorro');
-    
-    // Inputs
-    const consumoDiarioInput = document.getElementById('consumoDiario');
-    const precioKwhInput = document.getElementById('precioKwh');
+    // Menu Móvil
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('adminSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
 
-    // Contextos de Gráficos (¡Nuevos IDs!)
+    if (menuToggle && sidebar && overlay) {
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+    }
+
+    // Lógica Cálculos
+    const form = document.getElementById('formCalculo');
     const ctxGen = document.getElementById('chartGeneracion')?.getContext('2d');
     const ctxAhorro = document.getElementById('chartAhorro')?.getContext('2d');
-    
     let chartGeneracion, chartAhorro;
-    
-    // --- Configuración Global de Gráficos (Estilo Neón) ---
-    Chart.defaults.color = '#b0b0b0'; // Color de texto (ms-muted)
-    Chart.defaults.borderColor = 'rgba(0, 255, 136, 0.1)'; // Borde de la grilla
 
-    const formatoNumero = (num) => new Intl.NumberFormat('es-CL', { maximumFractionDigits: 0 }).format(num);
-    const formatoMoneda = (num) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(num);
+    Chart.defaults.color = '#888';
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+
+    const fmt = (n) => new Intl.NumberFormat('es-CL', { maximumFractionDigits: 0 }).format(n);
+    const fmtM = (n) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n);
 
     function calcular(e) {
         if (e) e.preventDefault();
+        
+        const consumo = parseFloat(document.getElementById('consumoDiario').value) || 0;
+        const irr = parseFloat(document.getElementById('irradiacion').value) || 0;
+        const pot = parseFloat(document.getElementById('potenciaPanel').value) || 0;
+        const num = parseFloat(document.getElementById('numPaneles').value) || 0;
+        const eff = (parseFloat(document.getElementById('eficiencia').value) || 0) / 100;
+        const precio = parseFloat(document.getElementById('precioKwh').value) || 0;
 
-        // 1. Obtener valores
-        const consumoDiario = parseFloat(consumoDiarioInput.value) || 0;
-        const irradiacion = parseFloat(document.getElementById('irradiacion').value) || 0;
-        const potenciaPanel = parseFloat(document.getElementById('potenciaPanel').value) || 0;
-        const numPaneles = parseFloat(document.getElementById('numPaneles').value) || 0;
-        const eficiencia = (parseFloat(document.getElementById('eficiencia').value) || 0) / 100;
-        const precioKwh = parseFloat(precioKwhInput.value) || 0;
-
-        // 2. Calcular
-        const potenciaTotalPico = (potenciaPanel * numPaneles) / 1000; // en kWp
-        const genDia = potenciaTotalPico * irradiacion * eficiencia;
+        const genDia = (pot * num / 1000) * irr * eff;
         const genMes = genDia * 30;
-        const consumoMes = consumoDiario * 30;
-        
-        // Cobertura (no puede ser más de 100%)
+        const consumoMes = consumo * 30;
         const cobertura = consumoMes > 0 ? Math.min(100, (genMes / consumoMes) * 100) : 0;
-        
-        // Ahorro (lo que generas y autoconsumes, o inyectas si hay NetBilling)
-        // Simplificación: Ahorro es la generación total al precio de la energía
-        const ahorroMes = genMes * precioKwh;
+        const ahorro = genMes * precio;
 
-        // 3. Actualizar DOM (Tarjetas y Resultados)
-        kwhMesEl.textContent = `${formatoNumero(genMes)} kWh`;
-        ahorroMesEl.textContent = formatoMoneda(ahorroMes);
-        
-        genDiaEl.textContent = formatoNumero(genDia);
-        genMesEl.textContent = formatoNumero(genMes);
-        coberturaEl.textContent = formatoNumero(cobertura);
-        ahorroEl.textContent = formatoMoneda(ahorroMes);
+        document.getElementById('kwhMes').textContent = Math.round(genMes) + ' kWh';
+        document.getElementById('ahorroMes').textContent = '$' + Math.round(ahorro).toLocaleString('es-CL');
+        document.getElementById('genDia').textContent = Math.round(genDia);
+        document.getElementById('genMes').textContent = Math.round(genMes);
+        document.getElementById('cobertura').textContent = Math.round(cobertura);
+        document.getElementById('ahorro').textContent = '$' + Math.round(ahorro).toLocaleString('es-CL');
 
-        // 4. Actualizar Gráficos
-        actualizarGraficoGeneracion(consumoMes, genMes);
-        actualizarGraficoAhorro(ahorroMes);
+        updateCharts(consumoMes, genMes, ahorro);
     }
 
-    function actualizarGraficoGeneracion(consumo, generacion) {
-        if (!ctxGen) return;
-        
-        if (chartGeneracion) {
-            chartGeneracion.destroy(); // Destruir gráfico anterior
-        }
+    function updateCharts(con, gen, aho) {
+        if (chartGeneracion) chartGeneracion.destroy();
         chartGeneracion = new Chart(ctxGen, {
             type: 'bar',
             data: {
-                labels: ['Consumo vs Generación'],
-                datasets: [
-                    {
-                        label: 'Consumo Mensual (kWh)',
-                        data: [consumo],
-                        backgroundColor: 'rgba(255, 68, 68, 0.5)', // Rojo
-                        borderColor: '#ff4444',
-                        borderWidth: 2
-                    },
-                    {
-                        label: 'Generación Mensual (kWh)',
-                        data: [generacion],
-                        backgroundColor: 'rgba(0, 255, 170, 0.5)', // Verde Neón (ms-accent)
-                        borderColor: '#00ffaa',
-                        borderWidth: 2
-                    }
-                ]
+                labels: ['Consumo', 'Generación'],
+                datasets: [{
+                    label: 'kWh',
+                    data: [con, gen],
+                    backgroundColor: ['#ff4757', '#00ff88'],
+                    borderRadius: 6
+                }]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'bottom' }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'kWh' }
-                    }
-                }
-            }
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
         });
-    }
 
-    function actualizarGraficoAhorro(ahorroMensual) {
-        if (!ctxAhorro) return;
-        
-        const meses = ['Año 1', 'Año 2', 'Año 3', 'Año 4', 'Año 5'];
-        // Asumiendo ahorro constante (sin IPC energético)
-        const dataAhorro = [
-            ahorroMensual * 12,
-            (ahorroMensual * 12) * 2,
-            (ahorroMensual * 12) * 3,
-            (ahorroMensual * 12) * 4,
-            (ahorroMensual * 12) * 5,
-        ];
-
-        if (chartAhorro) {
-            chartAhorro.destroy();
-        }
+        if (chartAhorro) chartAhorro.destroy();
         chartAhorro = new Chart(ctxAhorro, {
             type: 'line',
             data: {
-                labels: meses,
+                labels: ['Año 1', 'Año 2', 'Año 3', 'Año 4', 'Año 5'],
                 datasets: [{
-                    label: 'Ahorro Acumulado',
-                    data: dataAhorro,
-                    fill: true,
-                    backgroundColor: 'rgba(0, 255, 170, 0.2)',
-                    borderColor: '#00ffaa', // Verde Neón (ms-accent)
-                    tension: 0.1
+                    label: 'Ahorro ($)',
+                    data: [aho*12, aho*24, aho*36, aho*48, aho*60],
+                    borderColor: '#00ff88',
+                    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                    fill: true, tension: 0.4
                 }]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'CLP ($)' }
-                    }
-                }
-            }
+            options: { plugins: { legend: { display: false } } }
         });
     }
 
-    // --- Iniciar ---
     if(form) {
         form.addEventListener('submit', calcular);
-        // Calcular valores iniciales al cargar la página
-        calcular(); 
+        calcular();
     }
 });
-// --- FIN: Script de 'calculos.js' adaptado ---
 </script>
 
 </body>

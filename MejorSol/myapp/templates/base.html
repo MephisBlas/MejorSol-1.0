@@ -95,56 +95,7 @@
 
     {% if not user.is_authenticated or not user.is_staff %}
     <!-- Footer Elegante -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <div class="logo">
-                        <h3>SIEER Chile</h3>
-                        <span>Servicios de Ingeniería Eléctrica</span>
-                    </div>
-                    <p>Expertos en soluciones eléctricas integrales para proyectos industriales, comerciales y residenciales.</p>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-                <div class="footer-section">
-                    <h4>Enlaces rápidos</h4>
-                    <ul>
-                        <li><a href="{% url 'index' %}">Inicio</a></li>
-                        <li><a href="#servicios">Servicios</a></li>
-                        <li><a href="#nosotros">Nosotros</a></li>
-                        <li><a href="#proyectos">Proyectos</a></li>
-                        <li><a href="#contacto">Contacto</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Servicios</h4>
-                    <ul>
-                        <li><a href="#">Instalaciones Eléctricas</a></li>
-                        <li><a href="#">Energías Renovables</a></li>
-                        <li><a href="#">Productos</a></li>
-                        <li><a href="#">Mantenimiento</a></li>
-                        <li><a href="#">Iluminación Eficiente</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Suscríbete</h4>
-                    <p>Recibe nuestras novedades y promociones</p>
-                    <form class="subscribe-form">
-                        <input type="email" placeholder="Tu correo electrónico">
-                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
-                    </form>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 SIEER Chile - Servicios de Ingeniería Eléctrica. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </footer>
+
     {% endif %}
 
     <!-- Scripts -->

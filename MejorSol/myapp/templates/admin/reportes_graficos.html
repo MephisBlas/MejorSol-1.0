@@ -12,76 +12,129 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
+  
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     /* ======================================= */
-    /* CSS para Dashboard de Reportes (Estilo BI) */
+    /* 1. RESET & FIX PANTALLA COMPLETA
     /* ======================================= */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+        width: 100%; height: 100%;
+        background-color: #050505; /* Negro Puro */
+        font-family: 'Roboto', sans-serif;
+        color: #ffffff;
+        overflow: hidden; /* Evita scroll en body principal */
+    }
+
+    .admin-container { display: flex; width: 100vw; height: 100vh; }
+
+    /* Variables Neón */
     :root {
-        --ms-panel: rgba(25, 25, 35, 0.9);
-        --ms-border: 1px solid rgba(0, 255, 136, 0.3);
-        --ms-accent: #00ffaa;
-        --neon-glow: 0 0 20px rgba(0, 255, 136, 0.5);
-        --ms-text: #ffffff;
-        --ms-muted: #b0b0b0;
-        --ms-info: #3b82f6;
-        --ms-warning: #f59e0b;
-        --ml-color: #00ccff; 
+        --neon-green: #00ff88; --neon-hover: #00cc6a;
+        --bg-panel: #0f0f0f; 
+        --border-neon: 1px solid rgba(0, 255, 136, 0.2);
+        --text-gray: #b0b0b0;
+        --danger: #ff4757;
+        --ml-blue: #00ccff;
+    }
+
+    /* ======================================= */
+    /* 2. SIDEBAR (DISEÑO UNIFICADO)
+    /* ======================================= */
+    .admin-sidebar {
+        width: 280px; height: 100%;
+        background: var(--bg-panel); border-right: var(--border-neon);
+        display: flex; flex-direction: column; flex-shrink: 0;
+        z-index: 1000; transition: transform 0.3s ease;
+    }
+    .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .admin-logo { display: flex; align-items: center; gap: 1rem; }
+    .admin-logo img { height: 45px; filter: drop-shadow(0 0 5px rgba(0,255,136,0.4)); }
+    .logo-text h2 { margin: 0; color: #fff; font-size: 1.3rem; font-family: 'Montserrat', sans-serif; }
+    .logo-text span { color: var(--neon-green); font-size: 0.75rem; letter-spacing: 1px; }
+
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 1.5rem 1rem; }
+    
+    /* Títulos de Sección */
+    .nav-section h3 { 
+        color: #666; font-size: 0.75rem; font-weight: 700; 
+        text-transform: uppercase; margin: 0 0 0.8rem 0.5rem; letter-spacing: 1px;
     }
     
-    /* --- ¡NUEVO! Panel de Filtros --- */
-    .filter-panel {
-        grid-column: 1 / -1; /* Ocupa toda la fila */
-        background: var(--ms-panel);
-        border: var(--ms-border);
-        border-radius: 16px;
-        padding: 1.5rem 2rem;
-        box-shadow: var(--neon-glow);
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
+    .nav-item { list-style: none; margin-bottom: 0.5rem; }
+    
+    /* Enlaces */
+    .nav-item a {
+        display: flex; align-items: center; gap: 12px; padding: 10px 15px;
+        color: #888; text-decoration: none; border-radius: 8px;
+        transition: 0.3s; font-size: 0.9rem; font-weight: 500;
+        border-left: 3px solid transparent;
     }
-    .filter-panel h2 {
-        color: var(--ms-accent);
-        margin: 0;
-        font-size: 1.2rem;
-        font-family: 'Montserrat', sans-serif;
+    .nav-item a:hover { background: rgba(255, 255, 255, 0.03); color: #fff; }
+    
+    /* Activo */
+    .nav-item.active a { 
+        background: rgba(0, 255, 136, 0.1); color: var(--neon-green); font-weight: 600;
+        border-left: 3px solid var(--neon-green);
     }
-    .filter-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-    .filter-group label {
-        font-size: 0.8rem;
-        color: var(--ms-muted);
-        font-weight: 500;
-    }
-    .filter-group input[type="date"] {
-        background: #121a26;
-        border: 1px solid rgba(0, 255, 136, 0.2);
-        color: var(--ms-text);
-        padding: 0.5rem 0.75rem;
-        border-radius: 8px;
-        font-family: 'Roboto', sans-serif;
-        color-scheme: dark;
-    }
-    .filter-buttons {
-        margin-left: auto;
-        display: flex;
-        gap: 1rem;
-    }
-    /* ----------------------------- */
+    .nav-item a i { width: 20px; text-align: center; font-size: 1.1rem; }
+    .nav-item.active a i { color: var(--neon-green); }
 
+    .sidebar-footer { padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); }
+    .user-info { display: flex; gap: 12px; align-items: center; margin-bottom: 1.2rem; }
+    
+    /* Avatar */
+    .user-avatar { 
+        width: 40px; height: 40px; background: var(--neon-green); color: #000; 
+        border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem;
+    }
+    .user-details strong { display: block; font-size: 0.95rem; color: #fff; }
+    .user-details span { color: #666; font-size: 0.8rem; }
+    
+    /* Botón Cerrar Sesión */
+    .logout-btn {
+        width: 100%; padding: 10px; background: rgba(255, 71, 87, 0.1); color: #ff4757;
+        border: 1px solid rgba(255, 71, 87, 0.3); border-radius: 8px; cursor: pointer;
+        font-weight: 600; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px;
+        font-size: 0.9rem;
+    }
+    .logout-btn:hover { background: #ff4757; color: #fff; box-shadow: 0 0 15px rgba(255, 71, 87, 0.4); }
+
+    /* ======================================= */
+    /* 3. CONTENIDO PRINCIPAL
+    /* ======================================= */
+    .admin-main {
+        flex-grow: 1; height: 100vh; background: #050505;
+        display: flex; flex-direction: column; overflow-y: auto; position: relative;
+    }
+
+    .admin-header {
+        padding: 1rem 2rem; background: var(--bg-panel); border-bottom: var(--border-neon);
+        display: flex; justify-content: space-between; align-items: center;
+        position: sticky; top: 0; z-index: 500;
+    }
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .header-left h1 { margin: 0; font-family: 'Montserrat', sans-serif; font-size: 1.5rem; color: #fff; }
+    .menu-toggle { display: none; color: var(--neon-green); background: none; border: 1px solid #333; padding: 8px; border-radius: 5px; font-size: 1.2rem; cursor: pointer; }
+
+    .btn-primary {
+        background: var(--neon-green); color: #000; padding: 10px 20px; border-radius: 50px;
+        text-decoration: none; font-weight: 700; font-size: 0.9rem; border: none; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;
+    }
+    .btn-primary:hover { background: var(--neon-hover); box-shadow: 0 0 15px rgba(0,255,136,0.3); transform: translateY(-2px); }
+
+    /* ======================================= */
+    /* 4. PÁGINA DE REPORTES (Grid BI)
+    /* ======================================= */
     .admin-content {
+        padding: 2rem; padding-bottom: 5rem;
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        grid-auto-rows: minmax(150px, auto);
         gap: 1.5rem;
-        /* Grid layout actualizado para filtros y ML */
         grid-template-areas:
             "filtros filtros filtros filtros"
             "kpi1 kpi2 kpi3 kpi4"
@@ -89,98 +142,86 @@
             "tendencia tendencia prediccion prediccion";
     }
 
+    /* Filtros */
+    .filter-panel {
+        grid-area: filtros;
+        background: var(--bg-panel); border: var(--border-neon); border-radius: 16px;
+        padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem;
+        box-shadow: 0 0 20px rgba(0,255,136,0.05);
+    }
+    .filter-panel h2 { margin: 0; color: var(--neon-green); font-family: 'Montserrat', sans-serif; font-size: 1.2rem; margin-right: auto; }
+    
+    .filter-group { display: flex; flex-direction: column; gap: 5px; }
+    .filter-group label { font-size: 0.8rem; color: #888; font-weight: 600; }
+    .filter-group input[type="date"] {
+        background: #050505; border: 1px solid #333; color: #fff;
+        padding: 8px 12px; border-radius: 8px; font-family: 'Roboto', sans-serif;
+        color-scheme: dark; /* Icono calendario blanco */
+    }
+    
+    .btn-outline {
+        background: transparent; border: 1px solid var(--neon-green); color: var(--neon-green);
+        padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;
+        display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;
+    }
+    .btn-outline:hover { background: rgba(0,255,136,0.1); color: #fff; }
+    
+    .filter-buttons { display: flex; gap: 10px; align-items: flex-end; }
+
+    /* KPIs */
     .kpi-card {
-        background: var(--ms-panel);
-        border: var(--ms-border);
-        border-radius: 16px;
-        padding: 1.5rem;
-        box-shadow: var(--neon-glow);
+        background: var(--bg-panel); border: var(--border-neon); border-radius: 16px;
+        padding: 1.5rem; display: flex; flex-direction: column; justify-content: center;
+        transition: 0.3s; position: relative; overflow: hidden;
     }
-    .kpi-card .lbl {
-        font-size: 0.9rem;
-        color: var(--ms-muted);
-        margin-bottom: 0.5rem;
-        display: block;
-    }
-    .kpi-card .val {
-        font-size: 2.25rem;
-        font-weight: 700;
-        color: var(--ms-text);
-        font-family: 'Montserrat', sans-serif;
-    }
-    .kpi-card .val small {
-        font-size: 1.25rem;
-        color: var(--ms-accent);
-    }
+    .kpi-card:hover { transform: translateY(-5px); border-color: var(--neon-green); }
     
-    #filtros { grid-area: filtros; }
-    #kpi-1 { grid-area: kpi1; }
-    #kpi-2 { grid-area: kpi2; }
-    #kpi-3 { grid-area: kpi3; }
-    #kpi-4 { grid-area: kpi4; }
+    .kpi-card .lbl { font-size: 0.9rem; color: #888; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-card .val { font-size: 2.5rem; font-weight: 700; color: #fff; font-family: 'Montserrat', sans-serif; }
+    .kpi-card .val small { font-size: 1.2rem; color: var(--neon-green); margin-left: 5px; }
+    
+    #kpi-1 { grid-area: kpi1; } #kpi-2 { grid-area: kpi2; }
+    #kpi-3 { grid-area: kpi3; } #kpi-4 { grid-area: kpi4; }
 
+    /* Gráficos */
     .chart-panel {
-        background: var(--ms-panel);
-        border: var(--ms-border);
-        border-radius: 16px;
-        padding: 1.5rem 2rem;
-        box-shadow: var(--neon-glow);
-        height: 450px; /* Altura fija para alinear */
+        background: var(--bg-panel); border: var(--border-neon); border-radius: 16px;
+        padding: 1.5rem; height: 400px; position: relative; display: flex; flex-direction: column;
     }
     
-    /* --- ¡NUEVO! Cabecera del Gráfico con Toggles --- */
     .chart-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        border-bottom: 1px solid var(--ms-border);
-        padding-bottom: 1rem;
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #222;
     }
-    .chart-header h3 {
-        color: var(--ms-accent);
-        margin: 0;
-        text-align: left;
-        font-family: 'Montserrat', sans-serif;
-        font-size: 1.1rem;
-    }
-    .chart-toggles {
-        display: flex;
-        gap: 0.5rem;
-    }
-    .chart-toggle {
-        background: #121a26;
-        border: 1px solid rgba(0, 255, 136, 0.2);
-        color: var(--ms-muted);
-        width: 30px;
-        height: 30px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    .chart-toggle:hover {
-        color: var(--ms-accent);
-        border-color: var(--ms-accent);
-    }
-    .chart-toggle.active {
-        background: var(--ms-accent);
-        color: #000;
-        border-color: var(--ms-accent);
-    }
-    /* ------------------------------------------- */
+    .chart-header h3 { margin: 0; color: var(--neon-green); font-size: 1.1rem; font-family: 'Montserrat', sans-serif; }
     
-    #chart-embudo { grid-area: embudo; }
-    #chart-tendencia { grid-area: tendencia; }
-    #chart-productos { grid-area: productos; }
+    .chart-toggles { display: flex; gap: 5px; }
+    .chart-toggle {
+        background: #222; border: 1px solid #333; color: #666; width: 30px; height: 30px;
+        border-radius: 6px; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center;
+    }
+    .chart-toggle:hover { color: #fff; border-color: #555; }
+    .chart-toggle.active { background: var(--neon-green); color: #000; border-color: var(--neon-green); }
 
-    #chart-prediccion {
-        grid-area: prediccion;
-        border: 1px solid var(--ml-color);
-        box-shadow: 0 0 20px rgba(0, 204, 255, 0.3);
+    /* Areas Gráficos */
+    #chart-embudo { grid-area: embudo; }
+    #chart-productos { grid-area: productos; }
+    #chart-tendencia { grid-area: tendencia; }
+    
+    #chart-prediccion { 
+        grid-area: prediccion; 
+        border-color: var(--ml-blue); 
+        box-shadow: 0 0 20px rgba(0, 204, 255, 0.1);
     }
-    #chart-prediccion h3 {
-        color: var(--ml-color); /* Título azul */
-    }
+    #chart-prediccion h3 { color: var(--ml-blue); }
+
+    /* Canvas Container */
+    .chart-container-inner { flex: 1; position: relative; width: 100%; height: 100%; }
+
+    /* ======================================= */
+    /* 5. RESPONSIVE MÓVIL
+    /* ======================================= */
+    .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; backdrop-filter: blur(5px); }
 
     @media (max-width: 1200px) {
         .admin-content {
@@ -195,423 +236,305 @@
                 "prediccion prediccion";
         }
     }
+
+    @media (max-width: 992px) {
+        .admin-sidebar { position: fixed; left: -280px; }
+        .admin-sidebar.active { left: 0; box-shadow: 10px 0 30px rgba(0,0,0,0.8); }
+        .sidebar-overlay.active { display: block; }
+        
+        .menu-toggle { display: block; margin-right: 10px; }
+        .header-left { display: flex; align-items: center; }
+        .admin-content { padding: 1rem; padding-bottom: 6rem; gap: 1rem; }
+        
+        /* Filtros Móvil */
+        .filter-panel { flex-direction: column; align-items: stretch; gap: 1rem; }
+        .filter-buttons { display: grid; grid-template-columns: 1fr 1fr; margin-top: 10px; }
+        .filter-buttons .btn, .filter-buttons .btn-outline { justify-content: center; }
+    }
+
     @media (max-width: 768px) {
         .admin-content {
             grid-template-columns: 1fr;
             grid-template-areas:
                 "filtros"
-                "kpi1"
-                "kpi2"
-                "kpi3"
-                "kpi4"
-                "embudo"
-                "productos"
-                "tendencia"
-                "prediccion";
+                "kpi1" "kpi2" "kpi3" "kpi4"
+                "embudo" "productos" "tendencia" "prediccion";
         }
-        .filter-panel { flex-direction: column; align-items: stretch; }
-        .filter-buttons { margin-left: 0; justify-content: stretch; }
-        .filter-buttons .btn { flex: 1; }
     }
   </style>
 </head>
 
 <body>
-  <div class="admin-container">
+<div class="admin-container">
 
-    <aside class="admin-sidebar">
-      <div class="sidebar-header">
-        <div class="admin-logo">
-          <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo">
-          <div class="logo-text">
-            <h2>SIEER Chile</h2>
-            <span>Panel Administrativo</span>
-          </div>
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <div class="admin-logo">
+                <img src="{% static 'img/logo.png' %}" alt="SIEER">
+                <div class="logo-text"><h2>SIEER Chile</h2><span>Panel Admin</span></div>
+            </div>
         </div>
-      </div>
-      <nav class="sidebar-nav">
-        <div class="nav-section">
-          <h3>Facturación</h3>
-          <ul>
-            <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}">
-                <a href="{% url 'admin_panel' %}">
-                    <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}">
-              <a href="{% url 'calculos_estadisticas' %}">
-                <i class="fas fa-calculator"></i>
-                <span>Cálculos y Estadísticas</span>
-              </a>
-            </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'cotizaciones' %}active{% endif %}">
-              <a href="{% url 'cotizaciones' %}">
-                <i class="fas fa-file-alt"></i>
-                <span>Cotizaciones</span>
-              </a>
-            </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'control_inventario' %}active{% endif %}">
-              <a href="{% url 'control_inventario' %}">
-                <i class="fas fa-boxes"></i>
-                <span>Control de Inventario</span>
-              </a>
-            </li>
-          </ul>
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <h3>Facturación</h3>
+                <ul>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'admin_panel' %}active{% endif %}"><a href="{% url 'admin_panel' %}"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'calculos_estadisticas' %}active{% endif %}"><a href="{% url 'calculos_estadisticas' %}"><i class="fas fa-calculator"></i><span>Cálculos</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'cotizaciones' %}active{% endif %}"><a href="{% url 'cotizaciones' %}"><i class="fas fa-file-invoice-dollar"></i><span>Cotizaciones</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'control_inventario' %}active{% endif %}"><a href="{% url 'control_inventario' %}"><i class="fas fa-boxes"></i><span>Inventario</span></a></li>
+                </ul>
+            </div>
+            <div class="nav-section">
+                <h3>Reportes</h3>
+                <ul>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'reportes_graficos' %}active{% endif %}"><a href="{% url 'reportes_graficos' %}"><i class="fas fa-chart-bar"></i><span>Gráficos</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'historial_cotizaciones' %}active{% endif %}"><a href="{% url 'historial_cotizaciones' %}"><i class="fas fa-history"></i><span>Historial</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}"><a href="{% url 'cuenta' %}"><i class="fas fa-user-cog"></i><span>Cuenta</span></a></li>
+                    <li class="nav-item {% if request.resolver_match.url_name == 'configuracion' %}active{% endif %}"><a href="{% url 'configuracion' %}"><i class="fas fa-cogs"></i><span>Configuración</span></a></li>
+                </ul>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+                <div class="user-details"><strong>{{ user.username }}</strong><span>Administrador</span></div>
+            </div>
+            <form method="post" action="{% url 'logout' %}" class="logout-form">{% csrf_token %}<button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button></form>
         </div>
-        <div class="nav-section">
-          <h3>Reportes</h3>
-          <ul>
-            <li class="nav-item {% if request.resolver_match.url_name == 'reportes_graficos' %}active{% endif %}">
-              <a href="{% url 'reportes_graficos' %}">
-                <i class="fas fa-chart-bar"></i>
-                <span>Reportes Gráficos</span>
-              </a>
-            </li>
-              <li class="nav-item {% if request.resolver_match.url_name == 'historial_cotizaciones' %}active{% endif %}">
-                  <a href="{% url 'historial_cotizaciones' %}">
-                  <i class="fas fa-history"></i><span>Historial de Cotizaciones</span>
-                  </a>
-             </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'cuenta' %}active{% endif %}">
-              <a href="{% url 'cuenta' %}">
-                <i class="fas fa-user-cog"></i>
-                <span>Cuenta</span>
-              </a>
-            </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'configuracion' %}active{% endif %}">
-              <a href="{% url 'configuracion' %}">
-                <i class="fas fa-cogs"></i>
-                <span>Configuración</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="user-info">
-          <div class="user-avatar">
-            <i class="fas fa-user-shield"></i>
-          </div>
-          <div class="user-details">
-            <strong>Administrador</strong>
-            <span>{{ user.username }}</span>
-          </div>
-        </div>
-        <form method="post" action="{% url 'logout' %}" class="logout-form">
-          {% csrf_token %}
-          <button type="submit" class="logout-btn">
-            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-          </button>
-        </form>
-      </div>
     </aside>
 
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <main class="admin-main">
-      <header class="admin-header">
-        <div class="header-left">
-          <button class="menu-toggle" id="menuToggle">
-            <i class="fas fa-bars"></i>
-          </button>
-          <h1>Reportes de Inteligencia de Negocios (BI)</h1>
-        </div>
-        <div class="header-right">
-          <a href="{% url 'admin_panel' %}" class="btn btn-primary">
-            <i class="fas fa-arrow-left"></i> Volver al Dashboard
-          </a>
-        </div>
-      </header>
-
-      <div class="admin-content">
-        
-        <div class="filter-panel" id="filtros">
-            <h2>Filtros</h2>
-            <form method="GET" style="display: contents;">
-                <div class="filter-group">
-                    <label for="id_desde">Desde</label>
-                    <input type="date" name="desde" id="id_desde" value="{{ desde|default:'' }}">
-                </div>
-                <div class="filter-group">
-                    <label for="id_hasta">Hasta</label>
-                    <input type="date" name="hasta" id="id_hasta" value="{{ hasta|default:'' }}">
-                </div>
-                <div class="filter-buttons">
-                    <a href="{% url 'reportes_graficos' %}" class="btn btn-outline">
-                        <i class="fas fa-times"></i> Limpiar
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-filter"></i> Aplicar
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <div class="kpi-card" id="kpi-1">
-            <span class="lbl">Tasa de Conversión</span>
-            <span class="val">{{ kpi_tasa_conversion|floatformat:1 }}<small>%</small></span>
-        </div>
-        <div class="kpi-card" id="kpi-2">
-            <span class="lbl">Total Cotizaciones (Filtro)</span>
-            <span class="val">{{ kpi_total_cotizaciones|intcomma }}</span>
-        </div>
-        <div class="kpi-card" id="kpi-3">
-            <span class="lbl">Promedio Cotiz./Día (Filtro)</span>
-            <span class="val">{{ kpi_promedio_cot_dia|floatformat:1 }}</span>
-        </div>
-        <div class="kpi-card" id="kpi-4">
-            <span class="lbl">Cotizaciones Aprobadas (Filtro)</span>
-            <span class="val">{{ kpi_aprobadas|intcomma }}</span>
-        </div>
-
-        <div class="chart-panel" id="chart-embudo">
-            <div class="chart-header">
-                <h3>Embudo de Cotizaciones (Filtro)</h3>
-                </div>
-            <canvas id="embudoChart"></canvas>
-        </div>
-
-        <div class="chart-panel" id="chart-productos">
-            <div class="chart-header">
-                <h3>Top 7 Productos (Filtro)</h3>
-                <div class="chart-toggles" data-chart="productosChart">
-                    <button class="chart-toggle active" data-type="bar"><i class="fas fa-chart-bar"></i></button>
-                    <button class="chart-toggle" data-type="doughnut"><i class="fas fa-chart-pie"></i></button>
-                </div>
+        <header class="admin-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+                <h1>Reportes BI</h1>
             </div>
-            <canvas id="productosChart"></canvas>
-        </div>
-        
-        <div class="chart-panel" id="chart-tendencia">
-            <div class="chart-header">
-                <h3>Tendencia Cotizaciones (Filtro)</h3>
-                <div class="chart-toggles" data-chart="tendenciaChart">
-                    <button class="chart-toggle active" data-type="line"><i class="fas fa-chart-line"></i></button>
-                    <button class="chart-toggle" data-type="bar"><i class="fas fa-chart-bar"></i></button>
+            <div class="header-right">
+                <a href="{% url 'admin_panel' %}" class="btn-primary"><i class="fas fa-arrow-left"></i> Volver</a>
+            </div>
+        </header>
+
+        <div class="admin-content">
+            
+            <div class="filter-panel" id="filtros">
+                <h2><i class="fas fa-filter"></i> Filtros</h2>
+                <form method="GET" style="display: contents;">
+                    <div class="filter-group">
+                        <label>Desde</label>
+                        <input type="date" name="desde" value="{{ desde|default:'' }}">
+                    </div>
+                    <div class="filter-group">
+                        <label>Hasta</label>
+                        <input type="date" name="hasta" value="{{ hasta|default:'' }}">
+                    </div>
+                    <div class="filter-buttons">
+                        <button type="submit" class="btn-primary">Aplicar</button>
+                        <a href="{% url 'reportes_graficos' %}" class="btn-outline">Limpiar</a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="kpi-card" id="kpi-1">
+                <span class="lbl">Tasa Conversión</span>
+                <span class="val">{{ kpi_tasa_conversion|floatformat:1 }}<small>%</small></span>
+            </div>
+            <div class="kpi-card" id="kpi-2">
+                <span class="lbl">Total Cotizaciones</span>
+                <span class="val">{{ kpi_total_cotizaciones|intcomma }}</span>
+            </div>
+            <div class="kpi-card" id="kpi-3">
+                <span class="lbl">Promedio Diario</span>
+                <span class="val">{{ kpi_promedio_cot_dia|floatformat:1 }}</span>
+            </div>
+            <div class="kpi-card" id="kpi-4">
+                <span class="lbl">Aprobadas</span>
+                <span class="val" style="color:var(--neon-green)">{{ kpi_aprobadas|intcomma }}</span>
+            </div>
+
+            <div class="chart-panel" id="chart-embudo">
+                <div class="chart-header"><h3>Embudo de Ventas</h3></div>
+                <div class="chart-container-inner"><canvas id="embudoChart"></canvas></div>
+            </div>
+
+            <div class="chart-panel" id="chart-productos">
+                <div class="chart-header">
+                    <h3>Top Productos</h3>
+                    <div class="chart-toggles" data-chart="productosChart">
+                        <button class="chart-toggle active" data-type="bar"><i class="fas fa-chart-bar"></i></button>
+                        <button class="chart-toggle" data-type="doughnut"><i class="fas fa-chart-pie"></i></button>
+                    </div>
                 </div>
+                <div class="chart-container-inner"><canvas id="productosChart"></canvas></div>
             </div>
-            <canvas id="tendenciaChart"></canvas>
-        </div>
-
-        <div class="chart-panel" id="chart-prediccion">
-            <div class="chart-header">
-                <h3><i class="fas fa-brain"></i> Predicción ML (Próximos 7 Días)</h3>
+            
+            <div class="chart-panel" id="chart-tendencia">
+                <div class="chart-header">
+                    <h3>Tendencia Histórica</h3>
+                    <div class="chart-toggles" data-chart="tendenciaChart">
+                        <button class="chart-toggle active" data-type="line"><i class="fas fa-chart-line"></i></button>
+                        <button class="chart-toggle" data-type="bar"><i class="fas fa-chart-bar"></i></button>
+                    </div>
+                </div>
+                <div class="chart-container-inner"><canvas id="tendenciaChart"></canvas></div>
             </div>
-            <canvas id="prediccionChart"></canvas>
-        </div>
 
-      </div>
+            <div class="chart-panel" id="chart-prediccion">
+                <div class="chart-header">
+                    <h3><i class="fas fa-brain"></i> Predicción IA (7 Días)</h3>
+                </div>
+                <div class="chart-container-inner"><canvas id="prediccionChart"></canvas></div>
+            </div>
+
+        </div>
     </main>
-  </div>
+</div>
 
-  <script id="data-embudo-labels" type="application/json">{{ embudo_labels|safe }}</script>
-  <script id="data-embudo-valores" type="application/json">{{ embudo_valores|safe }}</script>
-  <script id="data-tendencia-labels" type="application/json">{{ tendencia_labels|safe }}</script>
-  <script id="data-tendencia-valores" type="application/json">{{ tendencia_valores|safe }}</script>
-  <script id="data-productos-labels" type="application/json">{{ productos_labels|safe }}</script>
-  <script id="data-productos-valores" type="application/json">{{ productos_valores|safe }}</script>
-  <script id="data-prediccion-labels" type="application/json">{{ prediccion_labels|safe }}</script>
-  <script id="data-prediccion-valores" type="application/json">{{ prediccion_valores|safe }}</script>
+<script id="data-embudo-labels" type="application/json">{{ embudo_labels|safe }}</script>
+<script id="data-embudo-valores" type="application/json">{{ embudo_valores|safe }}</script>
+<script id="data-tendencia-labels" type="application/json">{{ tendencia_labels|safe }}</script>
+<script id="data-tendencia-valores" type="application/json">{{ tendencia_valores|safe }}</script>
+<script id="data-productos-labels" type="application/json">{{ productos_labels|safe }}</script>
+<script id="data-productos-valores" type="application/json">{{ productos_valores|safe }}</script>
+<script id="data-prediccion-labels" type="application/json">{{ prediccion_labels|safe }}</script>
+<script id="data-prediccion-valores" type="application/json">{{ prediccion_valores|safe }}</script>
 
-
-  <script>
-    // Guardamos las instancias de los gráficos en un scope global
+<script>
     let embudoChart, tendenciaChart, productosChart, prediccionChart;
 
     document.addEventListener('DOMContentLoaded', function() {
-        // --- Configuración Global de Gráficos (Estilo Neón) ---
-        Chart.defaults.color = '#b0b0b0';
-        Chart.defaults.borderColor = 'rgba(0, 255, 136, 0.1)';
-        Chart.defaults.plugins.legend.labels.color = '#ffffff';
-
-        // --- Función Segura para Cargar Datos ---
-        function parseJsonData(id) {
-            try {
-                const element = document.getElementById(id);
-                if (!element) {
-                    console.warn(`Elemento con ID "${id}" no encontrado.`);
-                    return [];
-                }
-                return JSON.parse(element.textContent);
-            } catch (e) {
-                console.error(`Error al parsear JSON de "${id}":`, e, element.textContent);
-                return []; 
-            }
+        
+        // --- 1. MENÚ MÓVIL ---
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('adminSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
         }
 
-        // --- Cargar todos los datos ---
-        const embudoLabels = parseJsonData('data-embudo-labels');
-        const embudoValores = parseJsonData('data-embudo-valores');
-        const tendenciaLabels = parseJsonData('data-tendencia-labels');
-        const tendenciaValores = parseJsonData('data-tendencia-valores');
-        const productosLabels = parseJsonData('data-productos-labels');
-        const productosValores = parseJsonData('data-productos-valores');
-        const prediccionLabels = parseJsonData('data-prediccion-labels');
-        const prediccionValores = parseJsonData('data-prediccion-valores');
+        // --- 2. CONFIGURACIÓN CHARTS ---
+        Chart.defaults.color = '#888';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+        Chart.defaults.font.family = "'Roboto', sans-serif";
+        
+        function parseData(id) {
+            try { return JSON.parse(document.getElementById(id).textContent); } 
+            catch (e) { return []; }
+        }
 
-        // Colores Neón
-        const neonColors = ['#00ffaa', '#3b82f6', '#f59e0b', '#ff4757', '#a855f7', '#33ff99'];
-        const neonColorsRGBA = [
-            'rgba(0, 255, 170, 0.7)',
-            'rgba(59, 130, 246, 0.7)',
-            'rgba(245, 158, 11, 0.7)',
-            'rgba(255, 71, 87, 0.7)',
-            'rgba(168, 85, 247, 0.7)',
-            'rgba(51, 255, 153, 0.7)',
-        ];
+        const embudoLabels = parseData('data-embudo-labels');
+        const embudoValores = parseData('data-embudo-valores');
+        const tendenciaLabels = parseData('data-tendencia-labels');
+        const tendenciaValores = parseData('data-tendencia-valores');
+        const productosLabels = parseData('data-productos-labels');
+        const productosValores = parseData('data-productos-valores');
+        const predLabels = parseData('data-prediccion-labels');
+        const predValores = parseData('data-prediccion-valores');
 
-        // 1. Gráfico de Embudo (Dona)
-        const ctxEmbudo = document.getElementById('embudoChart');
-        if (ctxEmbudo && embudoValores.length > 0) {
-            embudoChart = new Chart(ctxEmbudo, {
+        const neonColors = ['#00ff88', '#00ccff', '#ff4757', '#ffa500', '#a855f7'];
+        const neonBg = neonColors.map(c => c + '33');
+
+        if (document.getElementById('embudoChart')) {
+            embudoChart = new Chart(document.getElementById('embudoChart'), {
                 type: 'doughnut',
                 data: {
                     labels: embudoLabels,
                     datasets: [{
-                        label: 'Cotizaciones',
                         data: embudoValores,
-                        backgroundColor: neonColorsRGBA,
-                        borderColor: neonColors,
-                        borderWidth: 1
+                        backgroundColor: neonBg, borderColor: neonColors, borderWidth: 1
                     }]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { 
-                        legend: { position: 'bottom', labels: { padding: 15 } } 
-                    } 
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#fff' } } } }
             });
         }
 
-        // 2. Gráfico de Productos (Barras)
-        const ctxProductos = document.getElementById('productosChart');
-        if (ctxProductos && productosValores.length > 0) {
-            productosChart = new Chart(ctxProductos, {
-                type: 'bar', // Tipo inicial
+        if (document.getElementById('productosChart')) {
+            productosChart = new Chart(document.getElementById('productosChart'), {
+                type: 'bar',
                 data: {
                     labels: productosLabels,
                     datasets: [{
-                        label: 'N° de Cotizaciones',
+                        label: 'Cotizaciones',
                         data: productosValores,
-                        backgroundColor: neonColorsRGBA,
-                        borderColor: neonColors,
-                        borderWidth: 1
+                        backgroundColor: 'rgba(0, 255, 136, 0.2)', borderColor: '#00ff88', borderWidth: 1
                     }]
                 },
                 options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    indexAxis: 'y', // Empieza como barras horizontales
-                    scales: { x: { beginAtZero: true } }, 
-                    plugins: { legend: { display: false } } 
+                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true } }
                 }
             });
         }
 
-        // 3. Gráfico de Tendencia (Línea)
-        const ctxTendencia = document.getElementById('tendenciaChart');
-        if (ctxTendencia && tendenciaValores.length > 0) {
-            tendenciaChart = new Chart(ctxTendencia, {
-                type: 'line', // Tipo inicial
+        if (document.getElementById('tendenciaChart')) {
+            tendenciaChart = new Chart(document.getElementById('tendenciaChart'), {
+                type: 'line',
                 data: {
                     labels: tendenciaLabels,
                     datasets: [{
-                        label: 'Cotizaciones Reales',
+                        label: 'Histórico',
                         data: tendenciaValores,
-                        borderColor: '#00ffaa',
-                        backgroundColor: 'rgba(0, 255, 170, 0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 3,
-                        pointBackgroundColor: '#00ffaa'
+                        borderColor: '#00ff88', backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                        fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#00ff88'
                     }]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    scales: { 
-                        y: { beginAtZero: true },
-                        x: { ticks: { maxTicksLimit: 10 } }
-                    }, 
-                    plugins: { legend: { display: false } } 
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
             });
         }
-        
-        // 4. Gráfico de Predicción (Línea)
-        const ctxPrediccion = document.getElementById('prediccionChart');
-        if (ctxPrediccion && prediccionValores.length > 0) {
-            prediccionChart = new Chart(ctxPrediccion, {
-                type: 'line',
-                data: {
-                    labels: prediccionLabels, 
-                    datasets: [{
-                        label: 'Predicción de Cotizaciones',
-                        data: prediccionValores, 
-                        borderColor: '#00ccff', // Azul ML
-                        backgroundColor: 'rgba(0, 204, 255, 0.1)',
-                        borderDash: [5, 5], 
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 3,
-                        pointBackgroundColor: '#00ccff'
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    scales: { y: { beginAtZero: true } }, 
-                    plugins: { 
-                        legend: { display: false },
-                        title: {
-                            display: true,
-                            text: 'Modelo ARIMA(1,1,1)',
-                            color: '#00ccff',
-                            font: { style: 'italic' }
-                        }
-                    } 
-                }
-            });
-        } else if (ctxPrediccion) {
-            ctxPrediccion.parentElement.innerHTML = '<h3><i class="fas fa-brain"></i> Predicción de ML (Próximos 7 Días)</h3><p style="color: var(--ms-muted); text-align: center; margin-top: 4rem; padding: 0 1rem;">Se necesitan más datos históricos (al menos 11 días de cotizaciones) para generar una predicción.</p>';
+
+        const ctxPred = document.getElementById('prediccionChart');
+        if (ctxPred) {
+            if (predValores.length > 0) {
+                prediccionChart = new Chart(ctxPred, {
+                    type: 'line',
+                    data: {
+                        labels: predLabels,
+                        datasets: [{
+                            label: 'IA Predicción',
+                            data: predValores,
+                            borderColor: '#00ccff', backgroundColor: 'rgba(0, 204, 255, 0.1)',
+                            fill: true, borderDash: [5, 5], tension: 0.4
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                });
+            } else {
+                ctxPred.style.display = 'none';
+                const msg = document.createElement('div');
+                msg.innerHTML = '<p style="color:#666;text-align:center;margin-top:30%;">Necesitamos más datos históricos para activar la IA.</p>';
+                ctxPred.parentElement.appendChild(msg);
+            }
         }
 
-        // --- ¡NUEVO! Lógica para los Toggles de Gráficos ---
-        document.querySelectorAll('.chart-toggles').forEach(toggleGroup => {
-            toggleGroup.addEventListener('click', function(e) {
-                const button = e.target.closest('.chart-toggle');
-                if (!button) return;
-
-                // 1. Obtener el gráfico y el nuevo tipo
-                const chartName = toggleGroup.dataset.chart;
-                const newType = button.dataset.type;
-                let chartInstance;
-
-                if (chartName === 'tendenciaChart') chartInstance = tendenciaChart;
-                if (chartName === 'productosChart') chartInstance = productosChart;
-
-                if (!chartInstance) return;
-
-                // 2. Actualizar botones (activo/inactivo)
-                toggleGroup.querySelectorAll('.chart-toggle').forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-
-                // 3. Cambiar el tipo de gráfico
-                chartInstance.config.type = newType;
+        document.querySelectorAll('.chart-toggles').forEach(group => {
+            group.addEventListener('click', e => {
+                const btn = e.target.closest('.chart-toggle');
+                if (!btn) return;
                 
-                // 4. Ajustes especiales
-                if (newType === 'bar' && chartName === 'productosChart') {
-                    // Si vuelve a ser 'bar', necesita ser horizontal
-                    chartInstance.config.options.indexAxis = 'y';
-                } else {
-                    chartInstance.config.options.indexAxis = 'x';
+                const chartName = group.dataset.chart;
+                const type = btn.dataset.type;
+                let chart = chartName === 'tendenciaChart' ? tendenciaChart : productosChart;
+                
+                if(chart) {
+                    group.querySelectorAll('.chart-toggle').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    chart.config.type = type;
+                    if(chartName === 'productosChart') chart.config.options.indexAxis = type === 'bar' ? 'y' : 'x';
+                    chart.update();
                 }
-
-                // 5. Actualizar el gráfico
-                chartInstance.update();
             });
         });
     });
-  </script>
+</script>
 </body>
 </html>

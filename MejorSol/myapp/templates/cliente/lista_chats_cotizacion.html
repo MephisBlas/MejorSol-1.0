@@ -10,158 +10,173 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    
     <style>
-        /* Variables y Estilos adaptados de admin_panel.css para coherencia */
+        /* =========================================
+           1. VARIABLES Y RESET (Tema Oscuro Neón)
+           ========================================= */
         :root {
-            --primary-green: #00ff88;
-            --accent-green: #00ffaa;
-            --card-bg: rgba(25, 25, 35, 0.9);
-            --border-glow: 1px solid rgba(0, 255, 136, 0.3);
-            --text-light: #ffffff;
+            --neon-green: #00ff88;
+            --text-white: #ffffff;
             --text-gray: #b0b0b0;
+            --bg-card: rgba(15, 15, 15, 0.8);
+            --border-neon: 1px solid rgba(0, 255, 136, 0.2);
+            --shadow-neon: 0 0 15px rgba(0, 255, 136, 0.1);
             
-            --ms-panel: var(--card-bg);
-            --ms-border: var(--border-glow);
-            --ms-text: var(--text-light);
-            --ms-muted: var(--text-gray);
-            --ms-accent: var(--accent-green); 
-            
-            --danger-color: #ff4444;
-            --info-color: #3b82f6;
-            --warning-color: #ffaa00;
+            /* Estados */
+            --status-pending: #ffa502;
+            --status-approved: #00ff88;
+            --status-rejected: #ff4757;
+            --status-process: #1e90ff;
         }
         
-        /* Estilos de la lista de chats (MEJORADOS) */
         body { 
-            background: transparent; 
+            background: transparent; /* Transparente para iframe */
             font-family: 'Roboto', sans-serif; 
-            color: var(--ms-text); 
-            padding: 0.5rem; 
+            color: var(--text-white); 
+            padding: 1rem;
+            margin: 0;
         }
+
+        /* Scrollbar personalizada (fina y oscura) */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-green); }
+
+        /* =========================================
+           2. LISTA DE TARJETAS
+           ========================================= */
         .cotizacion-list { 
             display: flex; 
             flex-direction: column; 
             gap: 1rem; 
         }
+
         .cotizacion-card {
-            background: var(--ms-panel); 
-            border: 1px solid rgba(0, 255, 136, 0.5); 
-            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
-            border-radius: 12px; 
-            padding: 1.5rem; 
+            background: var(--bg-card);
+            border: var(--border-neon);
+            border-radius: 16px; 
+            padding: 1.2rem; 
             display: grid; 
-            grid-template-columns: 3fr 1fr 1fr; 
-            gap: 1rem;
+            grid-template-columns: auto 1fr auto auto; /* Avatar | Info | Estado | Botón */
+            gap: 1.2rem;
             align-items: center; 
             transition: all 0.3s ease; 
-            text-decoration: none; 
-            color: var(--ms-text); 
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
+
+        /* Efecto Hover */
         .cotizacion-card:hover { 
-            border-color: var(--ms-accent); 
-            transform: translateY(-2px); 
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.8); 
+            border-color: var(--neon-green); 
+            transform: translateY(-3px); 
+            box-shadow: var(--shadow-neon);
+            background: rgba(20, 20, 20, 0.95);
         }
-        .producto-info { 
-            display: flex; 
-            align-items: center; 
-            gap: 1rem; 
-        }
+
+        /* =========================================
+           3. ELEMENTOS DE LA TARJETA
+           ========================================= */
+        
+        /* Avatar del Producto */
         .producto-avatar { 
-            width: 50px; 
-            height: 50px; 
-            border-radius: 8px; 
-            background: #121a26; 
-            flex-shrink: 0; 
-            border: 1px solid var(--ms-border); 
-            display: flex; /* Centrar icono */
-            align-items: center;
-            justify-content: center;
-        }
-        .producto-avatar img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            border-radius: 8px; 
-        }
-        .producto-avatar i { 
-            font-size: 1.5rem; 
-            color: var(--ms-accent); 
-        }
-        .producto-info strong { 
-            font-weight: 600; 
-            color: var(--ms-text);
-        }
-        .producto-info span { 
-            color: var(--ms-muted); 
-            font-size: 0.875rem; 
-        }
-        .status-badge { 
-            padding: 0.4rem 0.8rem; 
-            border-radius: 20px; 
-            font-size: 0.75rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 0.4rem; 
-            justify-content: center; 
-        }
-        .status-pendiente { 
-            background: rgba(136, 153, 170, 0.2); 
-            color: #8899aa; 
-            border: 1px solid #8899aa; 
-        }
-        .status-en_proceso { 
-            background: rgba(59, 130, 246, 0.2); 
-            color: var(--info-color); 
-            border: 1px solid var(--info-color); 
-        }
-        .status-aprobada { 
-            background: rgba(41, 255, 154, 0.2); 
-            color: var(--ms-accent); 
-            border: 1px solid var(--ms-accent); 
-        }
-        .status-rechazada { 
-            background: rgba(255, 68, 68, 0.2); 
-            color: var(--danger-color); 
-            border: 1px solid var(--danger-color); 
+            width: 55px; 
+            height: 55px; 
+            border-radius: 12px; 
+            background: #000; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
         }
         
-        .btn-outline { 
+        .producto-avatar img { 
+            width: 100%; height: 100%; object-fit: cover; 
+        }
+        
+        .producto-avatar i { 
+            font-size: 1.5rem; color: #555; 
+        }
+
+        /* Información Principal */
+        .producto-info { 
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        
+        .producto-info strong { 
+            font-size: 1rem; font-weight: 600; color: #fff;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .producto-info span { 
+            color: var(--text-gray); font-size: 0.8rem; display: flex; align-items: center; gap: 5px;
+        }
+
+        /* Badge de Estado */
+        .status-badge { 
+            padding: 0.35rem 0.8rem; 
+            border-radius: 50px; 
+            font-size: 0.7rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .status-pendiente { 
+            color: var(--status-pending); border-color: var(--status-pending); background: rgba(255, 165, 2, 0.1);
+        }
+        .status-en_proceso { 
+            color: var(--status-process); border-color: var(--status-process); background: rgba(30, 144, 255, 0.1);
+        }
+        .status-aprobada { 
+            color: var(--status-approved); border-color: var(--status-approved); background: rgba(0, 255, 136, 0.1);
+        }
+        .status-rechazada { 
+            color: var(--status-rejected); border-color: var(--status-rejected); background: rgba(255, 71, 87, 0.1);
+        }
+
+        /* Botón de Acción */
+        .btn-chat { 
             background: transparent; 
-            color: var(--ms-accent);
-            border: 1px solid var(--ms-accent); 
-            padding: 0.5rem 1rem; 
-            border-radius: 8px; 
-            text-decoration: none; 
-            font-weight: 500; 
-            font-size: 0.9rem; 
-            text-align: center; 
-            transition: all 0.3s ease; 
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green); 
+            padding: 0.6rem; 
+            border-radius: 10px; 
+            transition: 0.3s;
+            display: flex; align-items: center; justify-content: center;
         }
-        .btn-outline:hover { 
-            border-color: var(--ms-accent); 
-            color: #031019; 
-            background: var(--ms-accent); 
-            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        
+        .btn-chat:hover { 
+            background: var(--neon-green); color: #000;
+            box-shadow: 0 0 10px var(--neon-green);
         }
+
+        /* =========================================
+           4. ESTADO VACÍO (NO CHATS)
+           ========================================= */
         .no-chats { 
             text-align: center; 
-            padding: 3rem; 
-            color: var(--ms-muted); 
-            background: var(--ms-panel);
-            border-radius: 12px;
-            border: 2px dashed var(--ms-border);
+            padding: 4rem 2rem; 
+            color: var(--text-gray); 
+            background: rgba(255,255,255,0.02);
+            border-radius: 16px;
+            border: 2px dashed rgba(255,255,255,0.1);
         }
         .no-chats i { 
-            font-size: 3rem; 
-            margin-bottom: 1rem; 
-            opacity: 0.5; 
+            font-size: 3rem; margin-bottom: 1rem; opacity: 0.3; 
+        }
+        .no-chats h3 { margin: 0 0 0.5rem 0; color: #fff; }
+
+        /* Responsive: Apilar en móvil muy pequeño */
+        @media (max-width: 500px) {
+            .cotizacion-card {
+                grid-template-columns: auto 1fr;
+                gap: 10px;
+            }
+            .cotizacion-estado { grid-column: 2; justify-self: start; }
+            .btn-chat { grid-column: 2; justify-self: start; width: 100%; }
         }
     </style>
 </head>
@@ -171,18 +186,17 @@
         {% for chat in lista_de_chats %}
             <div class="cotizacion-card" data-chat-id="{{ chat.id }}">
                 
+                <div class="producto-avatar">
+                    {% if chat.producto.imagenes.first.imagen.url %}
+                        <img src="{{ chat.producto.imagenes.first.imagen.url }}" alt="{{ chat.producto.nombre }}">
+                    {% else %}
+                        <i class="fas fa-box"></i>
+                    {% endif %}
+                </div>
+                
                 <div class="producto-info">
-                    <div class="producto-avatar">
-                        {% if chat.producto.imagenes.first.imagen.url %}
-                            <img src="{{ chat.producto.imagenes.first.imagen.url }}" alt="{{ chat.producto.nombre }}">
-                        {% else %}
-                            <i class="fas fa-{{ chat.producto.icono|default:'box' }}"></i>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <strong>{{ chat.producto.nombre }}</strong><br>
-                        <span>Cotización #{{ chat.id }} ({{ chat.fecha_actualizacion|date:"d/m/Y" }})</span>
-                    </div>
+                    <strong>{{ chat.producto.nombre }}</strong>
+                    <span><i class="far fa-clock"></i> {{ chat.fecha_actualizacion|date:"d M Y" }}</span>
                 </div>
                 
                 <div class="cotizacion-estado">
@@ -191,42 +205,38 @@
                     </span>
                 </div>
 
-                <button class="btn btn-outline btn-abrir-chat" data-chat-id="{{ chat.id }}">
-                    <i class="fas fa-comments"></i> Ir al Chat
+                <button class="btn-chat btn-abrir-chat" data-chat-id="{{ chat.id }}" title="Abrir Chat">
+                    <i class="fas fa-comment-dots"></i>
                 </button>
             </div>
         {% empty %}
             <div class="no-chats">
-                <i class="fas fa-comment-slash"></i>
-                <h3>No tienes cotizaciones</h3>
-                <p>Inicia una cotización desde el catálogo de productos.</p>
+                <i class="fas fa-inbox"></i>
+                <h3>Sin Cotizaciones</h3>
+                <p>Explora el catálogo para iniciar una nueva conversación.</p>
             </div>
         {% endfor %}
     </div>
 
     <script>
-        // Este script escucha los clics en la lista de chats
+        // Script para comunicación con el padre (Dashboard)
+        
+        // 1. Click en botón específico
         document.querySelectorAll('.btn-abrir-chat').forEach(button => {
             button.addEventListener('click', function(e) {
-                e.stopPropagation(); // Prevenir doble clic si se da en el botón
+                e.stopPropagation(); 
                 const chatId = this.dataset.chatId;
-                window.parent.postMessage({
-                    type: 'OPEN_CHAT_MODAL',
-                    chatId: chatId
-                }, '*');
+                window.parent.postMessage({ type: 'OPEN_CHAT_MODAL', chatId: chatId }, '*');
             });
         });
         
-        // Clic en la tarjeta completa para abrir el chat
+        // 2. Click en toda la tarjeta
         document.querySelectorAll('.cotizacion-card').forEach(card => {
              card.addEventListener('click', function(e) {
                  if (e.target.closest('.btn-abrir-chat')) return; 
                  
                  const chatId = this.dataset.chatId;
-                 window.parent.postMessage({
-                    type: 'OPEN_CHAT_MODAL',
-                    chatId: chatId
-                }, '*');
+                 window.parent.postMessage({ type: 'OPEN_CHAT_MODAL', chatId: chatId }, '*');
              });
         });
     </script>

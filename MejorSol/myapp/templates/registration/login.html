@@ -6,23 +6,212 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/login_css.css' %}">
 <style>
-    /* Estilo extra para el enlace de olvidar contraseña */
-    .forgot-pass-link {
-        text-align: right;
+    /* =========================================
+       LOGIN STYLE - CLEAN & PRO
+       ========================================= */
+    
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 100px 20px 40px; /* Espacio header */
+        position: relative;
+    }
+
+    /* Partículas de fondo */
+    .floating-particles {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        pointer-events: none;
+        z-index: 0;
+    }
+    .particle {
+        position: absolute;
+        background: var(--primary-green);
+        border-radius: 50%;
+        opacity: 0.2;
+    }
+
+    /* Tarjeta Principal */
+    .login-card {
+        background: rgba(15, 15, 15, 0.95); /* Fondo oscuro sólido */
+        border: 1px solid rgba(0, 255, 136, 0.15);
+        border-radius: 24px; /* Bordes más redondeados */
+        padding: 3rem 2.5rem;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        position: relative;
+        z-index: 1;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cabecera */
+    .login-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .logo-img-login {
+        width: 60px;
+        height: auto;
+        margin-bottom: 1rem;
+        filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.2));
+    }
+
+    .login-header h2 {
+        color: #fff;
+        font-family: var(--font-title);
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-header p {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+    }
+
+    /* Mensajes de Error */
+    .alert-error {
+        background: rgba(255, 71, 87, 0.1);
+        border-left: 3px solid #ff4757;
+        color: #ff6b81;
+        padding: 1rem;
+        border-radius: 8px;
         margin-bottom: 1.5rem;
-        font-size: 0.85rem;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
-    .forgot-pass-link a {
-        color: #b0b0b0;
-        text-decoration: none;
+
+    /* Inputs */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        color: #e0e0e0;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .form-input-wrapper {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+        transition: 0.3s;
+        font-size: 1rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 14px 16px 14px 48px; /* Espacio icono */
+        background: #0a0a0a;
+        border: 1px solid #333;
+        border-radius: 12px;
+        color: #fff;
+        font-family: var(--font-body);
+        font-size: 1rem;
         transition: all 0.3s ease;
+        outline: none;
     }
-    .forgot-pass-link a:hover {
+
+    .form-input:focus {
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 4px rgba(0, 255, 136, 0.1);
+        background: #111;
+    }
+
+    .form-input:focus + .input-icon {
+        color: var(--primary-green);
+    }
+
+    /* Botón Principal */
+    .btn-full {
+        width: 100%;
+        padding: 14px;
+        background: var(--primary-green);
+        color: #000;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 0.5rem;
+    }
+
+    .btn-full:hover {
+        background: var(--dark-green);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 255, 136, 0.2);
+    }
+
+    /* Footer del Login (Enlaces Agrupados) */
+    .login-footer {
+        margin-top: 2.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+        text-align: center;
+    }
+
+    .login-link-item {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .login-link-item a {
+        color: var(--primary-green);
+        font-weight: 600;
+        text-decoration: none;
+        margin-left: 5px;
+    }
+
+    .login-link-item a:hover {
+        text-decoration: underline;
         color: #fff;
     }
-    .forgot-pass-link span {
-        color: #00ff88; /* Tu verde neón */
-        font-weight: 500;
+
+    /* Link secundario (Olvidé contraseña) más sutil */
+    .forgot-link {
+        font-size: 0.9rem;
+        color: #888;
+    }
+    .forgot-link:hover {
+        color: var(--primary-green);
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+        .login-card {
+            padding: 2rem 1.5rem;
+            background: rgba(15, 15, 15, 1); /* Opacidad total en móvil */
+        }
+        .login-header h2 { font-size: 1.5rem; }
     }
 </style>
 {% endblock %}
@@ -33,23 +222,15 @@
     
     <div class="login-card">
         <div class="login-header">
-            <div class="logo-container">
-                <div class="logo-flex">
-                    <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo" class="logo-img">
-                    <div class="logo-text">
-                        <h1>SIEER Chile</h1>
-                        <span>Servicios de Ingeniería Eléctrica</span>
-                    </div>
-                </div>
-            </div>
-            <h2>Iniciar Sesión</h2>
-            <p>Accede a tu cuenta de SIEER Chile</p>
+            <img src="{% static 'img/logo.png' %}" alt="SIEER Chile" class="logo-img-login">
+            <h2>Bienvenido</h2>
+            <p>Ingresa a tu panel de cliente</p>
         </div>
         
         {% if form.errors %}
         <div class="alert-error">
-            <i class="fas fa-exclamation-triangle"></i>
-            Usuario o contraseña incorrectos. Por favor, intenta nuevamente.
+            <i class="fas fa-exclamation-circle"></i>
+            <span>Usuario o contraseña incorrectos.</span>
         </div>
         {% endif %}
         
@@ -57,87 +238,81 @@
             {% csrf_token %}
             
             <div class="form-group">
-                <label for="id_username">Usuario:</label>
+                <label for="id_username">Usuario</label>
                 <div class="form-input-wrapper">
-                    <i class="fas fa-user input-icon"></i>
                     {{ form.username }}
+                    <i class="fas fa-user input-icon"></i>
                 </div>
             </div>
             
             <div class="form-group">
-                <label for="id_password">Contraseña:</label>
+                <label for="id_password">Contraseña</label>
                 <div class="form-input-wrapper">
-                    <i class="fas fa-lock input-icon"></i>
                     {{ form.password }}
+                    <i class="fas fa-lock input-icon"></i>
                 </div>
             </div>
-            
 
             <input type="hidden" name="next" value="{{ next }}">
             
             <button type="submit" class="btn-full">
-                <i class="fas fa-sign-in-alt"></i> INICIAR SESIÓN
+                Iniciar Sesión
             </button>
         </form>
         
-        <div class="login-links">
-            <p>¿No tienes cuenta? <a href="{% url 'registro' %}">Regístrate aquí</a></p>
-            <p>¿Olvidaste contraseña?<a href="{% url 'password_reset' %}">Pincha aquí</a></p>
+        <div class="login-footer">
+            <div class="login-link-item">
+                ¿No tienes cuenta? 
+                <a href="{% url 'registro' %}">Regístrate ahora</a>
+            </div>
+            <a href="{% url 'password_reset' %}" class="login-link-item forgot-link">
+                ¿Olvidaste tu contraseña?
+            </a>
         </div>
-                    
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const particlesContainer = document.getElementById('particles');
-        const particleCount = 15;
-        
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            
-            const size = Math.random() * 6 + 2;
-            const left = Math.random() * 100;
-            const top = Math.random() * 100;
-            const delay = Math.random() * 5;
-            const duration = 8 + Math.random() * 8;
-            
-            particle.style.width = `${size}px`;
-            particle.style.height = `${size}px`;
-            particle.style.left = `${left}%`;
-            particle.style.top = `${top}%`;
-            particle.style.animationDelay = `${delay}s`;
-            particle.style.animationDuration = `${duration}s`;
-            particle.style.opacity = Math.random() * 0.3 + 0.1;
-            
-            particlesContainer.appendChild(particle);
-        }
-
-        // Focus effects
-        const inputs = document.querySelectorAll('.form-input, input[type="text"], input[type="password"]');
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.classList.add('focused');
-            });
-            
-            input.addEventListener('blur', function() {
-                this.parentElement.classList.remove('focused');
-            });
-        });
-
-        // Agregar clases a los inputs del formulario Django y placeholders
+        // --- Configuración de Inputs ---
         const usernameInput = document.getElementById('id_username');
         const passwordInput = document.getElementById('id_password');
 
         if (usernameInput) {
             usernameInput.classList.add('form-input');
-            usernameInput.setAttribute('placeholder', 'Ingresa tu usuario');
+            usernameInput.setAttribute('placeholder', 'Ej: usuario.cliente');
         }
         
         if (passwordInput) {
             passwordInput.classList.add('form-input');
-            passwordInput.setAttribute('placeholder', 'Ingresa tu contraseña');
+            passwordInput.setAttribute('placeholder', '••••••••');
+        }
+
+        // --- Efecto de Partículas ---
+        const container = document.getElementById('particles');
+        const count = 20;
+        
+        for (let i = 0; i < count; i++) {
+            let p = document.createElement('div');
+            p.className = 'particle';
+            let size = Math.random() * 5 + 2;
+            p.style.width = size + 'px';
+            p.style.height = size + 'px';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.top = Math.random() * 100 + '%';
+            
+            // Animación simple inline para no cargar CSS extra
+            let duration = Math.random() * 10 + 10;
+            p.style.transition = `transform ${duration}s linear`;
+            
+            container.appendChild(p);
+            
+            // Mover aleatoriamente
+            setTimeout(() => {
+                let x = (Math.random() - 0.5) * 100;
+                let y = (Math.random() - 0.5) * 100;
+                p.style.transform = `translate(${x}px, ${y}px)`;
+            }, 100);
         }
     });
 </script>
