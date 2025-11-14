@@ -5,15 +5,33 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/login_css.css' %}">
+<style>
+    /* Estilo extra para el enlace de olvidar contraseña */
+    .forgot-pass-link {
+        text-align: right;
+        margin-bottom: 1.5rem;
+        font-size: 0.85rem;
+    }
+    .forgot-pass-link a {
+        color: #b0b0b0;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    .forgot-pass-link a:hover {
+        color: #fff;
+    }
+    .forgot-pass-link span {
+        color: #00ff88; /* Tu verde neón */
+        font-weight: 500;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="login-container">
-    <!-- Partículas flotantes -->
     <div class="floating-particles" id="particles"></div>
     
     <div class="login-card">
-        <!-- Logo y título -->
         <div class="login-header">
             <div class="logo-container">
                 <div class="logo-flex">
@@ -35,16 +53,14 @@
         </div>
         {% endif %}
         
-        <!-- FORMULARIO CORREGIDO: Agregar action y usar el formulario de Django -->
         <form method="post" action="{% url 'login' %}">
             {% csrf_token %}
             
-            <!-- Usar el formulario de Django directamente o campos manuales -->
             <div class="form-group">
                 <label for="id_username">Usuario:</label>
                 <div class="form-input-wrapper">
                     <i class="fas fa-user input-icon"></i>
-                    {{ form.username }}  <!-- Usar el campo del formulario Django -->
+                    {{ form.username }}
                 </div>
             </div>
             
@@ -52,11 +68,12 @@
                 <label for="id_password">Contraseña:</label>
                 <div class="form-input-wrapper">
                     <i class="fas fa-lock input-icon"></i>
-                    {{ form.password }}  <!-- Usar el campo del formulario Django -->
+                    {{ form.password }}
                 </div>
             </div>
             
-            <input type="hidden" name="next" value="{{ next }}">  <!-- IMPORTANTE: Campo next -->
+
+            <input type="hidden" name="next" value="{{ next }}">
             
             <button type="submit" class="btn-full">
                 <i class="fas fa-sign-in-alt"></i> INICIAR SESIÓN
@@ -65,7 +82,9 @@
         
         <div class="login-links">
             <p>¿No tienes cuenta? <a href="{% url 'registro' %}">Regístrate aquí</a></p>
+            <p>¿Olvidaste contraseña?<a href="{% url 'password_reset' %}">Pincha aquí</a></p>
         </div>
+                    
     </div>
 </div>
 
@@ -107,11 +126,19 @@
             });
         });
 
-        // Agregar clases a los inputs del formulario Django
-        document.querySelectorAll('#id_username, #id_password').forEach(input => {
-            input.classList.add('form-input');
-            input.setAttribute('placeholder', input.type === 'text' ? 'Ingresa tu usuario' : 'Ingresa tu contraseña');
-        });
+        // Agregar clases a los inputs del formulario Django y placeholders
+        const usernameInput = document.getElementById('id_username');
+        const passwordInput = document.getElementById('id_password');
+
+        if (usernameInput) {
+            usernameInput.classList.add('form-input');
+            usernameInput.setAttribute('placeholder', 'Ingresa tu usuario');
+        }
+        
+        if (passwordInput) {
+            passwordInput.classList.add('form-input');
+            passwordInput.setAttribute('placeholder', 'Ingresa tu contraseña');
+        }
     });
 </script>
 {% endblock %}

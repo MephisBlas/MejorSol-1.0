@@ -16,7 +16,30 @@ urlpatterns = [
     path('registro/', views.registro, name='registro'),
     path('accounts/login/', CustomLoginView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('accounts/', include('django.contrib.auth.urls')),
+    # path('accounts/', include('django.contrib.auth.urls')), # <--- COMENTA ESTO PARA EVITAR CONFLICTOS
+
+    # ===========================
+    # RECUPERACIÓN DE CONTRASEÑA (EXTERNA)
+    # ===========================
+    # 1. Solicitar correo
+    path('reset_password/', 
+         auth_views.PasswordResetView.as_view(template_name="registration/password_reset_form.html"), 
+         name='password_reset'),
+
+    # 2. Mensaje de envío exitoso
+    path('reset_password_sent/', 
+         auth_views.PasswordResetDoneView.as_view(template_name="registration/password_reset_done.html"), 
+         name='password_reset_done'),
+
+    # 3. Link que llega al correo (Ingresar nueva clave)
+    path('reset/<uidb64>/<token>/', 
+         auth_views.PasswordResetConfirmView.as_view(template_name="registration/password_reset_confirm.html"), 
+         name='password_reset_confirm'),
+
+    # 4. Mensaje de éxito final
+    path('reset_password_complete/', 
+         auth_views.PasswordResetCompleteView.as_view(template_name="registration/password_reset_complete.html"), 
+         name='password_reset_complete'),
     
     # ===========================
     # URLS DE PANELES
@@ -70,7 +93,7 @@ urlpatterns = [
     path('api/chat/<int:chat_id>/mensajes/', views.chat_api_view, name='chat_api_view'),
 
     # ===========================
-    # CAMBIO DE CONTRASEÑA
+    # CAMBIO DE CONTRASEÑA (INTERNA)
     # ===========================
     path(
         'cambiar-contrasena/',
