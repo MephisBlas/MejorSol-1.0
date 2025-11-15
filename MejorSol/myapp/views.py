@@ -951,3 +951,32 @@ def chatbot_dialogflow(request):
     df_response = dialogflow_service.detect_intent(session_id, msg)
 
     return JsonResponse(df_response)
+
+# ==========================================================
+# HACK PARA CREAR ADMIN EN RENDER (¡BORRAR DESPUÉS!)
+# ==========================================================
+from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+
+def crear_superusuario_secreto(request):
+    User = get_user_model()
+    username = 'mephis'
+    email = 'reyshelsss@gmail.com'
+    password = 'ikaros12'
+
+    # Revisa si el usuario 'mephis' ya existe
+    if not User.objects.filter(username=username).exists():
+        try:
+            # Si no existe, lo crea
+            User.objects.create_superuser(username, email, password)
+            print("¡ADMIN 'mephis' CREADO CON ÉXITO!")
+            return HttpResponse(f"<h1>¡LISTO!</h1><p>Usuario admin '{username}' creado con éxito.</p><p>Ya puedes ir a /admin y entrar.</p>")
+        except Exception as e:
+            return HttpResponse(f"<h1>ERROR</h1><p>No se pudo crear el admin: {e}</p>")
+    else:
+        # Si ya existía, te avisa
+        print("El admin 'mephis' ya existe.")
+        return HttpResponse(f"<h1>YA EXISTE</h1><p>El usuario admin '{username}' ya existe. No se hizo nada.</p>")
+# ==========================================================
+# FIN DEL HACK
+# ==========================================================

