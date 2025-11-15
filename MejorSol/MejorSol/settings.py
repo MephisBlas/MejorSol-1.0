@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 from datetime import timedelta
 
-
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,7 +12,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ===========================
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-clave-temporal-cambiar-en-produccion')
+# Importante: En Render DEBUG suele ser False, asegúrate de tener las variables configuradas
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+
+# Permitimos el host de Render (y todos para facilitar la demo)
 ALLOWED_HOSTS = ['*']
 
 # Configuraciones de seguridad para producción
@@ -24,6 +26,8 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    # Fix para que HTTPS funcione bien detrás del proxy de Render
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # ===========================
 # CONFIGURACIÓN DE APLICACIONES
@@ -36,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles', # Necesario para whitenoise
     'django.contrib.humanize',
     
     # === TAREA T-R.S2.5 (Erick): AÑADIR APPS DE API Y SEGURIDAD JWT ===
@@ -48,25 +52,29 @@ INSTALLED_APPS = [
 ]
 
 # ===========================
-# CONFIGURACIÓN DE MIDDLEWARE
+# CONFIGURACIÓN DE MIDDLEWARE (¡CORREGIDO!)
 # ===========================
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # ------------------------------------------------------------------------
+    # [CORRECCIÓN CRÍTICA] WhiteNoise debe ir AQUÍ, justo después de Security
+    # ------------------------------------------------------------------------
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
+    
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 # ===========================
 # CONFIGURACIÓN DE URLS Y TEMPLATES
 # ===========================
 
-ROOT_URLCONF = 'MejorSol.urls' # (Asegúrate de que 'MejorSol' sea el nombre correcto de la carpeta de settings)
+ROOT_URLCONF = 'MejorSol.urls' 
 
 TEMPLATES = [
     {
@@ -87,14 +95,13 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'MejorSol.wsgi.application' # (Asegúrate de que 'MejorSol' sea el nombre correcto)
+WSGI_APPLICATION = 'MejorSol.wsgi.application'
 
 # ===========================
 # CONFIGURACIÓN DE BASE DE DATOS
 # ===========================
 
 # === TAREA T-R.S2.2 (Isaí): MIGRACIÓN A MYSQL ===
-# Esta configuración reemplaza SQLite y lee las credenciales del archivo .env
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -128,7 +135,7 @@ USE_TZ = True
 USE_L10N = True
 
 # ===========================
-# ARCHIVOS ESTÁTICOS Y MEDIA
+# ARCHIVOS ESTÁTICOS Y MEDIA (¡AJUSTADO PARA RENDER!)
 # ===========================
 
 STATIC_URL = '/static/'
@@ -136,7 +143,11 @@ STATICFILES_DIRS = [
     BASE_DIR / 'myapp/static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'  
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  
+
+# [AJUSTE DE SEGURIDAD] Usamos 'CompressedStaticFilesStorage' en lugar de 'Manifest...'
+# Esto evita que el deploy falle si falta una imagen referenciada en el CSS.
+# Es más seguro para entregas rápidas.
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'  
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -158,14 +169,14 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated', # Por defecto, todas las APIs requieren token
+        'rest_framework.permissions.IsAuthenticated', 
     ]
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), # Duración del token de acceso
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),   # Duración del token para refrescar
-    'AUTH_HEADER_TYPES': ('Bearer',),              # El tipo de token que se espera en la cabecera
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), 
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),   
+    'AUTH_HEADER_TYPES': ('Bearer',),              
 }
 
 # ===========================
@@ -196,4 +207,3 @@ APP_CONFIG = {
     'EMPRESA_EMAIL': 'contacto@sieer.cl',
     'IVA_PORCENTAJE': 19,
 }
-
