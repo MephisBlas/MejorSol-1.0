@@ -1,341 +1,406 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>SIEER Chile - Servicios de Ingeniería Eléctrica</title>
-    <meta name="description"
-        content="Expertos en soluciones de ingeniería eléctrica para proyectos industriales, comerciales y residenciales en Chile">
+    <meta
+      name="description"
+      content="Expertos en soluciones de ingeniería eléctrica para proyectos industriales, comerciales y residenciales en Chile"
+    />
 
     <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap"
-        rel="stylesheet">
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
 
     <!-- Hoja de estilos CORREGIDA -->
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/index.css' %}">
-</head>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/index.css' %}" />
+  </head>
 
-<body>
+  <body>
     <!-- Header -->
     <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <!-- Logo a la IZQUIERDA -->
-                <div class="logo-container">
-                    <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo" class="logo-img">
-                    <div class="logo-text">
-                        <h1><a href="/">SIEER Chile</a></h1>
-                        <span>Servicios de Ingeniería Eléctrica</span>
-                    </div>
-                </div>
-
-                <!-- Botones a la DERECHA -->
-                <div class="auth-buttons">
-                    {% if user.is_authenticated %}
-                    <span>
-                        <i class="fas fa-user"></i> Hola, {{ user.username }}
-                    </span>
-                    <form method="post" action="{% url 'logout' %}" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline">
-                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                        </button>
-                    </form>
-                    {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-outline">
-                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                    </a>
-                    <a href="{% url 'registro' %}" class="btn btn-solid">
-                        <i class="fas fa-user-plus"></i> Registrarse
-                    </a>
-                    {% endif %}
-                </div>
-
-                <!-- Menú móvil -->
-                <div class="mobile-menu-toggle">
-                    <i class="fas fa-bars"></i>
-                </div>
+      <div class="container">
+        <div class="header-content">
+          <!-- Logo a la IZQUIERDA -->
+          <div class="logo-container">
+            <img
+              src="{% static 'img/logo.png' %}"
+              alt="SIEER Chile Logo"
+              class="logo-img"
+            />
+            <div class="logo-text">
+              <h1><a href="/">SIEER Chile</a></h1>
+              <span>Servicios de Ingeniería Eléctrica</span>
             </div>
+          </div>
+
+          <!-- Botones a la DERECHA -->
+          <div class="auth-buttons">
+            {% if user.is_authenticated %}
+            <span> <i class="fas fa-user"></i> Hola, {{ user.username }} </span>
+            <form
+              method="post"
+              action="{% url 'logout' %}"
+              style="display: inline"
+            >
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+              </button>
+            </form>
+            {% else %}
+            <a href="{% url 'login' %}" class="btn btn-outline">
+              <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+            </a>
+            <a href="{% url 'registro' %}" class="btn btn-solid">
+              <i class="fas fa-user-plus"></i> Registrarse
+            </a>
+            {% endif %}
+          </div>
+
+          <!-- Menú móvil -->
+          <div class="mobile-menu-toggle">
+            <i class="fas fa-bars"></i>
+          </div>
         </div>
+      </div>
     </header>
 
-   <!-- Hero Section -->
-<section id="inicio" class="hero">
-    <video autoplay muted loop playsinline class="hero-bg">
-        <source src="{% static 'media/mp4/panel.mp4' %}" type="video/mp4">
+    <!-- Hero Section -->
+    <section id="inicio" class="hero">
+      <video autoplay muted loop playsinline class="hero-bg">
+        <source src="{% static 'media/mp4/panel.mp4' %}" type="video/mp4" />
         Tu navegador no soporta videos en HTML5.
-    </video>
+      </video>
 
-    <div class="hero-overlay">
+      <div class="hero-overlay">
         <div class="hero-content">
-            <h2>Soluciones eléctricas integrales</h2>
-            <p>Expertos en ingeniería eléctrica para proyectos industriales, comerciales y residenciales</p>
-            <div class="hero-buttons">
-                <a href="#servicios" class="btn btn-primary">Nuestros Servicios</a>
-                <a href="#contacto" class="btn btn-secondary">Contáctenos</a>
-            </div>
+          <h2>Soluciones eléctricas integrales</h2>
+          <p>
+            Expertos en ingeniería eléctrica para proyectos industriales,
+            comerciales y residenciales
+          </p>
+          <div class="hero-buttons">
+            <a href="#servicios" class="btn btn-primary">Nuestros Servicios</a>
+            <a href="#contacto" class="btn btn-secondary">Contáctenos</a>
+          </div>
         </div>
-    </div>
-</section>
-
+      </div>
+    </section>
 
     <!-- Servicios Section -->
     <section id="servicios" class="services">
-        <div class="services-grid">
-            <div class="service-card">
-                <div class="service-icon">
-                    <i class="fas fa-bolt"></i>
-                </div>
-                <h3>Instalaciones Eléctricas</h3>
-                <p>Diseño e implementación de sistemas eléctricos para todo tipo de proyectos.</p>
-            </div>
-
-            <div class="service-card">
-                <div class="service-icon">
-                    <i class="fas fa-solar-panel"></i>
-                </div>
-                <h3>Energías Renovables</h3>
-                <p>Soluciones sostenibles con paneles solares y sistemas de energía alternativa.</p>
-            </div>
-
-            <a class="service-card card-link">
-                <div class="service-icon">
-                    <i class="fas fa-charging-station"></i>
-                </div>
-                <h3>Productos</h3>
-                <p>Sistemas de control y automatización para procesos industriales.</p>
-            </a>
-
-            <div class="service-card">
-                <div class="service-icon">
-                    <i class="fas fa-tachometer-alt"></i>
-                </div>
-                <h3>Mantenimiento</h3>
-                <p>Programas de mantenimiento preventivo y correctivo para instalaciones eléctricas.</p>
-            </div>
-
-            <div class="service-card">
-                <div class="service-icon">
-                    <i class="fas fa-lightbulb"></i>
-                </div>
-                <h3>Iluminación Eficiente</h3>
-                <p>Diseño e implementación de sistemas de iluminación de bajo consumo.</p>
-            </div>
-
-            <div class="service-card">
-                <div class="service-icon">
-                    <i class="fas fa-file-alt"></i>
-                </div>
-                <h3>Asesorías Técnicas</h3>
-                <p>Consultoría especializada en proyectos eléctricos y normativas.</p>
-            </div>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <h3>Instalaciones Eléctricas</h3>
+          <p>
+            Diseño e implementación de sistemas eléctricos para todo tipo de
+            proyectos.
+          </p>
         </div>
 
+        <div class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-solar-panel"></i>
+          </div>
+          <h3>Energías Renovables</h3>
+          <p>
+            Soluciones sostenibles con paneles solares y sistemas de energía
+            alternativa.
+          </p>
+        </div>
+
+        <a class="service-card card-link">
+          <div class="service-icon">
+            <i class="fas fa-charging-station"></i>
+          </div>
+          <h3>Productos</h3>
+          <p>
+            Sistemas de control y automatización para procesos industriales.
+          </p>
+        </a>
+
+        <div class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-tachometer-alt"></i>
+          </div>
+          <h3>Mantenimiento</h3>
+          <p>
+            Programas de mantenimiento preventivo y correctivo para
+            instalaciones eléctricas.
+          </p>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-lightbulb"></i>
+          </div>
+          <h3>Iluminación Eficiente</h3>
+          <p>
+            Diseño e implementación de sistemas de iluminación de bajo consumo.
+          </p>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">
+            <i class="fas fa-file-alt"></i>
+          </div>
+          <h3>Asesorías Técnicas</h3>
+          <p>Consultoría especializada en proyectos eléctricos y normativas.</p>
+        </div>
+      </div>
     </section>
 
     <!-- About Section -->
     <section id="nosotros" class="about">
-        <div class="container">
-            <div class="about-content">
-                <div class="about-text">
-                    <h2>Sobre Nosotros</h2>
-                    <p>En SIEER Chile nos especializamos en proveer soluciones integrales de ingeniería eléctrica. Con
-                        más de 10 años de experiencia en el mercado, nuestro equipo de profesionales altamente
-                        capacitados garantiza el más alto estándar de calidad en cada proyecto.</p>
-                    <p>Nuestra misión es entregar servicios eléctricos confiables, eficientes y seguros, contribuyendo
-                        al desarrollo de infraestructura eléctrica sostenible en Chile.</p>
-                    <ul class="about-features">
-                        <li><i class="fas fa-check-circle"></i> Personal calificado y certificado</li>
-                        <li><i class="fas fa-check-circle"></i> Cumplimiento de normativas vigentes</li>
-                        <li><i class="fas fa-check-circle"></i> Soluciones a medida para cada cliente</li>
-                        <li><i class="fas fa-check-circle"></i> Atención personalizada y soporte continuo</li>
-                    </ul>
-                </div>
-                <div class="about-image">
-                    <img src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
-                        alt="Ingeniero eléctrico trabajando">
-                </div>
-            </div>
+      <div class="container">
+        <div class="about-content">
+          <div class="about-text">
+            <h2>Sobre Nosotros</h2>
+            <p>
+              En SIEER Chile nos especializamos en proveer soluciones integrales
+              de ingeniería eléctrica. Con más de 10 años de experiencia en el
+              mercado, nuestro equipo de profesionales altamente capacitados
+              garantiza el más alto estándar de calidad en cada proyecto.
+            </p>
+            <p>
+              Nuestra misión es entregar servicios eléctricos confiables,
+              eficientes y seguros, contribuyendo al desarrollo de
+              infraestructura eléctrica sostenible en Chile.
+            </p>
+            <ul class="about-features">
+              <li>
+                <i class="fas fa-check-circle"></i> Personal calificado y
+                certificado
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i> Cumplimiento de normativas
+                vigentes
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i> Soluciones a medida para
+                cada cliente
+              </li>
+              <li>
+                <i class="fas fa-check-circle"></i> Atención personalizada y
+                soporte continuo
+              </li>
+            </ul>
+          </div>
+          <div class="about-image">
+            <img
+              src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+              alt="Ingeniero eléctrico trabajando"
+            />
+          </div>
         </div>
+      </div>
     </section>
 
     <!-- Projects Section -->
     <section id="proyectos" class="projects">
-        <div class="container">
-            <div class="section-header">
-                <h2>Proyectos Destacados</h2>
-                <p>Algunos de nuestros trabajos más relevantes</p>
-            </div>
-            <div class="projects-grid">
-                <div class="project-card">
-                    <div class="project-image">
-                        <img src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
-                            alt="Proyecto industrial">
-                    </div>
-                    <div class="project-info">
-                        <h3>Planta Industrial</h3>
-                        <p>Instalación eléctrica completa para planta manufacturera en Santiago.</p>
-                    </div>
-                </div>
-                <div class="project-card">
-                    <div class="project-image">
-                        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
-                            alt="Proyecto comercial">
-                    </div>
-                    <div class="project-info">
-                        <h3>Centro Comercial</h3>
-                        <p>Sistema de iluminación eficiente para centro comercial en Viña del Mar.</p>
-                    </div>
-                </div>
-                <div class="project-card">
-                    <div class="project-image">
-                        <img src="https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
-                            alt="Proyecto solar">
-                    </div>
-                    <div class="project-info">
-                        <h3>Granja Solar</h3>
-                        <p>Instalación de sistema fotovoltaico para empresa agrícola en el sur de Chile.</p>
-                    </div>
-                </div>
-            </div>
+      <div class="container">
+        <div class="section-header">
+          <h2>Proyectos Destacados</h2>
+          <p>Algunos de nuestros trabajos más relevantes</p>
         </div>
+        <div class="projects-grid">
+          <div class="project-card">
+            <div class="project-image">
+              <img
+                src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                alt="Proyecto industrial"
+              />
+            </div>
+            <div class="project-info">
+              <h3>Planta Industrial</h3>
+              <p>
+                Instalación eléctrica completa para planta manufacturera en
+                Santiago.
+              </p>
+            </div>
+          </div>
+          <div class="project-card">
+            <div class="project-image">
+              <img
+                src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                alt="Proyecto comercial"
+              />
+            </div>
+            <div class="project-info">
+              <h3>Centro Comercial</h3>
+              <p>
+                Sistema de iluminación eficiente para centro comercial en Viña
+                del Mar.
+              </p>
+            </div>
+          </div>
+          <div class="project-card">
+            <div class="project-image">
+              <img
+                src="https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                alt="Proyecto solar"
+              />
+            </div>
+            <div class="project-info">
+              <h3>Granja Solar</h3>
+              <p>
+                Instalación de sistema fotovoltaico para empresa agrícola en el
+                sur de Chile.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Contact Section -->
     <section id="contacto" class="contact">
-        <div class="container">
-            <div class="section-header">
-                <h2>Contáctenos</h2>
-                <p>Estamos listos para atender sus requerimientos</p>
-            </div>
-            <div class="contact-content">
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <div class="contact-details">
-                            <h3>Ubicación</h3>
-                            <p>Av. Principal 1234, Santiago, Chile</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-phone"></i>
-                        </div>
-                        <div class="contact-details">
-                            <h3>Teléfono</h3>
-                            <p>+56 2 2345 6789</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <div class="contact-details">
-                            <h3>Email</h3>
-                            <p>contacto@sieerchile.cl</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="contact-details">
-                            <h3>Horario de atención</h3>
-                            <p>Lunes a Viernes: 9:00 - 18:00 hrs</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <div class="container">
+        <div class="section-header">
+          <h2>Contáctenos</h2>
+          <p>Estamos listos para atender sus requerimientos</p>
         </div>
+        <div class="contact-content">
+          <div class="contact-info">
+            <div class="contact-item">
+              <div class="contact-icon">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+              <div class="contact-details">
+                <h3>Ubicación</h3>
+                <p>Av. Principal 1234, Santiago, Chile</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-icon">
+                <i class="fas fa-phone"></i>
+              </div>
+              <div class="contact-details">
+                <h3>Teléfono</h3>
+                <p>+56 2 2345 6789</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-icon">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <div class="contact-details">
+                <h3>Email</h3>
+                <p>contacto@sieerchile.cl</p>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="contact-details">
+                <h3>Horario de atención</h3>
+                <p>Lunes a Viernes: 9:00 - 18:00 hrs</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <div class="logo">
-                        <h3>SIEER Chile</h3>
-                        <span>Servicios de Ingeniería Eléctrica</span>
-                    </div>
-                    <p>Expertos en soluciones eléctricas integrales para proyectos industriales, comerciales y
-                        residenciales.</p>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-                <div class="footer-section">
-                    <h4>Enlaces rápidos</h4>
-                    <ul>
-                        <li><a href="#inicio">Inicio</a></li>
-                        <li><a href="#servicios">Servicios</a></li>
-                        <li><a href="#nosotros">Nosotros</a></li>
-                        <li><a href="#proyectos">Proyectos</a></li>
-                        <li><a href="#contacto">Contacto</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Servicios</h4>
-                    <ul>
-                        <li><a href="#servicios">Instalaciones Eléctricas</a></li>
-                        <li><a href="#servicios">Energías Renovables</a></li>
-                        <li><a href="#servicios">Automatización</a></li>
-                        <li><a href="#servicios">Mantenimiento</a></li>
-                        <li><a href="#servicios">Iluminación Eficiente</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Suscríbete</h4>
-                    <p>Recibe nuestras novedades y promociones</p>
-                    <form class="subscribe-form">
-                        <input type="email" placeholder="Tu correo electrónico">
-                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
-                    </form>
-                </div>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <div class="logo">
+              <h3>SIEER Chile</h3>
+              <span>Servicios de Ingeniería Eléctrica</span>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 SIEER Chile - Servicios de Ingeniería Eléctrica. Todos los derechos reservados.</p>
+            <p>
+              Expertos en soluciones eléctricas integrales para proyectos
+              industriales, comerciales y residenciales.
+            </p>
+            <div class="social-links">
+              <a href="#"><i class="fab fa-facebook-f"></i></a>
+              <a href="#"><i class="fab fa-twitter"></i></a>
+              <a href="#"><i class="fab fa-linkedin-in"></i></a>
+              <a href="#"><i class="fab fa-instagram"></i></a>
             </div>
+          </div>
+          <div class="footer-section">
+            <h4>Enlaces rápidos</h4>
+            <ul>
+              <li><a href="#inicio">Inicio</a></li>
+              <li><a href="#servicios">Servicios</a></li>
+              <li><a href="#nosotros">Nosotros</a></li>
+              <li><a href="#proyectos">Proyectos</a></li>
+              <li><a href="#contacto">Contacto</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h4>Servicios</h4>
+            <ul>
+              <li><a href="#servicios">Instalaciones Eléctricas</a></li>
+              <li><a href="#servicios">Energías Renovables</a></li>
+              <li><a href="#servicios">Automatización</a></li>
+              <li><a href="#servicios">Mantenimiento</a></li>
+              <li><a href="#servicios">Iluminación Eficiente</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h4>Suscríbete</h4>
+            <p>Recibe nuestras novedades y promociones</p>
+            <form class="subscribe-form">
+              <input type="email" placeholder="Tu correo electrónico" />
+              <button type="submit"><i class="fas fa-paper-plane"></i></button>
+            </form>
+          </div>
         </div>
+        <div class="footer-bottom">
+          <p>
+            &copy; 2025 SIEER Chile - Servicios de Ingeniería Eléctrica. Todos
+            los derechos reservados.
+          </p>
+        </div>
+      </div>
     </footer>
 
     <!-- Scripts -->
     <script>
-        // Efecto de transparencia al hacer scroll
-        window.addEventListener('scroll', function () {
-            const header = document.querySelector('.header');
-            if (window.scrollY > 100) {
-                header.classList.add('sticky');
-            } else {
-                header.classList.remove('sticky');
-            }
-        });
+      // Efecto de transparencia al hacer scroll
+      window.addEventListener("scroll", function () {
+        const header = document.querySelector(".header");
+        if (window.scrollY > 100) {
+          header.classList.add("sticky");
+        } else {
+          header.classList.remove("sticky");
+        }
+      });
 
-        // Menú móvil
-        document.addEventListener('DOMContentLoaded', function () {
-            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+      // Menú móvil
+      document.addEventListener("DOMContentLoaded", function () {
+        const mobileMenuToggle = document.querySelector(".mobile-menu-toggle");
 
-            if (mobileMenuToggle) {
-                mobileMenuToggle.addEventListener('click', function () {
-                    // Crear menú móvil dinámico
-                    if (!document.querySelector('.mobile-menu')) {
-                        const mobileMenu = document.createElement('div');
-                        mobileMenu.className = 'mobile-menu';
-                        mobileMenu.innerHTML = `
+        if (mobileMenuToggle) {
+          mobileMenuToggle.addEventListener("click", function () {
+            // Crear menú móvil dinámico
+            if (!document.querySelector(".mobile-menu")) {
+              const mobileMenu = document.createElement("div");
+              mobileMenu.className = "mobile-menu";
+              mobileMenu.innerHTML = `
                             <div class="mobile-menu-content">
                                 {% if user.is_authenticated %}
                                     <div class="mobile-user-info">
@@ -365,223 +430,229 @@
                                 </div>
                             </div>
                         `;
-                        document.body.appendChild(mobileMenu);
+              document.body.appendChild(mobileMenu);
 
-                        // Cerrar menú al hacer clic fuera
-                        mobileMenu.addEventListener('click', function (e) {
-                            if (e.target === mobileMenu) {
-                                mobileMenu.remove();
-                                mobileMenuToggle.querySelector('i').classList.remove('fa-times');
-                                mobileMenuToggle.querySelector('i').classList.add('fa-bars');
-                            }
-                        });
-                    } else {
-                        document.querySelector('.mobile-menu').remove();
-                    }
-
-                    // Cambiar ícono
-                    const icon = this.querySelector('i');
-                    if (icon.classList.contains('fa-bars')) {
-                        icon.classList.remove('fa-bars');
-                        icon.classList.add('fa-times');
-                    } else {
-                        icon.classList.remove('fa-times');
-                        icon.classList.add('fa-bars');
-                    }
-                });
+              // Cerrar menú al hacer clic fuera
+              mobileMenu.addEventListener("click", function (e) {
+                if (e.target === mobileMenu) {
+                  mobileMenu.remove();
+                  mobileMenuToggle
+                    .querySelector("i")
+                    .classList.remove("fa-times");
+                  mobileMenuToggle.querySelector("i").classList.add("fa-bars");
+                }
+              });
+            } else {
+              document.querySelector(".mobile-menu").remove();
             }
 
-            // Animación de scroll para secciones
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
+            // Cambiar ícono
+            const icon = this.querySelector("i");
+            if (icon.classList.contains("fa-bars")) {
+              icon.classList.remove("fa-bars");
+              icon.classList.add("fa-times");
+            } else {
+              icon.classList.remove("fa-times");
+              icon.classList.add("fa-bars");
+            }
+          });
+        }
 
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, observerOptions);
+        // Animación de scroll para secciones
+        const observerOptions = {
+          threshold: 0.1,
+          rootMargin: "0px 0px -50px 0px",
+        };
 
-            // Observar todas las secciones
-            document.querySelectorAll('.services, .about, .projects, .contact').forEach(section => {
-                observer.observe(section);
-            });
-        });
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+            }
+          });
+        }, observerOptions);
+
+        // Observar todas las secciones
+        document
+          .querySelectorAll(".services, .about, .projects, .contact")
+          .forEach((section) => {
+            observer.observe(section);
+          });
+      });
     </script>
 
     <style>
-        /* Estilos para el menú móvil */
-        .mobile-menu {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(10px);
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+      /* Estilos para el menú móvil */
+      .mobile-menu {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(10px);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
 
-        .mobile-menu-content {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 2rem;
-            border-radius: 15px;
-            text-align: center;
-            max-width: 300px;
-            width: 90%;
-        }
+      .mobile-menu-content {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        max-width: 300px;
+        width: 90%;
+      }
 
-        .mobile-user-info {
-            margin-bottom: 1rem;
-            color: var(--primary-green);
-            font-weight: 600;
-        }
+      .mobile-user-info {
+        margin-bottom: 1rem;
+        color: var(--primary-green);
+        font-weight: 600;
+      }
 
-        .mobile-nav {
-            margin-top: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
+      .mobile-nav {
+        margin-top: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
 
-        .mobile-nav a {
-            color: var(--dark);
-            text-decoration: none;
-            padding: 0.8rem;
-            border-radius: 8px;
-            transition: var(--transition);
-            font-weight: 500;
-        }
+      .mobile-nav a {
+        color: var(--dark);
+        text-decoration: none;
+        padding: 0.8rem;
+        border-radius: 8px;
+        transition: var(--transition);
+        font-weight: 500;
+      }
 
-        .mobile-nav a:hover {
-            background: var(--primary-green);
-            color: white;
-        }
+      .mobile-nav a:hover {
+        background: var(--primary-green);
+        color: white;
+      }
 
-        @media (min-width: 769px) {
-            .mobile-menu-toggle {
-                display: none;
-            }
+      @media (min-width: 769px) {
+        .mobile-menu-toggle {
+          display: none;
         }
+      }
 
-        /* ======= SECCIÓN SERVICIOS ======= */
-        .services {
-            padding: 5rem 0;
-            background-color: #0d0d0d;
-            text-align: center;
-        }
+      /* ======= SECCIÓN SERVICIOS ======= */
+      .services {
+        padding: 5rem 0;
+        background-color: #0d0d0d;
+        text-align: center;
+      }
 
-        .section-header h2 {
-            color: #00ff88;
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
+      .section-header h2 {
+        color: #00ff88;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
 
-        .section-header p {
-            color: #ccc;
-            font-size: 1.1rem;
-            margin-bottom: 3rem;
-        }
+      .section-header p {
+        color: #ccc;
+        font-size: 1.1rem;
+        margin-bottom: 3rem;
+      }
 
-        /* GRID BONITA */
+      /* GRID BONITA */
+      .services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2.5rem;
+        justify-items: center;
+        align-items: stretch;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      /* TARJETAS */
+      .service-card {
+        background: #121212;
+        border: 1px solid rgba(0, 255, 136, 0.2);
+        border-radius: 20px;
+        padding: 2rem 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        max-width: 350px;
+        box-shadow: 0 0 10px rgba(0, 255, 136, 0.05);
+      }
+
+      .service-card:hover {
+        transform: translateY(-8px);
+        border-color: #00ff88;
+        box-shadow: 0 0 25px rgba(0, 255, 136, 0.3);
+      }
+
+      /* ÍCONO */
+      .service-icon {
+        background: radial-gradient(circle, #00ff88, #00884e);
+        color: #000;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.8rem;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+      }
+
+      /* TEXTO */
+      .service-card h3 {
+        color: #fff;
+        font-size: 1.2rem;
+        margin-bottom: 0.8rem;
+        font-weight: 600;
+      }
+
+      .service-card p {
+        color: #bdbdbd;
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+
+      /* Enlace en “Productos” */
+      .service-card a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .service-card a:hover {
+        text-decoration: underline;
+      }
+
+      /* RESPONSIVE */
+      @media (max-width: 992px) {
         .services-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2.5rem;
-            justify-items: center;
-            align-items: stretch;
-            max-width: 1200px;
-            margin: 0 auto;
+          grid-template-columns: repeat(2, 1fr);
         }
+      }
 
-        /* TARJETAS */
-        .service-card {
-            background: #121212;
-            border: 1px solid rgba(0, 255, 136, 0.2);
-            border-radius: 20px;
-            padding: 2rem 1.5rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            max-width: 350px;
-            box-shadow: 0 0 10px rgba(0, 255, 136, 0.05);
+      @media (max-width: 600px) {
+        .services-grid {
+          grid-template-columns: 1fr;
         }
+      }
 
-        .service-card:hover {
-            transform: translateY(-8px);
-            border-color: #00ff88;
-            box-shadow: 0 0 25px rgba(0, 255, 136, 0.3);
-        }
+      .card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
 
-        /* ÍCONO */
-        .service-icon {
-            background: radial-gradient(circle, #00ff88, #00884e);
-            color: #000;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.8rem;
-            margin: 0 auto 1.5rem;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
-        }
-
-        /* TEXTO */
-        .service-card h3 {
-            color: #fff;
-            font-size: 1.2rem;
-            margin-bottom: 0.8rem;
-            font-weight: 600;
-        }
-
-        .service-card p {
-            color: #bdbdbd;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        /* Enlace en “Productos” */
-        .service-card a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .service-card a:hover {
-            text-decoration: underline;
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 992px) {
-            .services-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 600px) {
-            .services-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .card-link {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .card-link:hover {
-            transform: translateY(-5px);
-            text-decoration: none;
-        }
+      .card-link:hover {
+        transform: translateY(-5px);
+        text-decoration: none;
+      }
     </style>
-</body>
 
+    {% include 'chat/coipo_ai_chatbot.html' %}
+    <script src="{% static 'js/coipo_ai.js' %}"></script>
+  </body>
 </html>

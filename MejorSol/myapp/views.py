@@ -38,6 +38,7 @@ from .models import (
 )
 # --- Servicios ---
 from .services import ChatBotService 
+from .services import DialogflowService
 
 # --- ¡LIBRERÍAS DE MACHINE LEARNING! ---
 import pandas as pd
@@ -937,3 +938,16 @@ def lista_chats_cotizacion_view(request):
         'lista_de_chats': chats
     }
     return render(request, 'cliente/lista_chats_cotizacion.html', context)
+#Dialogflow
+dialogflow_service = DialogflowService()
+
+def chatbot_dialogflow(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido"}, status=405)
+
+    msg = request.POST.get("message")
+    session_id = request.POST.get("session_id", "default-session")
+
+    df_response = dialogflow_service.detect_intent(session_id, msg)
+
+    return JsonResponse(df_response)

@@ -1,0 +1,14 @@
+{% load static %}
+
+<script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+
+<link rel="stylesheet" href="{% static 'css/coipo_ai.css' %}" />
+
+<df-messenger
+  chat-title="CoipoAI"
+  agent-id="85b15dbd-d5f0-4e74-a931-0c01402be922"
+  language-code="es"
+></df-messenger>
+
+<!-- Cargar tu archivo JS -->
+<script src="{% static 'js/coipo_ai.js' %}"></script>

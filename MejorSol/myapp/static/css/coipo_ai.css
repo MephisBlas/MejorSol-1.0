@@ -1,0 +1,143 @@
+/* ============================================
+   ESTILOS PROFESIONALES CHATBOT COIPO AI
+============================================ */
+
+/* ===== COLORES CORPORATIVOS ===== */
+:root {
+    --df-messenger-button-titlebar-color: #00ff88;
+    --df-messenger-button-titlebar-icon-color: #0a0a10;
+
+    --primary-green: #00ff88;
+    --dark-green: #00cc6a;
+    --light-green: #33ff99;
+    --accent-green: #00ffaa;
+
+    --neon-glow: 0 0 15px rgba(0, 255, 136, 0.5);
+    --neon-glow-strong: 0 0 25px rgba(0, 255, 136, 0.8);
+
+    --dark-bg: #0f0f14;
+    --dark-bg-transparent: rgba(15, 15, 20, 0.85);
+
+    --card-bg: rgba(30, 30, 40, 0.9);
+
+    --text-light: #ffffff;
+    --text-gray: #bbbbbb;
+}
+
+df-messenger .df-titlebar {
+    font-family: 'Montserrat', sans-serif !important;   /* Reemplazar por Gotham si tienes el archivo */
+    font-weight: 700 !important;  /* grosor: 400, 500, 600, 700… */
+    letter-spacing: 0.5px !important;
+    font-size: 18px !important;
+}
+/* ============================================
+   BURBUJA DEL CHATBOT
+============================================ */
+
+df-messenger {
+    --df-messenger-font-color: var(--text-light);
+    --df-messenger-chat-background: var(--dark-bg);
+    --df-messenger-send-icon: var(--primary-green);
+
+    --df-messenger-button-titlebar-color: var(--primary-green);
+    --df-messenger-button-titlebar-font-color: #000;
+}
+
+/* Burbujita flotante */
+df-messenger::part(button) {
+    background: var(--primary-green) !important;
+    border-radius: 50% !important;
+    box-shadow: var(--neon-glow);
+    width: 70px !important;
+    height: 70px !important;
+    position: relative !important;
+}
+
+df-messenger::part(button):hover {
+    background: var(--dark-green) !important;
+    box-shadow: var(--neon-glow-strong);
+}
+
+/* QUITAR ICONO DE DIALOGFLOW */
+df-messenger::part(button-icon) {
+    opacity: 0 !important;
+}
+
+/* ÍCONO PERSONALIZADO (NUBE) */
+df-messenger::part(button)::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 50%;
+    left: 50%;
+    width: 70%;
+    height: 70%;
+    transform: translate(-50%, -50%) !important;
+
+    background-image: url("../img/chat_bubble.png") !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+
+    filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.5));
+}
+
+df-messenger::part(button):hover::after {
+    transform: translate(-50%, -50%) scale(1.1) !important;
+    filter: drop-shadow(0 0 12px rgba(0, 255, 170, 0.9));
+}
+
+/* ============================================
+   VENTANA DEL CHAT
+============================================ */
+
+df-messenger::part(chat-wrapper) {
+    background: var(--dark-bg-transparent) !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(0, 255, 136, 0.4) !important;
+    box-shadow: var(--neon-glow);
+}
+
+df-messenger::part(titlebar) {
+    background: var(--primary-green) !important;
+    color: #111 !important;
+    font-weight: bold !important;
+}
+
+/* ============================================
+   MENSAJES
+============================================ */
+
+df-messenger::part(user-message) {
+    background: var(--primary-green) !important;
+    color: #000 !important;
+    border-radius: 16px !important;
+}
+
+df-messenger::part(bot-message) {
+    background: var(--card-bg) !important;
+    border: 1px solid rgba(0, 255, 136, 0.3) !important;
+    color: var(--text-light) !important;
+    border-radius: 16px !important;
+    backdrop-filter: blur(6px);
+}
+
+/* ============================================
+   INPUT
+============================================ */
+
+df-messenger::part(input-container) {
+    background: rgba(20, 20, 28, 0.85) !important;
+    border-top: 1px solid rgba(0, 255, 136, 0.3) !important;
+}
+
+df-messenger::part(text-input) {
+    color: var(--text-light) !important;
+}
+
+df-messenger::part(text-input)::placeholder {
+    color: var(--text-gray) !important;
+}
+
+df-messenger::part(send-icon) {
+    filter: brightness(1.4) saturate(1.5) !important;
+}
