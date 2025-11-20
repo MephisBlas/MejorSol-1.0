@@ -1,1141 +1,1331 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SIEER Chile - Servicios de Ingeniería Eléctrica</title>
-    <meta
-      name="description"
-      content="Expertos en soluciones de ingeniería eléctrica para proyectos industriales, comerciales y residenciales en Chile"
-    />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto:wght@300;400;500&display=swap"
-      rel="stylesheet"
-    />
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SIEER Chile - Servicios de Ingeniería Eléctrica</title>
+  <meta name="description"
+    content="Expertos en soluciones de ingeniería eléctrica para proyectos industriales, comerciales y residenciales en Chile" />
 
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto:wght@300;400;500&display=swap"
+    rel="stylesheet" />
 
-    <style>
-      /* =========================================
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+
+  <style>
+    /* =========================================
          1. VARIABLES Y RESET
          ========================================= */
-      :root {
-        --primary-green: #00ff88;
-        --dark-green: #00cc6a;
-        --dark-bg: #0a0a0a;
-        --card-bg: #121212;
-        --text-light: #f0f0f0;
-        --text-gray: #b0b0b0;
-        --transition: all 0.3s ease;
-        --container-width: 1200px;
-        --font-title: "Montserrat", sans-serif;
-        --font-body: "Roboto", sans-serif;
-        --header-height: 80px; /* Altura estimada del header */
-      }
+    :root {
+      --primary-green: #00ff88;
+      --dark-green: #00cc6a;
+      --dark-bg: #0a0a0a;
+      --card-bg: #121212;
+      --text-light: #f0f0f0;
+      --text-gray: #b0b0b0;
+      --transition: all 0.3s ease;
+      --container-width: 1200px;
+      --font-title: "Montserrat", sans-serif;
+      --font-body: "Roboto", sans-serif;
+      --header-height: 80px;
+      /* Altura estimada del header */
+    }
 
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-      html {
-        scroll-behavior: smooth;
-      }
+    html {
+      scroll-behavior: smooth;
+    }
 
-      body {
-        font-family: var(--font-body);
-        background-color: var(--dark-bg);
-        color: var(--text-light);
-        line-height: 1.6;
-        overflow-x: hidden;
-      }
+    body {
+      font-family: var(--font-body);
+      background-color: var(--dark-bg);
+      color: var(--text-light);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
 
-      a {
-        text-decoration: none;
-        color: inherit;
-        transition: var(--transition);
-      }
+    a {
+      text-decoration: none;
+      color: inherit;
+      transition: var(--transition);
+    }
 
-      ul {
-        list-style: none;
-      }
+    ul {
+      list-style: none;
+    }
 
-      .container {
-        max-width: var(--container-width);
-        margin: 0 auto;
-        padding: 0 1.5rem;
-      }
+    .container {
+      max-width: var(--container-width);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
 
-      /* =========================================
+    /* =========================================
          2. BOTONES
          ========================================= */
-      .btn {
-        display: inline-block;
-        padding: 0.8rem 2rem;
-        border-radius: 50px;
-        font-weight: 700;
-        font-size: 0.95rem;
-        cursor: pointer;
-        border: 2px solid transparent;
-        transition: var(--transition);
-        font-family: var(--font-title);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
+    .btn {
+      display: inline-block;
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: var(--transition);
+      font-family: var(--font-title);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
 
-      .btn-outline {
-        border-color: var(--primary-green);
-        color: var(--primary-green);
-        background: transparent;
-      }
+    .btn-outline {
+      border-color: var(--primary-green);
+      color: var(--primary-green);
+      background: transparent;
+    }
 
-      .btn-outline:hover {
-        background: var(--primary-green);
-        color: #000;
-        box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
-      }
+    .btn-outline:hover {
+      background: var(--primary-green);
+      color: #000;
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+    }
 
-      .btn-solid, .btn-primary {
-        background: var(--primary-green);
-        color: #000;
-        border-color: var(--primary-green);
-      }
+    .btn-solid,
+    .btn-primary {
+      background: var(--primary-green);
+      color: #000;
+      border-color: var(--primary-green);
+    }
 
-      .btn-solid:hover, .btn-primary:hover {
-        background: #fff;
-        border-color: #fff;
-        color: #000;
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-      }
+    .btn-solid:hover,
+    .btn-primary:hover {
+      background: #fff;
+      border-color: #fff;
+      color: #000;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+    }
 
-      .btn-secondary {
-        background: transparent;
-        border: 2px solid #fff;
-        color: #fff;
-      }
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid #fff;
+      color: #fff;
+    }
 
-      .btn-secondary:hover {
-        background: #fff;
-        color: #000;
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-      }
+    .btn-secondary:hover {
+      background: #fff;
+      color: #000;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
 
-      /* =========================================
+    /* =========================================
          3. HEADER (SOLUCIÓN VISUAL)
          ========================================= */
-      .header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        z-index: 1000;
-        padding: 1rem 0;
-        transition: var(--transition);
-        background: transparent; /* Transparente por defecto en PC */
-      }
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 1rem 0;
+      transition: var(--transition);
+      background: transparent;
+      /* Transparente por defecto en PC */
+    }
 
-      /* Estado Sticky (al bajar scroll) */
-      .header.sticky {
-        background: rgba(5, 5, 5, 0.95);
-        backdrop-filter: blur(10px);
-        padding: 0.7rem 0;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        border-bottom: 1px solid rgba(0, 255, 136, 0.1);
-      }
+    /* Estado Sticky (al bajar scroll) */
+    .header.sticky {
+      background: rgba(5, 5, 5, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 0.7rem 0;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+    }
 
-      .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-      .logo-container {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-      }
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
 
-      .logo-img {
-        height: 55px;
-        width: auto;
-      }
+    .logo-img {
+      height: 55px;
+      width: auto;
+    }
 
-      .logo-text {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-      }
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
 
-      .logo-text h1 {
-        font-family: var(--font-title);
-        font-size: 1.4rem;
-        font-weight: 800;
-        color: #fff;
-        line-height: 1.1;
-        text-transform: uppercase;
-        letter-spacing: -0.5px;
-      }
+    .logo-text h1 {
+      font-family: var(--font-title);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+    }
 
-      .logo-text span {
-        font-size: 0.7rem;
-        color: var(--primary-green);
-        letter-spacing: 1px;
-        font-weight: 500;
-        text-transform: uppercase;
-      }
+    .logo-text span {
+      font-size: 0.7rem;
+      color: var(--primary-green);
+      letter-spacing: 1px;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
 
-      .auth-buttons {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-      }
+    .auth-buttons {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
 
-      .auth-buttons span {
-        margin-right: 0.5rem;
-        font-weight: 600;
-        font-size: 0.9rem;
-        color: var(--primary-green);
-      }
+    .auth-buttons span {
+      margin-right: 0.5rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--primary-green);
+    }
 
-      /* Botón Hamburguesa */
-      .mobile-menu-toggle {
-        display: none; /* Oculto en PC */
-        font-size: 1.8rem;
-        color: #fff;
-        cursor: pointer;
-        transition: transform 0.3s;
-      }
-      
-      .mobile-menu-toggle:hover {
-        color: var(--primary-green);
-      }
+    /* Botón Hamburguesa */
+    .mobile-menu-toggle {
+      display: none;
+      /* Oculto en PC */
+      font-size: 1.8rem;
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
 
-      /* =========================================
+    .mobile-menu-toggle:hover {
+      color: var(--primary-green);
+    }
+
+    /* =========================================
          4. HERO SECTION (SOLUCIÓN DE SUPERPOSICIÓN)
          ========================================= */
-      .hero {
-        position: relative;
-        height: 100vh; /* Ocupa toda la pantalla */
-        min-height: 600px;
-        width: 100%;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-      }
+    .hero {
+      position: relative;
+      height: 100vh;
+      /* Ocupa toda la pantalla */
+      min-height: 600px;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
 
-      .hero-bg {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        z-index: -1;
-      }
+    .hero-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
 
-      .hero-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        /* Gradiente mejorado para legibilidad */
-        background: linear-gradient(
-          to bottom,
-          rgba(0, 0, 0, 0.7) 0%,    /* Arriba oscuro para el header */
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      /* Gradiente mejorado para legibilidad */
+      background: linear-gradient(to bottom,
+          rgba(0, 0, 0, 0.7) 0%,
+          /* Arriba oscuro para el header */
           rgba(0, 0, 0, 0.4) 50%,
-          rgba(10, 10, 10, 1) 100%  /* Abajo se funde con la sección */
+          rgba(10, 10, 10, 1) 100%
+          /* Abajo se funde con la sección */
         );
-        z-index: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
+      z-index: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-      .hero-content {
-        position: relative;
-        z-index: 1;
-        max-width: 900px;
-        padding: 0 1.5rem;
-        /* Animación de entrada */
-        animation: fadeInUp 1s ease-out forwards;
-        opacity: 0;
-        transform: translateY(30px);
-      }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      padding: 0 1.5rem;
+      /* Animación de entrada */
+      animation: fadeInUp 1s ease-out forwards;
+      opacity: 0;
+      transform: translateY(30px);
+    }
 
-      .hero-content h2 {
-        font-family: var(--font-title);
-        font-size: 3.8rem;
-        font-weight: 900;
-        margin-bottom: 1rem;
-        line-height: 1.1;
-        text-transform: uppercase;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-      }
+    .hero-content h2 {
+      font-family: var(--font-title);
+      font-size: 3.8rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+      text-transform: uppercase;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
 
-      .hero-content p {
-        font-size: 1.3rem;
-        margin-bottom: 2.5rem;
-        color: #e0e0e0;
-        font-weight: 300;
-        max-width: 700px;
-        margin-left: auto;
-        margin-right: auto;
-      }
+    .hero-content p {
+      font-size: 1.3rem;
+      margin-bottom: 2.5rem;
+      color: #e0e0e0;
+      font-weight: 300;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
 
-      .hero-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-      }
+    .hero-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
 
-      @keyframes fadeInUp {
-        to { opacity: 1; transform: translateY(0); }
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
+    }
 
-      /* =========================================
+    /* =========================================
          5. SECCIONES GENERALES
          ========================================= */
-      section {
-        padding: 6rem 0;
-      }
+    section {
+      padding: 6rem 0;
+    }
 
-      .section-header {
-        text-align: center;
-        margin-bottom: 4rem;
-      }
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
 
-      .section-header h2 {
-        font-family: var(--font-title);
-        font-size: 2.5rem;
-        color: #fff;
-        margin-bottom: 1rem;
-        position: relative;
-        display: inline-block;
-        text-transform: uppercase;
-        font-weight: 700;
-      }
+    .section-header h2 {
+      font-family: var(--font-title);
+      font-size: 2.5rem;
+      color: #fff;
+      margin-bottom: 1rem;
+      position: relative;
+      display: inline-block;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
 
-      .section-header h2 span {
-        color: var(--primary-green);
-      }
+    .section-header h2 span {
+      color: var(--primary-green);
+    }
 
-      .section-header h2::after {
-        content: '';
-        display: block;
-        width: 80px;
-        height: 4px;
-        background: var(--primary-green);
-        margin: 0.5rem auto 0;
-        border-radius: 2px;
-      }
+    .section-header h2::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 4px;
+      background: var(--primary-green);
+      margin: 0.5rem auto 0;
+      border-radius: 2px;
+    }
 
-      .section-header p {
-        color: var(--text-gray);
-        font-size: 1.1rem;
-      }
+    .section-header p {
+      color: var(--text-gray);
+      font-size: 1.1rem;
+    }
 
-      /* =========================================
+    /* =========================================
          6. SERVICIOS
          ========================================= */
-      .services {
-        background-color: var(--dark-bg);
-      }
+    .services {
+      background-color: var(--dark-bg);
+    }
 
-      .services-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-      }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
 
-      .service-card {
-        background: var(--card-bg);
-        padding: 3rem 2rem;
-        border-radius: 16px;
-        text-align: center;
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        transition: var(--transition);
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-        height: 100%;
-      }
+    .service-card {
+      background: var(--card-bg);
+      padding: 3rem 2rem;
+      border-radius: 16px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: var(--transition);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+    }
 
-      /* Efecto de borde brillante al hover */
-      .service-card::before {
-        content: "";
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 4px;
-        background: var(--primary-green);
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
-        transform-origin: left;
-      }
+    /* Efecto de borde brillante al hover */
+    .service-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--primary-green);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+      transform-origin: left;
+    }
 
-      .service-card:hover::before {
-        transform: scaleX(1);
-      }
+    .service-card:hover::before {
+      transform: scaleX(1);
+    }
 
-      .service-card:hover {
-        transform: translateY(-10px);
-        border-color: rgba(0, 255, 136, 0.3);
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-      }
+    .service-card:hover {
+      transform: translateY(-10px);
+      border-color: rgba(0, 255, 136, 0.3);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
 
-      .service-icon {
-        width: 70px;
-        height: 70px;
-        background: rgba(0, 255, 136, 0.08);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        font-size: 1.8rem;
-        color: var(--primary-green);
-        transition: var(--transition);
-        border: 1px solid rgba(0, 255, 136, 0.2);
-      }
+    .service-icon {
+      width: 70px;
+      height: 70px;
+      background: rgba(0, 255, 136, 0.08);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 1.8rem;
+      color: var(--primary-green);
+      transition: var(--transition);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+    }
 
-      .service-card:hover .service-icon {
-        background: var(--primary-green);
-        color: #000;
-        box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
-      }
+    .service-card:hover .service-icon {
+      background: var(--primary-green);
+      color: #000;
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+    }
 
-      .service-card h3 {
-        color: #fff;
-        margin-bottom: 1rem;
-        font-size: 1.4rem;
-        font-weight: 700;
-      }
+    .service-card h3 {
+      color: #fff;
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
 
-      .service-card p {
-        color: var(--text-gray);
-        font-size: 0.95rem;
-        line-height: 1.7;
-      }
+    .service-card p {
+      color: var(--text-gray);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
 
-      /* =========================================
+    /* =========================================
          7. NOSOTROS
          ========================================= */
-      .about-content {
-        display: flex;
-        align-items: center;
-        gap: 4rem;
-      }
+    .about-content {
+      display: flex;
+      align-items: center;
+      gap: 4rem;
+    }
 
-      .about-text {
-        flex: 1;
-      }
+    .about-text {
+      flex: 1;
+    }
 
-      .about-text h2 {
-        font-family: var(--font-title);
-        font-size: 2.5rem;
-        color: #fff;
-        margin-bottom: 1.5rem;
-      }
-      
-      .about-text h2 span { color: var(--primary-green); }
+    .about-text h2 {
+      font-family: var(--font-title);
+      font-size: 2.5rem;
+      color: #fff;
+      margin-bottom: 1.5rem;
+    }
 
-      .about-text p {
-        margin-bottom: 1.5rem;
-        color: var(--text-light);
-        font-size: 1.05rem;
-      }
+    .about-text h2 span {
+      color: var(--primary-green);
+    }
 
-      .about-features {
-        margin-top: 2rem;
-      }
+    .about-text p {
+      margin-bottom: 1.5rem;
+      color: var(--text-light);
+      font-size: 1.05rem;
+    }
 
-      .about-features li {
-        display: flex;
-        align-items: flex-start;
-        margin-bottom: 1.2rem;
-        color: #ddd;
-      }
+    .about-features {
+      margin-top: 2rem;
+    }
 
-      .about-features i {
-        color: var(--primary-green);
-        margin-right: 15px;
-        font-size: 1.2rem;
-        margin-top: 4px;
-      }
+    .about-features li {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 1.2rem;
+      color: #ddd;
+    }
 
-      .about-image {
-        flex: 1;
-        position: relative;
-      }
+    .about-features i {
+      color: var(--primary-green);
+      margin-right: 15px;
+      font-size: 1.2rem;
+      margin-top: 4px;
+    }
 
-      .about-image img {
-        width: 100%;
-        border-radius: 20px;
-        box-shadow: -20px 20px 0 rgba(0, 255, 136, 0.1), 0 20px 40px rgba(0,0,0,0.5);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
+    .about-image {
+      flex: 1;
+      position: relative;
+    }
 
-      /* =========================================
+    .about-image img {
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: -20px 20px 0 rgba(0, 255, 136, 0.1), 0 20px 40px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* =========================================
          8. PROYECTOS
          ========================================= */
-      .projects-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 2.5rem;
-      }
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 2.5rem;
+    }
 
-      .project-card {
-        border-radius: 16px;
-        overflow: hidden;
-        background: var(--card-bg);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        transition: var(--transition);
-        position: relative;
-      }
+    .project-card {
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: var(--transition);
+      position: relative;
+    }
 
-      .project-card:hover {
-        border-color: var(--primary-green);
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-      }
+    .project-card:hover {
+      border-color: var(--primary-green);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
 
-      .project-image {
-        height: 240px;
-        overflow: hidden;
-        position: relative;
-      }
+    .project-image {
+      height: 240px;
+      overflow: hidden;
+      position: relative;
+    }
 
-      .project-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.6s ease;
-      }
+    .project-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
 
-      .project-card:hover .project-image img {
-        transform: scale(1.1);
-      }
+    .project-card:hover .project-image img {
+      transform: scale(1.1);
+    }
 
-      /* Overlay en la imagen al hover */
-      .project-image::after {
-        content: '';
-        position: absolute;
-        top:0; left:0; width:100%; height:100%;
-        background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.8));
-        opacity: 0.6;
-      }
+    /* Overlay en la imagen al hover */
+    .project-image::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.8));
+      opacity: 0.6;
+    }
 
-      .project-info {
-        padding: 1.8rem;
-      }
+    /* Evitar que el overlay bloquee el video */
+    .project-image::after {
+      pointer-events: none;
+    }
 
-      .project-info h3 {
-        color: #fff;
-        margin-bottom: 0.8rem;
-        font-size: 1.3rem;
-        font-weight: 700;
-      }
+    /* Asegurar que el video ocupe toda la tarjeta */
+    .project-image video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 16px 16px 0 0;
+    }
 
-      .project-info p {
-        color: var(--text-gray);
-        font-size: 0.95rem;
-      }
 
-      /* =========================================
+    .project-info {
+      padding: 1.8rem;
+    }
+
+    .project-info h3 {
+      color: #fff;
+      margin-bottom: 0.8rem;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .project-info p {
+      color: var(--text-gray);
+      font-size: 0.95rem;
+    }
+
+    /* =========================================
          9. CONTACTO
          ========================================= */
-      .contact-content {
-        background: linear-gradient(145deg, #151515, #0d0d0d);
-        border-radius: 24px;
-        padding: 4rem 2rem;
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-      }
+    .contact-content {
+      background: linear-gradient(145deg, #151515, #0d0d0d);
+      border-radius: 24px;
+      padding: 4rem 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
 
-      .contact-info {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 3rem;
-      }
+    .contact-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 3rem;
+    }
 
-      .contact-item {
-        text-align: center;
-        transition: var(--transition);
-      }
-      
-      .contact-item:hover { transform: translateY(-5px); }
+    .contact-item {
+      text-align: center;
+      transition: var(--transition);
+    }
 
-      .contact-icon {
-        width: 60px;
-        height: 60px;
-        background: rgba(0, 255, 136, 0.1);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.2rem;
-        color: var(--primary-green);
-        font-size: 1.4rem;
-        border: 1px solid rgba(0, 255, 136, 0.3);
-      }
+    .contact-item:hover {
+      transform: translateY(-5px);
+    }
 
-      .contact-details h3 {
-        color: #fff;
-        font-size: 1.2rem;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-      }
+    .contact-icon {
+      width: 60px;
+      height: 60px;
+      background: rgba(0, 255, 136, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.2rem;
+      color: var(--primary-green);
+      font-size: 1.4rem;
+      border: 1px solid rgba(0, 255, 136, 0.3);
+    }
 
-      .contact-details p {
-        color: #ccc;
-        font-size: 0.95rem;
-      }
+    .contact-details h3 {
+      color: #fff;
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
 
-      /* =========================================
+    .contact-details p {
+      color: #ccc;
+      font-size: 0.95rem;
+    }
+
+    /* =========================================
          10. FOOTER
          ========================================= */
-      .footer {
-        background-color: #050505;
-        color: #fff;
-        padding: 5rem 0 2rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        font-size: 0.95rem;
+    .footer {
+      background-color: #050505;
+      color: #fff;
+      padding: 5rem 0 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.95rem;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.5fr;
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-section .logo h3 {
+      font-size: 1.5rem;
+      font-family: var(--font-title);
+      color: #fff;
+      margin-bottom: 0.2rem;
+    }
+
+    .footer-section .logo span {
+      color: var(--primary-green);
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    .footer-section h4 {
+      color: #fff;
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      padding-bottom: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .footer-section h4::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 30px;
+      height: 2px;
+      background: var(--primary-green);
+    }
+
+    .footer-section ul li {
+      margin-bottom: 0.8rem;
+    }
+
+    .footer-section ul li a {
+      color: var(--text-gray);
+      transition: 0.2s;
+    }
+
+    .footer-section ul li a:hover {
+      color: var(--primary-green);
+      padding-left: 5px;
+    }
+
+    .social-links {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 1rem;
+    }
+
+    .social-links a {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      transition: 0.3s;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .social-links a:hover {
+      background: var(--primary-green);
+      color: #000;
+      transform: translateY(-3px);
+      box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+      border-color: var(--primary-green);
+    }
+
+    .subscribe-form {
+      display: flex;
+      margin-top: 1rem;
+    }
+
+    .subscribe-form input {
+      padding: 0.9rem;
+      border-radius: 8px 0 0 8px;
+      border: 1px solid #333;
+      background: #121212;
+      color: #fff;
+      flex: 1;
+      outline: none;
+      font-family: var(--font-body);
+    }
+
+    .subscribe-form input:focus {
+      border-color: var(--primary-green);
+    }
+
+    .subscribe-form button {
+      padding: 0 1.2rem;
+      background: var(--primary-green);
+      border: none;
+      border-radius: 0 8px 8px 0;
+      cursor: pointer;
+      color: #000;
+      font-size: 1.1rem;
+      transition: var(--transition);
+    }
+
+    .subscribe-form button:hover {
+      background: var(--dark-green);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      color: #666;
+      font-size: 0.85rem;
+    }
+
+    /* =========================================
+         11. MEDIA QUERIES (CELULAR / TABLET)
+         ========================================= */
+
+    /* Menú Móvil Styles */
+    .mobile-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.98);
+      /* Fondo muy oscuro */
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .mobile-menu-content {
+      width: 85%;
+      max-width: 350px;
+      text-align: center;
+    }
+
+    .mobile-user-info {
+      color: var(--primary-green);
+      font-weight: 700;
+      margin-bottom: 2rem;
+      font-size: 1.2rem;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .mobile-nav a {
+      padding: 1rem;
+      font-size: 1.2rem;
+      color: #fff;
+      font-weight: 600;
+      border-radius: 10px;
+      transition: 0.2s;
+    }
+
+    .mobile-nav a:hover {
+      background: rgba(0, 255, 136, 0.1);
+      color: var(--primary-green);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* --- AJUSTES RESPONSIVE ESPECÍFICOS --- */
+    @media (max-width: 992px) {
+      .auth-buttons {
+        display: none;
+      }
+
+      .mobile-menu-toggle {
+        display: block;
       }
 
       .footer-content {
-        display: grid;
-        grid-template-columns: 2fr 1fr 1fr 1.5fr;
+        grid-template-columns: 1fr 1fr;
         gap: 3rem;
-        margin-bottom: 3rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+
+      /* HEADER: Fondo oscuro para que no choque con video */
+      .header {
+        background-color: rgba(5, 5, 5, 0.95);
+        /* <--- ESTO ARREGLA LA LEGIBILIDAD */
+        padding: 0.8rem 0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
       }
 
-      .footer-section .logo h3 {
-        font-size: 1.5rem;
-        font-family: var(--font-title);
-        color: #fff;
-        margin-bottom: 0.2rem;
-      }
-      
-      .footer-section .logo span {
-        color: var(--primary-green);
-        font-size: 0.8rem;
-        letter-spacing: 1px;
+      .logo-img {
+        height: 40px;
       }
 
-      .footer-section h4 {
-        color: #fff;
+      /* Logo más pequeño */
+      .logo-text h1 {
         font-size: 1.1rem;
-        margin-bottom: 1.5rem;
-        position: relative;
-        padding-bottom: 10px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+      }
+
+      .logo-text span {
+        font-size: 0.6rem;
+      }
+
+      /* HERO: Empujar texto hacia abajo para que no choque con Header */
+      .hero-content {
+        margin-top: 80px;
+        /* <--- ESPACIO EXTRA ARRIBA */
+        padding: 0 1rem;
+      }
+
+      .hero-content h2 {
+        font-size: 2.2rem;
+        /* Título más pequeño */
+      }
+
+      .hero-buttons {
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+      }
+
+      .hero-buttons .btn {
+        width: 100%;
+      }
+
+      /* GENERAL */
+      section {
+        padding: 4rem 0;
+      }
+
+      .about-content {
+        flex-direction: column;
+      }
+
+      /* FOOTER EN COLUMNA */
+      .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 2.5rem;
       }
 
       .footer-section h4::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 30px;
-        height: 2px;
-        background: var(--primary-green);
-      }
-
-      .footer-section ul li {
-        margin-bottom: 0.8rem;
-      }
-
-      .footer-section ul li a {
-        color: var(--text-gray);
-        transition: 0.2s;
-      }
-
-      .footer-section ul li a:hover {
-        color: var(--primary-green);
-        padding-left: 5px;
+        left: 50%;
+        transform: translateX(-50%);
       }
 
       .social-links {
-        margin-top: 1.5rem;
-        display: flex;
-        gap: 1rem;
-      }
-
-      .social-links a {
-        width: 40px;
-        height: 40px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
         justify-content: center;
-        color: #fff;
-        transition: 0.3s;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .social-links a:hover {
-        background: var(--primary-green);
-        color: #000;
-        transform: translateY(-3px);
-        box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
-        border-color: var(--primary-green);
       }
 
       .subscribe-form {
-        display: flex;
-        margin-top: 1rem;
-      }
-
-      .subscribe-form input {
-        padding: 0.9rem;
-        border-radius: 8px 0 0 8px;
-        border: 1px solid #333;
-        background: #121212;
-        color: #fff;
-        flex: 1;
-        outline: none;
-        font-family: var(--font-body);
-      }
-      
-      .subscribe-form input:focus { border-color: var(--primary-green); }
-
-      .subscribe-form button {
-        padding: 0 1.2rem;
-        background: var(--primary-green);
-        border: none;
-        border-radius: 0 8px 8px 0;
-        cursor: pointer;
-        color: #000;
-        font-size: 1.1rem;
-        transition: var(--transition);
-      }
-      
-      .subscribe-form button:hover { background: var(--dark-green); }
-
-      .footer-bottom {
-        text-align: center;
-        padding-top: 2rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        color: #666;
-        font-size: 0.85rem;
-      }
-
-      /* =========================================
-         11. MEDIA QUERIES (CELULAR / TABLET)
-         ========================================= */
-      
-      /* Menú Móvil Styles */
-      .mobile-menu {
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.98); /* Fondo muy oscuro */
-        z-index: 9999;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        animation: fadeIn 0.3s ease;
-      }
-
-      .mobile-menu-content {
-        width: 85%;
-        max-width: 350px;
-        text-align: center;
-      }
-
-      .mobile-user-info {
-        color: var(--primary-green);
-        font-weight: 700;
-        margin-bottom: 2rem;
-        font-size: 1.2rem;
-        padding: 1rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .mobile-nav {
-        display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 0.8rem;
       }
 
-      .mobile-nav a {
-        padding: 1rem;
-        font-size: 1.2rem;
-        color: #fff;
-        font-weight: 600;
-        border-radius: 10px;
-        transition: 0.2s;
+      .subscribe-form input,
+      .subscribe-form button {
+        width: 100%;
+        border-radius: 8px;
       }
+    }
 
-      .mobile-nav a:hover {
-        background: rgba(0, 255, 136, 0.1);
-        color: var(--primary-green);
-      }
+    /* === CARRUSEL DENTRO DE LAS TARJETAS DE PROYECTO === */
 
-      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .project-swiper {
+      width: 100%;
+      height: 100%;
+    }
 
-      /* --- AJUSTES RESPONSIVE ESPECÍFICOS --- */
-      @media (max-width: 992px) {
-        .auth-buttons { display: none; }
-        .mobile-menu-toggle { display: block; }
-        
-        .footer-content {
-            grid-template-columns: 1fr 1fr;
-            gap: 3rem;
-        }
-      }
+    .project-swiper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-      @media (max-width: 768px) {
-        /* HEADER: Fondo oscuro para que no choque con video */
-        .header {
-            background-color: rgba(5, 5, 5, 0.95); /* <--- ESTO ARREGLA LA LEGIBILIDAD */
-            padding: 0.8rem 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }
+    /* Botones (flechas) del carrusel */
+    .project-card .swiper-button-next,
+    .project-card .swiper-button-prev {
+      color: var(--primary-green);
+    }
 
-        .logo-img { height: 40px; } /* Logo más pequeño */
-        .logo-text h1 { font-size: 1.1rem; }
-        .logo-text span { font-size: 0.6rem; }
+    /* Puntos de paginación */
+    .project-card .swiper-pagination-bullet {
+      background: #666;
+      opacity: 1;
+    }
 
-        /* HERO: Empujar texto hacia abajo para que no choque con Header */
-        .hero-content {
-            margin-top: 80px; /* <--- ESPACIO EXTRA ARRIBA */
-            padding: 0 1rem;
-        }
+    .project-card .swiper-pagination-bullet-active {
+      background: var(--primary-green);
+    }
+  </style>
+</head>
 
-        .hero-content h2 {
-            font-size: 2.2rem; /* Título más pequeño */
-        }
-
-        .hero-buttons {
-            flex-direction: column;
-            gap: 1rem;
-            width: 100%;
-        }
-        
-        .hero-buttons .btn { width: 100%; }
-
-        /* GENERAL */
-        section { padding: 4rem 0; }
-        
-        .about-content { flex-direction: column; }
-        
-        /* FOOTER EN COLUMNA */
-        .footer-content {
-            grid-template-columns: 1fr;
-            text-align: center;
-            gap: 2.5rem;
-        }
-        
-        .footer-section h4::after {
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .social-links { justify-content: center; }
-        
-        .subscribe-form { flex-direction: column; gap: 0.8rem; }
-        .subscribe-form input, .subscribe-form button {
-            width: 100%;
-            border-radius: 8px;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <header class="header">
-      <div class="container">
-        <div class="header-content">
-          <div class="logo-container">
-            <img
-              src="{% static 'img/logo.png' %}"
-              alt="SIEER Chile Logo"
-              class="logo-img"
-            />
-            <div class="logo-text">
-              <h1><a href="/">SIEER Chile</a></h1>
-              <span>Servicios de Ingeniería Eléctrica</span>
-            </div>
-          </div>
-
-          <div class="auth-buttons">
-            {% if user.is_authenticated %}
-            <span> <i class="fas fa-user"></i> {{ user.username }} </span>
-            <form
-              method="post"
-              action="{% url 'logout' %}"
-              style="display: inline"
-            >
-              {% csrf_token %}
-              <button type="submit" class="btn btn-outline">
-                <i class="fas fa-sign-out-alt"></i> Salir
-              </button>
-            </form>
-            {% else %}
-            <a href="{% url 'login' %}" class="btn btn-outline">
-              Ingresar
-            </a>
-            <a href="{% url 'registro' %}" class="btn btn-solid">
-              Registrarse
-            </a>
-            {% endif %}
-          </div>
-
-          <div class="mobile-menu-toggle">
-            <i class="fas fa-bars"></i>
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo-container">
+          <img src="{% static 'img/logo.png' %}" alt="SIEER Chile Logo" class="logo-img" />
+          <div class="logo-text">
+            <h1><a href="/">SIEER Chile</a></h1>
+            <span>Servicios de Ingeniería Eléctrica</span>
           </div>
         </div>
+
+        <div class="auth-buttons">
+          {% if user.is_authenticated %}
+          <span> <i class="fas fa-user"></i> {{ user.username }} </span>
+          <form method="post" action="{% url 'logout' %}" style="display: inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline">
+              <i class="fas fa-sign-out-alt"></i> Salir
+            </button>
+          </form>
+          {% else %}
+          <a href="{% url 'login' %}" class="btn btn-outline">
+            Ingresar
+          </a>
+          <a href="{% url 'registro' %}" class="btn btn-solid">
+            Registrarse
+          </a>
+          {% endif %}
+        </div>
+
+        <div class="mobile-menu-toggle">
+          <i class="fas fa-bars"></i>
+        </div>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <section id="inicio" class="hero">
-      <video autoplay muted loop playsinline class="hero-bg">
-        <source src="{% static 'media/mp4/panel.mp4' %}" type="video/mp4" />
-      </video>
+  <section id="inicio" class="hero">
+    <video autoplay muted loop playsinline class="hero-bg">
+      <source src="{% static 'media/mp4/panel.mp4' %}" type="video/mp4" />
+    </video>
 
-      <div class="hero-overlay">
-        <div class="hero-content">
-          <h2>Soluciones <span>Eléctricas</span> Integrales</h2>
+    <div class="hero-overlay">
+      <div class="hero-content">
+        <h2>Soluciones <span>Eléctricas</span> Integrales</h2>
+        <p>
+          Ingeniería experta para proyectos industriales, comerciales y residenciales en todo Chile. Calidad y seguridad
+          garantizada.
+        </p>
+        <div class="hero-buttons">
+          <a href="#servicios" class="btn btn-primary">Ver Servicios</a>
+          <a href="#contacto" class="btn btn-secondary">Cotizar Ahora</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="servicios" class="services">
+    <div class="container">
+      <div class="section-header">
+        <h2>Nuestros <span>Servicios</span></h2>
+        <p>Soluciones técnicas de alto nivel adaptadas a su industria</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-bolt"></i></div>
+          <h3>Instalaciones Eléctricas</h3>
+          <p>Diseño, montaje y certificación de sistemas eléctricos de baja y media tensión.</p>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-solar-panel"></i></div>
+          <h3>Energías Renovables</h3>
+          <p>Implementación de proyectos fotovoltaicos para eficiencia energética y ahorro.</p>
+        </div>
+
+        <a href="#" class="service-card" style="text-decoration:none">
+          <div class="service-icon"><i class="fas fa-shopping-cart"></i></div>
+          <h3>Venta de Productos</h3>
+          <p>Catálogo exclusivo de componentes eléctricos y automatización industrial.</p>
+        </a>
+
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-tools"></i></div>
+          <h3>Mantenimiento</h3>
+          <p>Planes preventivos y correctivos para asegurar la continuidad operativa.</p>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-lightbulb"></i></div>
+          <h3>Iluminación LED</h3>
+          <p>Proyectos de iluminación eficiente para galpones, oficinas y espacios públicos.</p>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon"><i class="fas fa-clipboard-check"></i></div>
+          <h3>Certificaciones TE1</h3>
+          <p>Tramitación y regularización de instalaciones ante la SEC.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="nosotros" class="about">
+    <div class="container">
+      <div class="about-content">
+        <div class="about-text">
+          <h2>Sobre <span>Nosotros</span></h2>
           <p>
-            Ingeniería experta para proyectos industriales, comerciales y residenciales en todo Chile. Calidad y seguridad garantizada.
+            En SIEER Chile nos dedicamos a transformar la energía en soluciones productivas. Con más de una década de
+            trayectoria, combinamos experiencia técnica con innovación tecnológica.
           </p>
-          <div class="hero-buttons">
-            <a href="#servicios" class="btn btn-primary">Ver Servicios</a>
-            <a href="#contacto" class="btn btn-secondary">Cotizar Ahora</a>
+          <p>
+            Nuestro compromiso es la seguridad y la eficiencia, brindando a nuestros clientes la tranquilidad de contar
+            con sistemas eléctricos robustos y normados.
+          </p>
+          <ul class="about-features">
+            <li><i class="fas fa-check-circle"></i> Equipo de ingenieros certificados SEC.</li>
+            <li><i class="fas fa-check-circle"></i> Cumplimiento estricto de normativas vigentes.</li>
+            <li><i class="fas fa-check-circle"></i> Soporte técnico 24/7 para emergencias.</li>
+          </ul>
+        </div>
+        <div class="about-image">
+          <img
+            src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80"
+            alt="Ingeniero eléctrico" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="proyectos" class="projects">
+    <div class="container">
+      <div class="section-header">
+        <h2>Proyectos <span>Realizados</span></h2>
+        <p>Nuestra experiencia en terreno habla por nosotros</p>
+      </div>
+      <div class="projects-grid">
+        <!-- TARJETA 1 CON CARRUSEL -->
+        <div class="project-card">
+          <div class="project-image">
+            <div class="swiper project-swiper">
+              <div class="swiper-wrapper">
+
+                <!-- Slide 1 -->
+                <div class="swiper-slide">
+                  <img src="{% static 'img/panel1.jpeg' %}" alt="Vista aérea casa con paneles solares">
+                </div>
+
+                <!-- Slide 2 -->
+                <div class="swiper-slide">
+                  <img src="{% static 'img/panel2.jpeg' %}" alt="Banco de baterías del sistema fotovoltaico">
+                </div>
+
+                <!-- Slide 3 -->
+                <div class="swiper-slide">
+                  <img src="{% static 'img/panel3.jpeg' %}" alt="Conexión eléctrica interior del sistema">
+                </div>
+
+                <!-- Slide 4 -->
+                <div class="swiper-slide">
+                  <img src="{% static 'img/panel4.jpeg' %}" alt="Vista aérea completa de la vivienda">
+                </div>
+
+                <!-- Slide 5 -->
+                <div class="swiper-slide">
+                  <img src="{% static 'img/panel5.jpeg' %}" alt="Detalle de los paneles instalados">
+                </div>
+
+              </div>
+
+              <!-- Botones flecha -->
+              <div class="swiper-button-next"></div>
+              <div class="swiper-button-prev"></div>
+
+              <!-- Puntos -->
+              <div class="swiper-pagination"></div>
+            </div>
+          </div>
+
+          <div class="project-info">
+            <h3>Proyecto Fotovoltaico Sur de Chile</h3>
+            <p>Sistema solar residencial con banco de baterías e integración a la red interna.</p>
           </div>
         </div>
-      </div>
-    </section>
+        <!-- TARJETA 3: VIDEO DEL PROYECTO -->
+        <div class="project-card">
+          <div class="project-image">
+            <video controls preload="metadata"
+              style="width: 100%; height: 100%; object-fit: cover; border-radius: 1rem 1rem 0 0;"
+              poster="{% static 'img/panel10.png' %}">
+              <source src="{% static 'img/proyecto3.mp4' %}" type="video/mp4">
+              Tu navegador no soporta video HTML5.
+            </video>
+          </div>
 
-    <section id="servicios" class="services">
-      <div class="container">
-        <div class="section-header">
-            <h2>Nuestros <span>Servicios</span></h2>
-            <p>Soluciones técnicas de alto nivel adaptadas a su industria</p>
-        </div>
-        <div class="services-grid">
-            <div class="service-card">
-                <div class="service-icon"><i class="fas fa-bolt"></i></div>
-                <h3>Instalaciones Eléctricas</h3>
-                <p>Diseño, montaje y certificación de sistemas eléctricos de baja y media tensión.</p>
-            </div>
-
-            <div class="service-card">
-                <div class="service-icon"><i class="fas fa-solar-panel"></i></div>
-                <h3>Energías Renovables</h3>
-                <p>Implementación de proyectos fotovoltaicos para eficiencia energética y ahorro.</p>
-            </div>
-
-            <a href="/client-dashboard/" class="service-card" style="text-decoration:none">
-                <div class="service-icon"><i class="fas fa-shopping-cart"></i></div>
-                <h3>Venta de Productos</h3>
-                <p>Catálogo exclusivo de componentes eléctricos y automatización industrial.</p>
-            </a>
-
-            <div class="service-card">
-                <div class="service-icon"><i class="fas fa-tools"></i></div>
-                <h3>Mantenimiento</h3>
-                <p>Planes preventivos y correctivos para asegurar la continuidad operativa.</p>
-            </div>
-
-            <div class="service-card">
-                <div class="service-icon"><i class="fas fa-lightbulb"></i></div>
-                <h3>Iluminación LED</h3>
-                <p>Proyectos de iluminación eficiente para galpones, oficinas y espacios públicos.</p>
-            </div>
-
-            <div class="service-card">
-                <div class="service-icon"><i class="fas fa-clipboard-check"></i></div>
-                <h3>Certificaciones TE1</h3>
-                <p>Tramitación y regularización de instalaciones ante la SEC.</p>
-            </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="nosotros" class="about">
-      <div class="container">
-        <div class="about-content">
-          <div class="about-text">
-            <h2>Sobre <span>Nosotros</span></h2>
+          <div class="project-info">
+            <h3>Instalación Fotovoltaica – Video del Proyecto</h3>
             <p>
-              En SIEER Chile nos dedicamos a transformar la energía en soluciones productivas. Con más de una década de trayectoria, combinamos experiencia técnica con innovación tecnológica.
+              Vista general del proceso y funcionamiento del sistema solar instalado.
+              Este video muestra el inversor, protecciones y rendimiento del sistema.
             </p>
-            <p>
-              Nuestro compromiso es la seguridad y la eficiencia, brindando a nuestros clientes la tranquilidad de contar con sistemas eléctricos robustos y normados.
-            </p>
-            <ul class="about-features">
-              <li><i class="fas fa-check-circle"></i> Equipo de ingenieros certificados SEC.</li>
-              <li><i class="fas fa-check-circle"></i> Cumplimiento estricto de normativas vigentes.</li>
-              <li><i class="fas fa-check-circle"></i> Soporte técnico 24/7 para emergencias.</li>
-            </ul>
-          </div>
-          <div class="about-image">
-            <img
-              src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80"
-              alt="Ingeniero eléctrico"
-            />
           </div>
         </div>
-      </div>
-    </section>
 
-    <section id="proyectos" class="projects">
-      <div class="container">
-        <div class="section-header">
-          <h2>Proyectos <span>Realizados</span></h2>
-          <p>Nuestra experiencia en terreno habla por nosotros</p>
-        </div>
-        <div class="projects-grid">
-          <div class="project-card">
-            <div class="project-image">
-              <img src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80" alt="Industrial">
-            </div>
-            <div class="project-info">
-              <h3>Planta Manufacturera</h3>
-              <p>Tableros de fuerza y control para línea de producción en Santiago.</p>
-            </div>
-          </div>
-          <div class="project-card">
-            <div class="project-image">
-              <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80" alt="Comercial">
-            </div>
-            <div class="project-info">
-              <h3>Mall Plaza Vespucio</h3>
-              <p>Recambio a iluminación LED inteligente en estacionamientos.</p>
-            </div>
-          </div>
-          <div class="project-card">
-            <div class="project-image">
-              <img src="https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80" alt="Solar">
-            </div>
-            <div class="project-info">
-              <h3>Agroindustria del Sur</h3>
-              <p>Parque fotovoltaico de 100kW para riego tecnificado.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+        <!-- TARJETA 2 (la de siempre) -->
+        <!-- TARJETA 2: CARRUSEL OFERTA 10 kW -->
+        <div class="project-card">
+          <div class="project-image">
+            <div class="swiper project-swiper">
+              <div class="swiper-wrapper">
 
-    <section id="contacto" class="contact">
-      <div class="container">
-        <div class="section-header">
-          <h2><span>Contáctenos</span></h2>
-          <p>Inicie su proyecto con la asesoría correcta</p>
-        </div>
-        <div class="contact-content">
-          <div class="contact-info">
-            <div class="contact-item">
-              <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
-              <div class="contact-details">
-                <h3>Oficina Central</h3>
-                <p>Av. Providencia 1234, Of. 605, Santiago</p>
+                <!-- Slide 1: publicación / texto oferta -->
+                <div class="swiper-slide">
+                  <img src="{% static 'img/panel6.png' %}" alt="Oferta sistema fotovoltaico 10kW SIEER Chile">
+                </div>
+
+                <!-- Slide 2: inversor con logo -->
+                <div class="swiper-slide">
+                  <img src="{% static 'img/panel7.png' %}" alt="Inversor fotovoltaico SIEER Chile">
+                </div>
+
+                <!-- Slide 3: tablero de protecciones -->
+                <div class="swiper-slide">
+                  <img src="{% static 'img/panel8.png' %}" alt="Tablero eléctrico y protecciones del sistema">
+                </div>
+
+                <!-- Slide 4: banco de baterías -->
+                <div class="swiper-slide">
+                  <img src="{% static 'img/panel9.png' %}" alt="Banco de baterías del sistema fotovoltaico">
+                </div>
+
+                <!-- Slide 5: paneles en techo -->
+                <div class="swiper-slide">
+                  <img src="{% static 'img/panel10.png' %}" alt="Paneles solares instalados en techo">
+                </div>
+
               </div>
+
+              <!-- Botones flecha -->
+              <div class="swiper-button-next"></div>
+              <div class="swiper-button-prev"></div>
+
+              <!-- Puntos -->
+              <div class="swiper-pagination"></div>
             </div>
-            <div class="contact-item">
-              <div class="contact-icon"><i class="fas fa-phone"></i></div>
-              <div class="contact-details">
-                <h3>Llámenos</h3>
-                <p>+56 2 2345 6789</p>
-              </div>
+          </div>
+
+          <div class="project-info">
+            <h3>Sistema Fotovoltaico 10kW – Cartagena</h3>
+          </div>
+        </div>
+
+
+  </section>
+
+  <section id="contacto" class="contact">
+    <div class="container">
+      <div class="section-header">
+        <h2><span>Contáctenos</span></h2>
+        <p>Inicie su proyecto con la asesoría correcta</p>
+      </div>
+      <div class="contact-content">
+        <div class="contact-info">
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div class="contact-details">
+              <h3>Oficina Central</h3>
+              <p>Los Andes
+              </p>
             </div>
-            <div class="contact-item">
-              <div class="contact-icon"><i class="fas fa-envelope"></i></div>
-              <div class="contact-details">
-                <h3>Escríbanos</h3>
-                <p>proyectos@sieerchile.cl</p>
-              </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-phone"></i></div>
+            <div class="contact-details">
+              <h3>Llámenos</h3>
+              <p>+56 9 8152 0994</p>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+            <div class="contact-details">
+              <h3>Escríbanos</h3>
+              <p>fmp.sieer@gmail.com</p>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <footer class="footer">
-      <div class="container">
-        <div class="footer-content">
-          <div class="footer-section">
-            <div class="logo">
-              <h3>SIEER <span>Chile</span></h3>
-            </div>
-            <p style="margin-top:1rem; color:#bbb;">
-              Ingeniería eléctrica de precisión. Energizamos el futuro de su empresa con seguridad y eficiencia.
-            </p>
-            <div class="social-links">
-              <a href="#"><i class="fab fa-facebook-f"></i></a>
-              <a href="#"><i class="fab fa-linkedin-in"></i></a>
-              <a href="#"><i class="fab fa-instagram"></i></a>
-            </div>
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <div class="logo">
+            <h3>SIEER <span>Chile</span></h3>
           </div>
-          <div class="footer-section">
-            <h4>Navegación</h4>
-            <ul>
-              <li><a href="#inicio">Inicio</a></li>
-              <li><a href="#servicios">Servicios</a></li>
-              <li><a href="#proyectos">Proyectos</a></li>
-              <li><a href="#contacto">Contacto</a></li>
-            </ul>
-          </div>
-          <div class="footer-section">
-            <h4>Áreas</h4>
-            <ul>
-              <li><a href="#servicios">Industrial</a></li>
-              <li><a href="#servicios">Inmobiliario</a></li>
-              <li><a href="#servicios">Energía Solar</a></li>
-              <li><a href="#servicios">Domótica</a></li>
-            </ul>
-          </div>
-          <div class="footer-section">
-            <h4>Boletín</h4>
-            <p style="color:#bbb; font-size:0.9rem;">Suscríbase para recibir noticias técnicas.</p>
-            <form class="subscribe-form">
-              <input type="email" placeholder="Su correo..." />
-              <button type="submit"><i class="fas fa-arrow-right"></i></button>
-            </form>
+          <p style="margin-top:1rem; color:#bbb;">
+            Ingeniería eléctrica de precisión. Energizamos el futuro de su empresa con seguridad y eficiencia.
+          </p>
+          <div class="social-links">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
           </div>
         </div>
-        <div class="footer-bottom">
-          <p>&copy; 2025 SIEER Chile Ltda. Todos los derechos reservados.</p>
+        <div class="footer-section">
+          <h4>Navegación</h4>
+          <ul>
+            <li><a href="#inicio">Inicio</a></li>
+            <li><a href="#servicios">Servicios</a></li>
+            <li><a href="#proyectos">Proyectos</a></li>
+            <li><a href="#contacto">Contacto</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Áreas</h4>
+          <ul>
+            <li><a href="#servicios">Industrial</a></li>
+            <li><a href="#servicios">Inmobiliario</a></li>
+            <li><a href="#servicios">Energía Solar</a></li>
+            <li><a href="#servicios">Domótica</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Boletín</h4>
+          <p style="color:#bbb; font-size:0.9rem;">Suscríbase para recibir noticias técnicas.</p>
+          <form class="subscribe-form">
+            <input type="email" placeholder="Su correo..." />
+            <button type="submit"><i class="fas fa-arrow-right"></i></button>
+          </form>
         </div>
       </div>
-    </footer>
+      <div class="footer-bottom">
+        <p>&copy; 2025 SIEER Chile Ltda. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
 
-    <script>
-      // Scroll Header Effect
-      window.addEventListener("scroll", function () {
-        const header = document.querySelector(".header");
-        if (window.scrollY > 50) {
-          header.classList.add("sticky");
-        } else {
-          header.classList.remove("sticky");
-        }
-      });
+  <script>
+    // Scroll Header Effect
+    window.addEventListener("scroll", function () {
+      const header = document.querySelector(".header");
+      if (window.scrollY > 50) {
+        header.classList.add("sticky");
+      } else {
+        header.classList.remove("sticky");
+      }
+    });
 
-      // Mobile Menu Logic
-      document.addEventListener("DOMContentLoaded", function () {
-        const mobileMenuToggle = document.querySelector(".mobile-menu-toggle");
+    // Mobile Menu Logic
+    document.addEventListener("DOMContentLoaded", function () {
+      const mobileMenuToggle = document.querySelector(".mobile-menu-toggle");
 
-        if (mobileMenuToggle) {
-          mobileMenuToggle.addEventListener("click", function () {
-            if (!document.querySelector(".mobile-menu")) {
-              const mobileMenu = document.createElement("div");
-              mobileMenu.className = "mobile-menu";
-              mobileMenu.innerHTML = `
+      if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener("click", function () {
+          if (!document.querySelector(".mobile-menu")) {
+            const mobileMenu = document.createElement("div");
+            mobileMenu.className = "mobile-menu";
+            mobileMenu.innerHTML = `
                     <div class="mobile-menu-content">
                         {% if user.is_authenticated %}
                             <div class="mobile-user-info">
@@ -1163,32 +1353,56 @@
                         </div>
                     </div>
                 `;
-              document.body.appendChild(mobileMenu);
+            document.body.appendChild(mobileMenu);
 
-              // Cerrar al hacer click fuera o en un link
-              mobileMenu.addEventListener("click", function (e) {
-                if (e.target === mobileMenu || e.target.tagName === 'A') {
-                  mobileMenu.remove();
-                  mobileMenuToggle.querySelector("i").classList.remove("fa-times");
-                  mobileMenuToggle.querySelector("i").classList.add("fa-bars");
-                }
-              });
+            // Cerrar al hacer click fuera o en un link
+            mobileMenu.addEventListener("click", function (e) {
+              if (e.target === mobileMenu || e.target.tagName === 'A') {
+                mobileMenu.remove();
+                mobileMenuToggle.querySelector("i").classList.remove("fa-times");
+                mobileMenuToggle.querySelector("i").classList.add("fa-bars");
+              }
+            });
 
-              // Cambiar icono
-              mobileMenuToggle.querySelector("i").classList.remove("fa-bars");
-              mobileMenuToggle.querySelector("i").classList.add("fa-times");
-              
-            } else {
-              document.querySelector(".mobile-menu").remove();
-              mobileMenuToggle.querySelector("i").classList.remove("fa-times");
-              mobileMenuToggle.querySelector("i").classList.add("fa-bars");
-            }
-          });
-        }
+            // Cambiar icono
+            mobileMenuToggle.querySelector("i").classList.remove("fa-bars");
+            mobileMenuToggle.querySelector("i").classList.add("fa-times");
+
+          } else {
+            document.querySelector(".mobile-menu").remove();
+            mobileMenuToggle.querySelector("i").classList.remove("fa-times");
+            mobileMenuToggle.querySelector("i").classList.add("fa-bars");
+          }
+        });
+      }
+    });
+  </script>
+  <!-- Swiper JS -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Inicializar todos los carruseles que usen .project-swiper
+      document.querySelectorAll('.project-swiper').forEach(function (el) {
+        new Swiper(el, {
+          loop: true,
+          pagination: {
+            el: el.querySelector('.swiper-pagination'),
+            clickable: true,
+          },
+          navigation: {
+            nextEl: el.querySelector('.swiper-button-next'),
+            prevEl: el.querySelector('.swiper-button-prev'),
+          },
+        });
       });
-    </script>
+    });
+  </script>
 
-    {% include 'chat/coipo_ai_chatbot.html' %}
-    <script src="{% static 'js/coipo_ai.js' %}"></script>
-  </body>
+
+
+  {% include 'chat/coipo_ai_chatbot.html' %}
+  <script src="{% static 'js/coipo_ai.js' %}"></script>
+</body>
+
 </html>
