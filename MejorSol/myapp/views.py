@@ -24,6 +24,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import ClienteProfileForm # Import limpio
+from sklearn.linear_model import LinearRegression
 
 # --- Formularios ---
 from .forms import (
@@ -431,6 +432,40 @@ def eliminar_cotizacion(request, cot_id):
     context = { 'cot': chat }
     return render(request, "admin/eliminar_cotizacion.html", context)
 
+# ================================================================
+# NUEVA FUNCIÓN: API PARA CAMBIAR ESTADO RÁPIDO (AJAX)
+# ================================================================
+@require_POST
+@login_required
+@user_passes_test(is_admin_or_vendedor)
+def actualizar_estado_rapido(request, chat_id):
+    """
+    Recibe una petición POST desde la tabla de cotizaciones
+    para cambiar el estado sin recargar la página.
+    """
+    try:
+        chat = get_object_or_404(ChatCotizacion, id=chat_id)
+        
+        # Obtenemos el dato del cuerpo de la petición o del POST form
+        try:
+            data = json.loads(request.body)
+            nuevo_estado = data.get('nuevo_estado')
+        except:
+            nuevo_estado = request.POST.get('nuevo_estado')
+
+        # Validamos que sea un estado permitido
+        estados_validos = dict(ChatCotizacion.ESTADO_CHOICES).keys()
+        
+        if nuevo_estado in estados_validos:
+            chat.estado = nuevo_estado
+            chat.save()
+            return JsonResponse({'status': 'ok', 'mensaje': f'Estado actualizado a {nuevo_estado}'})
+        else:
+            return JsonResponse({'status': 'error', 'mensaje': 'Estado no válido'}, status=400)
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'mensaje': str(e)}, status=500)
+
 
 # ===========================
 # VISTAS DE REPORTES, CUENTA, Y CHATBOT GENERAL
@@ -454,113 +489,149 @@ def calculos_estadisticas_view(request):
 # ================================================================
 # VISTA DE REPORTES GRÁFICOS (BI + ML) - ¡¡AQUÍ ESTÁ LA ACTUALIZACIÓN!!
 # ================================================================
+# En views.py
+
 @login_required
 @user_passes_test(is_admin)
 def reportes_graficos_view(request):
     """
-    NUEVA VISTA TIPO POWER BI
-    Calcula KPIs de BI y una predicción de ML.
+    Vista BI con DOBLE MODELO DE ML:
+    1. Predicción de Demanda (Cotizaciones)
+    2. Predicción de Crecimiento de Clientes
     """
     
-    # --- 1. KPIs de BI (Tus datos reales) ---
+    # --- 1. KPIs Generales ---
     total_cotizaciones = ChatCotizacion.objects.count()
     aprobadas = ChatCotizacion.objects.filter(estado='aprobada').count()
-    
-    # Tasa de Conversión
     tasa_conversion = (aprobadas / total_cotizaciones * 100) if total_cotizaciones > 0 else 0
     
-    # Promedio de cotizaciones por día (últimos 30 días)
     hace_30_dias = timezone.now() - timedelta(days=30)
     cotizaciones_30_dias = ChatCotizacion.objects.filter(fecha_creacion__gte=hace_30_dias).count()
     promedio_cot_dia = cotizaciones_30_dias / 30.0
 
-    # --- 2. Datos para Gráficos de BI (Tus datos reales) ---
-    
-    # Gráfico Embudo (Dona)
+    # --- 2. Datos Gráficos Generales ---
     embudo_data = ChatCotizacion.objects.values('estado').annotate(total=Count('estado')).order_by('-total')
-    # Usamos el display name de tus CHOICES en el modelo para que sea legible
     embudo_labels = [dict(ChatCotizacion.ESTADO_CHOICES).get(item['estado'], 'N/A') for item in embudo_data]
     embudo_valores = [item['total'] for item in embudo_data]
 
-    # Gráfico Productos (Barras)
     productos_data = ChatCotizacion.objects.values('producto__nombre').annotate(total=Count('id')).order_by('-total')[:7]
     productos_labels = [item['producto__nombre'] for item in productos_data if item['producto__nombre']]
     productos_valores = [item['total'] for item in productos_data if item['producto__nombre']]
 
-    # --- 3. ¡¡INICIO DE MACHINE LEARNING!! (Predicción de Demanda) ---
-    
-    # 3.1. Obtener datos históricos (los últimos 90 días para entrenar)
+    # ==========================================================
+    # MODELO ML 1: PREDICCIÓN DE COTIZACIONES (DIARIAS)
+    # ==========================================================
     hace_90_dias = timezone.now() - timedelta(days=90)
-    tendencia_data_historica = ChatCotizacion.objects.filter(
-        fecha_creacion__gte=hace_90_dias
-    ).annotate(
-        dia=TruncDay('fecha_creacion')
-    ).values('dia').annotate(
-        total=Count('id')
-    ).order_by('dia')
+    tendencia_data = ChatCotizacion.objects.filter(fecha_creacion__gte=hace_90_dias)\
+        .annotate(dia=TruncDay('fecha_creacion')).values('dia').annotate(total=Count('id')).order_by('dia')
 
-    prediccion_labels = []
-    prediccion_valores = []
+    pred_cot_labels = []
+    pred_cot_valores = []
 
-    # 3.2. Solo si tenemos suficientes datos para entrenar (ej: más de 10 días)
-    if len(tendencia_data_historica) > 10:
-        
-        # 3.3. Preparar datos con Pandas (fácil)
-        df = pd.DataFrame(list(tendencia_data_historica))
+    if len(tendencia_data) > 3:
+        df = pd.DataFrame(list(tendencia_data))
         df['dia'] = pd.to_datetime(df['dia'])
-        # Rellena días sin cotizaciones con 0 (clave para Time Series)
-        df = df.set_index('dia').asfreq('D', fill_value=0) 
+        df = df.set_index('dia').asfreq('D', fill_value=0).reset_index()
+        df['fecha_num'] = df['dia'].map(datetime.toordinal)
+        
+        X = df[['fecha_num']]
+        y = df['total']
         
         try:
-            # 3.4. Entrenar el modelo ARIMA (¡Esto es ML!)
-            # (order=(1,1,1) es una configuración simple, no te compliques con esto)
-            modelo = ARIMA(df['total'], order=(1, 1, 1))
-            modelo_fit = modelo.fit()
+            model_cot = LinearRegression()
+            model_cot.fit(X, y)
             
-            # 3.5. Predecir los próximos 7 días
-            prediccion = modelo_fit.forecast(steps=7)
+            last_date = df['dia'].iloc[-1]
+            next_days = [last_date + timedelta(days=i) for i in range(1, 8)] # 7 Días
+            next_days_num = [[d.toordinal()] for d in next_days]
+            preds = model_cot.predict(next_days_num)
             
-            # 3.6. Preparar datos de predicción para el gráfico
-            ultimo_dia = df.index[-1]
-            for i in range(7):
-                dia_futuro = (ultimo_dia + timedelta(days=i+1)).strftime('%d-%b')
-                prediccion_labels.append(dia_futuro)
-                # Nos aseguramos que la predicción no sea negativa
-                prediccion_valores.append(max(0, round(prediccion.iloc[i], 1))) 
-                
-        except Exception as e:
-            # Si el modelo falla (pasa a veces con pocos datos), no hacemos nada
-            print(f"Error al entrenar modelo ML: {e}")
-            pass # Los arrays de predicción quedarán vacíos
+            for i, d in enumerate(next_days):
+                pred_cot_labels.append(d.strftime('%d-%b'))
+                pred_cot_valores.append(max(0, round(preds[i], 1)))
+        except: pass
 
-    # 3.7. Preparar datos históricos (los últimos 30 días) para el gráfico de tendencia
-    tendencia_reciente_data = tendencia_data_historica.filter(dia__gte=hace_30_dias)
-    tendencia_labels = [item['dia'].strftime('%d-%b') for item in tendencia_reciente_data]
-    tendencia_valores = [item['total'] for item in tendencia_reciente_data]
+    # Datos históricos visuales
+    tendencia_recent = tendencia_data.filter(dia__gte=hace_30_dias)
+    tendencia_labels = [item['dia'].strftime('%d-%b') for item in tendencia_recent]
+    tendencia_valores = [item['total'] for item in tendencia_recent]
+
+    # ==========================================================
+    # MODELO ML 2: PREDICCIÓN DE CRECIMIENTO CLIENTES (ACUMULADO)
+    # ==========================================================
+    # 1. Obtenemos usuarios tipo cliente agrupados por fecha de registro
+    clientes_data = User.objects.filter(perfil__tipo_usuario='cliente', date_joined__gte=hace_90_dias)\
+        .annotate(dia=TruncDay('date_joined')).values('dia').annotate(nuevos=Count('id')).order_by('dia')
     
-    # --- 4. Enviar todo al contexto ---
+    cli_labels = [] # Fechas futuras
+    cli_valores = [] # Valores predichos (Total acumulado)
+    kpi_nuevos_clientes_proy = 0 # KPI numérico
+
+    if len(clientes_data) > 3:
+        df_cli = pd.DataFrame(list(clientes_data))
+        df_cli['dia'] = pd.to_datetime(df_cli['dia'])
+        # Rellenar días sin registros con 0
+        df_cli = df_cli.set_index('dia').asfreq('D', fill_value=0).reset_index()
+        
+        # IMPORTANTE: Para clientes, predecimos el ACUMULADO (Crecimiento total)
+        df_cli['total_acumulado'] = df_cli['nuevos'].cumsum()
+        
+        # Entrenamos con el total acumulado
+        df_cli['fecha_num'] = df_cli['dia'].map(datetime.toordinal)
+        
+        X_cli = df_cli[['fecha_num']]
+        y_cli = df_cli['total_acumulado']
+        
+        try:
+            model_cli = LinearRegression()
+            model_cli.fit(X_cli, y_cli)
+            
+            # Predecir prox 30 días (Tendencia mensual)
+            last_date_c = df_cli['dia'].iloc[-1]
+            current_total = df_cli['total_acumulado'].iloc[-1]
+            
+            # Proyectamos a 7 días para el gráfico
+            future_days = [last_date_c + timedelta(days=i) for i in range(1, 8)]
+            future_X = [[d.toordinal()] for d in future_days]
+            future_y = model_cli.predict(future_X)
+            
+            for i, d in enumerate(future_days):
+                cli_labels.append(d.strftime('%d-%b'))
+                cli_valores.append(int(future_y[i]))
+            
+            # Calculamos cuántos clientes nuevos ganaremos en 7 días
+            kpi_nuevos_clientes_proy = int(future_y[-1] - current_total)
+            
+        except Exception as e:
+            print(f"Error ML Clientes: {e}")
+            pass
+
+    # --- Contexto ---
     context = {
-        # KPIs
+        # KPIs existentes
         'kpi_tasa_conversion': tasa_conversion,
         'kpi_total_cotizaciones': total_cotizaciones,
         'kpi_promedio_cot_dia': promedio_cot_dia,
         'kpi_aprobadas': aprobadas,
         
-        # Gráfico Embudo (JSON)
+        # NUEVO KPI
+        'kpi_proyeccion_clientes': kpi_nuevos_clientes_proy,
+
+        # Datos Gráficos (JSON)
         'embudo_labels': json.dumps(embudo_labels),
         'embudo_valores': json.dumps(embudo_valores),
-        
-        # Gráfico Tendencia Histórica (JSON)
         'tendencia_labels': json.dumps(tendencia_labels),
         'tendencia_valores': json.dumps(tendencia_valores),
-        
-        # Gráfico Productos (JSON)
         'productos_labels': json.dumps(productos_labels),
         'productos_valores': json.dumps(productos_valores),
         
-        # ¡¡DATOS NUEVOS DE ML!! (JSON)
-        'prediccion_labels': json.dumps(prediccion_labels),
-        'prediccion_valores': json.dumps(prediccion_valores),
+        # ML Cotizaciones
+        'prediccion_labels': json.dumps(pred_cot_labels),
+        'prediccion_valores': json.dumps(pred_cot_valores),
+        
+        # NUEVO: ML Clientes
+        'clientes_ml_labels': json.dumps(cli_labels),
+        'clientes_ml_valores': json.dumps(cli_valores),
     }
     return render(request, "admin/reportes_graficos.html", context)
 
@@ -961,6 +1032,24 @@ def chatbot_dialogflow(request):
     df_response = dialogflow_service.detect_intent(session_id, msg)
 
     return JsonResponse(df_response)
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_lista_clientes_view(request):
+    """
+    Vista para listar todos los clientes registrados con sus datos de perfil.
+    """
+    # Filtramos solo los usuarios que tienen perfil de tipo 'cliente'
+    clientes = User.objects.filter(perfil__tipo_usuario='cliente').select_related('perfil').order_by('-date_joined')
+    
+    context = {
+        'clientes': clientes
+    }
+    return render(request, 'admin/lista_clientes.html', context)
+
+
+
 
 # ==========================================================
 # HACK PARA CREAR ADMIN EN RENDER (¡BORRAR DESPUÉS!)

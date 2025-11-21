@@ -1,0 +1,163 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listado de Clientes - SIEER Chile</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* ESTILOS BASE (Misma estética que Cotizaciones) */
+    :root {
+        --neon-green: #00ff88;
+        --bg-dark: #050505;
+        --bg-panel: #0f0f0f;
+        --border-neon: 1px solid rgba(0, 255, 136, 0.2);
+        --text-white: #ffffff;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+        background-color: var(--bg-dark);
+        font-family: 'Roboto', sans-serif;
+        color: var(--text-white);
+        padding: 2rem;
+    }
+
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    /* HEADER */
+    .page-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 2rem; padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .page-header h1 {
+        font-family: 'Montserrat', sans-serif; color: var(--neon-green);
+        font-size: 1.8rem; text-transform: uppercase;
+    }
+    .btn-back {
+        background: transparent; border: 1px solid var(--neon-green);
+        color: var(--neon-green); padding: 10px 20px; border-radius: 50px;
+        text-decoration: none; font-weight: 600; transition: 0.3s;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .btn-back:hover { background: var(--neon-green); color: #000; }
+
+    /* TABLA */
+    .table-card {
+        background: var(--bg-panel); border: var(--border-neon);
+        border-radius: 16px; overflow: hidden;
+        box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    }
+    
+    .table-responsive { overflow-x: auto; }
+    
+    .styled-table { width: 100%; border-collapse: collapse; }
+    
+    .styled-table th {
+        background: rgba(0, 255, 136, 0.05); color: var(--neon-green);
+        padding: 1.2rem; text-align: left; font-family: 'Montserrat', sans-serif;
+        font-weight: 600; font-size: 0.9rem; text-transform: uppercase;
+    }
+    
+    .styled-table td {
+        padding: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.05);
+        color: #ddd; font-size: 0.95rem; vertical-align: middle;
+    }
+    
+    .styled-table tr:hover { background: rgba(255,255,255,0.02); }
+    
+    /* Datos específicos */
+    .user-avatar-small {
+        width: 35px; height: 35px; background: #222; color: #fff;
+        border-radius: 50%; display: flex; justify-content: center; align-items: center;
+        font-size: 0.9rem; margin-right: 10px; border: 1px solid #444;
+    }
+    .client-name { display: flex; align-items: center; font-weight: 600; color: #fff; }
+    .info-sub { display: block; font-size: 0.8rem; color: #888; margin-top: 4px; }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-users"></i> Clientes Registrados</h1>
+        <a href="{% url 'admin_panel' %}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Volver al Panel
+        </a>
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente / Usuario</th>
+                        <th>Contacto (Email / Teléfono)</th>
+                        <th>Dirección</th>
+                        <th>Fecha Registro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cliente in clientes %}
+                    <tr>
+                        <td>#{{ cliente.id }}</td>
+                        
+                        <td>
+                            <div class="client-name">
+                                <div class="user-avatar-small">
+                                    {{ cliente.first_name|first|default:cliente.username|first|upper }}
+                                </div>
+                                <div>
+                                    {{ cliente.get_full_name|default:"Sin nombre completo" }}
+                                    <span class="info-sub">@{{ cliente.username }}</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div><i class="far fa-envelope" style="width:20px; color:#00ff88;"></i> {{ cliente.email }}</div>
+                            {% if cliente.perfil.telefono %}
+                                <div style="margin-top:5px;">
+                                    <i class="fas fa-phone" style="width:20px; color:#00ccff;"></i> {{ cliente.perfil.telefono }}
+                                </div>
+                            {% else %}
+                                <div style="margin-top:5px; color:#666;">
+                                    <i class="fas fa-phone-slash" style="width:20px;"></i> Sin teléfono
+                                </div>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if cliente.perfil.direccion %}
+                                {{ cliente.perfil.direccion }}
+                            {% else %}
+                                <span style="color:#666; font-style:italic;">No registrada</span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ cliente.date_joined|date:"d/m/Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding: 3rem;">
+                            <i class="fas fa-user-slash" style="font-size: 3rem; color: #333; margin-bottom: 1rem;"></i>
+                            <p>No hay clientes registrados en el sistema.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

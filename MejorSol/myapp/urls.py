@@ -4,6 +4,7 @@ from . import views
 from .views import CustomLoginView, chatbot_dialogflow
 
 urlpatterns = [
+    path('panel/clientes/', views.admin_lista_clientes_view, name='lista_clientes'),
     # ===========================
     # URLS PÚBLICAS
     # ===========================
@@ -91,7 +92,8 @@ urlpatterns = [
     path('iniciar-chat-cotizacion/<int:producto_id>/', views.iniciar_chat_view, name='iniciar_chat_cotizacion'),
     path('chat-cotizacion/<int:chat_id>/', views.chat_cotizacion_view, name='chat_cotizacion_view'),
     path('api/chat/<int:chat_id>/mensajes/', views.chat_api_view, name='chat_api_view'),
-
+    path('api/cotizacion/<int:chat_id>/estado/', views.actualizar_estado_rapido, name='actualizar_estado_rapido'),
+   
     # ===========================
     # CAMBIO DE CONTRASEÑA (INTERNA)
     # ===========================
