@@ -764,7 +764,7 @@ def client_dashboard(request):
 # VISTAS PARA CHAT DE COTIZACIÓN (CLIENTE Y API)
 # ===========================
 
-# VISTA 1: Iniciar el chat
+# VISTA 1: Iniciar el chat (¡MODIFICADA CON EL NUEVO MENSAJE DE BIENVENIDA!)
 @login_required
 def iniciar_chat_view(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
@@ -776,11 +776,22 @@ def iniciar_chat_view(request, producto_id):
     )
     
     if created:
+        # Obtener el nombre del usuario, usando first_name si existe, sino username
+        nombre_usuario = request.user.first_name if request.user.first_name else request.user.username
+        
+        # Mensaje de bienvenida simplificado (Tu solicitud)
+        mensaje_bienvenida = (
+            f"¡Hola {nombre_usuario}! Soy el asistente virtual de ventas para el producto "
+            f"**{producto.nombre}**. Tu interés ha sido registrado. "
+            f"Un administrador o vendedor se unirá a este chat en breve para ayudarte con tu cotización. "
+            f"Por favor, espera un momento o describe tu solicitud mientras te atienden."
+        )
+        
         MensajeCotizacion.objects.create(
             chat=chat,
             autor=User.objects.filter(is_superuser=True).first(), 
             es_bot=True,
-            mensaje=f"¡Hola! Gracias por tu interés en el producto: {producto.nombre}. Soy tu asistente. Para ayudarte, ¿podrías indicarme tu nombre completo?"
+            mensaje=mensaje_bienvenida
         )
     
     return JsonResponse({'status': 'ok', 'chat_id': chat.id})
@@ -867,7 +878,7 @@ def chat_api_view(request, chat_id):
         return JsonResponse({'mensajes': mensajes_json})
 
 
-# VISTA 4: La lógica del "Bot asistente" (REPARADO: Lógica de pasos)
+# VISTA 4: La lógica del "Bot asistente" (SE MANTIENE EL FLUJO ORIGINAL DE RECOLECCIÓN/GUARDADO)
 def procesar_respuesta_bot(chat, ultimo_mensaje_cliente):
     if chat.estado not in ['pendiente', 'en_proceso'] and chat.cliente_mensaje_dato is not None:
         return None 
@@ -885,8 +896,9 @@ def procesar_respuesta_bot(chat, ultimo_mensaje_cliente):
 
     # 1. Pide NOMBRE
     if chat.cliente_nombre_dato is None:
+        # Se elimina el saludo de bienvenida de aquí ya que se movió a iniciar_chat_view
         if len(ultimo_mensaje_cliente) < 5 or not re.search(r'\s', ultimo_mensaje_cliente):
-             return "Por favor, ingresa tu nombre y apellido completo."
+             return "Para ayudarte, ¿podrías indicarme tu nombre y apellido completo para el registro de la cotización?"
         chat.cliente_nombre_dato = ultimo_mensaje_cliente
         chat.save()
         return f"¡Genial, {chat.cliente_nombre_dato}! Ahora, ¿cuál es tu correo electrónico?"

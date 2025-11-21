@@ -2,13 +2,137 @@
 
 <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
 
-<link rel="stylesheet" href="{% static 'css/coipo_ai.css' %}" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&display=swap');
+  df-messenger {
+    --df-messenger-button-titlebar-color: #00ff88;
+    --df-messenger-button-titlebar-font-color: #000000;
+    --df-messenger-chat-background-color: #121212;
+    --df-messenger-message-list-background: #121212;
+    --df-messenger-bot-message: #1e1e2d;
+    --df-messenger-user-message: #00ff88;
+    --df-messenger-font-color: #ffffff;
+    --df-messenger-user-font-color: #000000;
+    /* Variables de respaldo */
+    --df-messenger-input-box-color: #ffffff;
+    --df-messenger-input-font-color: #000000;
+    --df-messenger-input-placeholder-font-color: #666666;
+    font-family: 'Montserrat', sans-serif;
+  }
+</style>
 
 <df-messenger
-  chat-title="CoipoAI"
+  chat-title="Sieer"
   agent-id="85b15dbd-d5f0-4e74-a931-0c01402be922"
   language-code="es"
+  intent="WELCOME"
 ></df-messenger>
 
-<!-- Cargar tu archivo JS -->
-<script src="{% static 'js/coipo_ai.js' %}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+      
+      // Configuración del estilo "Tarjeta Flotante" para JS
+      const cardStyleMobile = `
+          position: fixed !important;
+          top: 50% !important;
+          left: 50% !important;
+          transform: translate(-50%, -50%) !important;
+          bottom: auto !important;
+          right: auto !important;
+          width: 85% !important;
+          height: 60vh !important;
+          max-height: 600px !important;
+          border-radius: 20px !important;
+          box-shadow: 0 0 0 1000px rgba(0,0,0,0.8), 0 10px 40px rgba(0,0,0,0.5) !important;
+          z-index: 2147483647 !important;
+          display: flex !important;
+          flex-direction: column !important;
+      `;
+
+      const footerStyleWhite = `
+          background-color: #ffffff !important;
+          background: #ffffff !important;
+          border-top: 1px solid #eeeeee !important;
+          border-bottom-left-radius: 20px !important;
+          border-bottom-right-radius: 20px !important;
+          color: black !important;
+      `;
+
+      const headerStyleRound = `
+          border-top-left-radius: 20px !important;
+          border-top-right-radius: 20px !important;
+      `;
+
+      // Función que aplica los estilos DIRECTAMENTE al atributo 'style'
+      function hammerStyles() {
+          const messenger = document.querySelector('df-messenger');
+          
+          if (!messenger || !messenger.shadowRoot) return;
+
+          // 1. Atacar el contenedor principal (.chat-wrapper)
+          const wrapper = messenger.shadowRoot.querySelector('.chat-wrapper');
+          if (wrapper) {
+              // Solo aplicar modo tarjeta si es celular
+              if (window.innerWidth <= 600) {
+                  // Sobrescribimos cualquier estilo que Google intente poner
+                  wrapper.style.cssText = cardStyleMobile;
+              }
+          }
+
+          // 2. Atacar el Header
+          const header = messenger.shadowRoot.querySelector('.df-messenger-titlebar');
+          if (header && window.innerWidth <= 600) {
+              header.style.cssText = headerStyleRound;
+          }
+
+          // 3. Atacar el Footer (Input)
+          const footer = messenger.shadowRoot.querySelector('.chat-wrapper-footer');
+          if (footer) {
+              footer.style.cssText = footerStyleWhite;
+          }
+
+          // 4. Atacar el Input Interno (Shadow DOM nivel 2)
+          const userInput = messenger.shadowRoot.querySelector('df-messenger-user-input');
+          if (userInput && userInput.shadowRoot) {
+              const inputContainer = userInput.shadowRoot.querySelector('.input-container');
+              const inputBox = userInput.shadowRoot.querySelector('.input-box-wrapper');
+              const inputField = userInput.shadowRoot.querySelector('input');
+
+              if (inputContainer) inputContainer.style.cssText = "background-color: #ffffff !important;";
+              if (inputBox) inputBox.style.cssText = "background-color: #ffffff !important;";
+              if (inputField) inputField.style.cssText = "background-color: #ffffff !important; color: black !important;";
+          }
+          
+          // 5. Forzar botón cerrar visible
+          const minIcon = messenger.shadowRoot.querySelector('#minimizeIcon');
+          if (minIcon) {
+              minIcon.style.cssText = "fill: #000000 !important; color: #000 !important; display: block !important; min-width: 24px !important; opacity: 1 !important;";
+          }
+      }
+
+      // EJECUTAR REPETIDAMENTE PARA GANARLE A GOOGLE
+      // Esto asegura que si Google intenta cambiar el tamaño, nosotros lo volvemos a cambiar 1 milisegundo después.
+      const heavyInterval = setInterval(hammerStyles, 50); 
+      
+      // Detener después de 20 segundos (ahorra batería)
+      setTimeout(() => clearInterval(heavyInterval), 20000);
+
+      // Reactivar si el usuario toca el botón de abrir
+      document.addEventListener('click', (e) => {
+          if(e.target.tagName === 'DF-MESSENGER') {
+              let count = 0;
+              const clickInterval = setInterval(() => {
+                  hammerStyles();
+                  count++;
+                  if(count > 50) clearInterval(clickInterval);
+              }, 50);
+          }
+      });
+  });
+</script>
+
+<script>
+    var script = document.createElement('script');
+    script.src = "{% static 'js/coipo_ai.js' %}?v=" + new Date().getTime();
+    document.body.appendChild(script);
+</script>

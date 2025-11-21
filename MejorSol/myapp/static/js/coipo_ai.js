@@ -1,61 +1,37 @@
-document.getElementById("coipo-chat-launcher").onclick = () => {
-    const win = document.getElementById("coipo-chat-window");
-    win.style.display = win.style.display === "flex" ? "none" : "flex";
-};
-
-async function sendCoipoMessage() {
-    const input = document.getElementById("coipo-chat-input");
-    const text = input.value.trim();
-
-    if (!text) return;
-
-    appendMessage("user", text);
-
-    input.value = "";
-
-    const response = await fetch(""/api/chatbot-dialogflow/"", {
-        method: "POST",
-        headers: { 
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCSRFToken()
-        },
-        body: JSON.stringify({ message: text })
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // 1. Listener para el Widget de Dialogflow (<df-messenger>)
+    // Este evento se dispara cuando el chat de Google carga completamente
+    window.addEventListener('dfMessengerLoaded', function (event) {
+        console.log('Chatbot Sieer cargado y listo.');
+        
+        const dfMessenger = document.querySelector('df-messenger');
+        if (dfMessenger) {
+            // Opcional: Puedes forzar que el chat se abra solo o envíe un saludo
+            // dfMessenger.renderCustomText('¡Hola! ¿En qué puedo ayudarte hoy?');
+        }
     });
 
-    const data = await response.json();
-
-    appendMessage("bot", data.response || "No pude procesar eso.");
-}
-
-function appendMessage(sender, message) {
-    const box = document.getElementById("coipo-chat-messages");
-    const div = document.createElement("div");
-
-    div.className = sender === "user" ? "msg-user" : "msg-bot";
-    div.innerText = message;
-
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
-}
-
-document.getElementById("coipo-chat-send").onclick = sendCoipoMessage;
-
-document.getElementById("coipo-chat-input").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") sendCoipoMessage();
+    // 2. Manejo de eventos de envío (Opcional, para logs)
+    window.addEventListener('df-request-sent', function (event) {
+        console.log('Solicitud enviada al bot:', event.detail);
+    });
 });
 
-// para manejar CSRF correctamente
+// 3. Función para obtener el CSRF Token 
+// (Útil si necesitas hacer otras peticiones AJAX en el futuro)
 function getCSRFToken() {
     let cookieValue = null;
-    const cookies = document.cookie.split(";");
-
-    for (let cookie of cookies) {
-        cookie = cookie.trim();
-        if (cookie.startsWith("csrftoken=")) {
-            cookieValue = cookie.substring("csrftoken=".length);
-            break;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Busca la cookie que empieza con csrftoken=
+            if (cookie.substring(0, 10) === ('csrftoken=')) {
+                cookieValue = decodeURIComponent(cookie.substring(10));
+                break;
+            }
         }
     }
     return cookieValue;
 }
-

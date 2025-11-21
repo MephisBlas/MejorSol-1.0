@@ -1,143 +1,140 @@
-/* ============================================
-   ESTILOS PROFESIONALES CHATBOT COIPO AI
-============================================ */
-
-/* ===== COLORES CORPORATIVOS ===== */
+/* ======================================= */
+/* VARIABLES GLOBALES (Asegurando consistencia) */
+/* ======================================= */
 :root {
-    --df-messenger-button-titlebar-color: #00ff88;
-    --df-messenger-button-titlebar-icon-color: #0a0a10;
-
-    --primary-green: #00ff88;
-    --dark-green: #00cc6a;
-    --light-green: #33ff99;
-    --accent-green: #00ffaa;
-
-    --neon-glow: 0 0 15px rgba(0, 255, 136, 0.5);
-    --neon-glow-strong: 0 0 25px rgba(0, 255, 136, 0.8);
-
-    --dark-bg: #0f0f14;
-    --dark-bg-transparent: rgba(15, 15, 20, 0.85);
-
-    --card-bg: rgba(30, 30, 40, 0.9);
-
-    --text-light: #ffffff;
-    --text-gray: #bbbbbb;
+    --ms-panel: #1e1e2d; /* Fondo del área de mensajes (Oscuro) */
+    --ms-accent: #00ffaa; /* Neón verde/cian (Botones, burbuja de usuario) */
+    --ms-text: #ffffff; /* Texto claro */
+    --ms-muted: #b0b0b0; /* Texto secundario/bordes */
+    --darker-bg: #121a26; /* Fondo de burbuja Bot/Header */
+    --darkest-bg: #0f172a; /* Fondo de ventana/input principal */
+    --dark-text: #031019; /* Texto oscuro para fondos neón */
+    --bot-color: #ffaa00; /* Amarillo para el Bot/Íconos */
+    --neon-shadow: 0 0 10px rgba(0, 255, 170, 0.5);
+    --user-bubble-bg: #f0f0f0; /* Color temporal de burbuja usuario original (lo sobreescribiremos) */
 }
 
-df-messenger .df-titlebar {
-    font-family: 'Montserrat', sans-serif !important;   /* Reemplazar por Gotham si tienes el archivo */
-    font-weight: 700 !important;  /* grosor: 400, 500, 600, 700… */
-    letter-spacing: 0.5px !important;
-    font-size: 18px !important;
-}
-/* ============================================
-   BURBUJA DEL CHATBOT
-============================================ */
-
-df-messenger {
-    --df-messenger-font-color: var(--text-light);
-    --df-messenger-chat-background: var(--dark-bg);
-    --df-messenger-send-icon: var(--primary-green);
-
-    --df-messenger-button-titlebar-color: var(--primary-green);
-    --df-messenger-button-titlebar-font-color: #000;
-}
-
-/* Burbujita flotante */
-df-messenger::part(button) {
-    background: var(--primary-green) !important;
-    border-radius: 50% !important;
-    box-shadow: var(--neon-glow);
-    width: 70px !important;
-    height: 70px !important;
-    position: relative !important;
+/* 1. CONTENEDOR PRINCIPAL DEL CHAT (Ventana Flotante) */
+/* Asegúrate que el elemento principal tenga el ID "coipo-chat-window" */
+#coipo-chat-window {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 90%; /* Responsivo: 90% en móviles */
+    max-width: 400px; /* Ancho máximo en escritorio */
+    height: 80vh; /* Altura responsiva */
+    max-height: 600px;
+    
+    /* Aplicando el tema oscuro */
+    background: var(--darkest-bg); 
+    border: 1px solid var(--ms-accent);
+    border-radius: 12px;
+    box-shadow: var(--neon-shadow);
+    
+    display: flex; /* La imagen parece ser la ventana visible, usando flex */
+    flex-direction: column;
+    z-index: 1000;
+    overflow: hidden;
+    
+    font-family: 'Roboto', sans-serif;
+    color: var(--ms-text);
 }
 
-df-messenger::part(button):hover {
-    background: var(--dark-green) !important;
-    box-shadow: var(--neon-glow-strong);
+/* 1.1. HEADER (La barra verde "Sieer") */
+.coipo-chat-header, .sieer-header {
+    background: var(--ms-accent); /* Verde Neón */
+    color: var(--darkest-bg);
+    padding: 10px 15px;
+    font-size: 1.2rem;
+    font-weight: 700;
 }
 
-/* QUITAR ICONO DE DIALOGFLOW */
-df-messenger::part(button-icon) {
-    opacity: 0 !important;
+/* 2. ÁREA DE MENSAJES */
+/* Asegúrate que el área de scroll tenga el ID "coipo-chat-messages" */
+#coipo-chat-messages {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--ms-panel); 
 }
 
-/* ÍCONO PERSONALIZADO (NUBE) */
-df-messenger::part(button)::after {
-    content: "" !important;
-    position: absolute !important;
-    top: 50%;
-    left: 50%;
-    width: 70%;
-    height: 70%;
-    transform: translate(-50%, -50%) !important;
-
-    background-image: url("../img/chat_bubble.png") !important;
-    background-size: contain !important;
-    background-repeat: no-repeat !important;
-    background-position: center !important;
-
-    filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.5));
+/* Ocultar la barra de desplazamiento en Chrome/Safari/Opera */
+#coipo-chat-messages::-webkit-scrollbar {
+    width: 5px;
+}
+#coipo-chat-messages::-webkit-scrollbar-thumb {
+    background-color: var(--darker-bg);
+    border-radius: 10px;
 }
 
-df-messenger::part(button):hover::after {
-    transform: translate(-50%, -50%) scale(1.1) !important;
-    filter: drop-shadow(0 0 12px rgba(0, 255, 170, 0.9));
+/* 3. ESTILO DE BURBUJAS */
+
+/* Base de la burbuja */
+.msg-user, .msg-bot {
+    max-width: 75%;
+    padding: 10px 15px;
+    border-radius: 18px;
+    line-height: 1.4;
+    word-break: break-word;
 }
 
-/* ============================================
-   VENTANA DEL CHAT
-============================================ */
-
-df-messenger::part(chat-wrapper) {
-    background: var(--dark-bg-transparent) !important;
-    border-radius: 20px !important;
-    border: 1px solid rgba(0, 255, 136, 0.4) !important;
-    box-shadow: var(--neon-glow);
+/* Mensajes del Bot (Bienvenido/a a SIEER) */
+.msg-bot {
+    background: var(--darker-bg);
+    color: var(--ms-text);
+    border-bottom-left-radius: 5px;
+    align-self: flex-start;
 }
 
-df-messenger::part(titlebar) {
-    background: var(--primary-green) !important;
-    color: #111 !important;
-    font-weight: bold !important;
+/* Mensajes del Usuario (hola) */
+.msg-user {
+    background: var(--ms-accent);
+    color: var(--dark-text); 
+    border-bottom-right-radius: 5px;
+    align-self: flex-end;
+    font-weight: 500;
 }
 
-/* ============================================
-   MENSAJES
-============================================ */
-
-df-messenger::part(user-message) {
-    background: var(--primary-green) !important;
-    color: #000 !important;
-    border-radius: 16px !important;
+/* 4. ÁREA DE INPUT INFERIOR */
+/* La barra "Haz una pregunta..." */
+.coipo-chat-input-area {
+    padding: 10px;
+    border-top: 1px solid rgba(0, 255, 170, 0.3);
+    background: var(--darkest-bg);
+    display: flex;
+    gap: 10px;
 }
 
-df-messenger::part(bot-message) {
-    background: var(--card-bg) !important;
-    border: 1px solid rgba(0, 255, 136, 0.3) !important;
-    color: var(--text-light) !important;
-    border-radius: 16px !important;
-    backdrop-filter: blur(6px);
+#coipo-chat-input {
+    /* El input en la imagen parece estar usando todo el ancho.
+       Si estás usando tu JS, el input debe tener ID "coipo-chat-input" */
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--ms-muted);
+    border-radius: 8px;
+    background: var(--darker-bg);
+    color: var(--ms-text);
+    font-size: 1rem;
+    transition: border-color 0.3s;
 }
 
-/* ============================================
-   INPUT
-============================================ */
-
-df-messenger::part(input-container) {
-    background: rgba(20, 20, 28, 0.85) !important;
-    border-top: 1px solid rgba(0, 255, 136, 0.3) !important;
+#coipo-chat-input:focus {
+    outline: none;
+    border-color: var(--ms-accent);
+    box-shadow: 0 0 5px rgba(0, 255, 170, 0.5);
 }
 
-df-messenger::part(text-input) {
-    color: var(--text-light) !important;
-}
-
-df-messenger::part(text-input)::placeholder {
-    color: var(--text-gray) !important;
-}
-
-df-messenger::part(send-icon) {
-    filter: brightness(1.4) saturate(1.5) !important;
+/* AJUSTE PARA RESPONSIVIDAD (Asegurando que funcione bien en móviles) */
+@media (max-width: 450px) {
+    #coipo-chat-window {
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        height: 100%; /* Ocupa toda la pantalla en móvil */
+        max-height: 100%;
+        border-radius: 0;
+    }
 }
