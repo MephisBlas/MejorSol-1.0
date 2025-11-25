@@ -19,24 +19,25 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
         --bg-body: #050505; 
-        --bg-panel: #0f0f0f; /* Restaurado al tono original del panel */
+        --bg-panel: #0f0f0f;
         --bg-card: rgba(20, 20, 20, 0.6);
         --neon-green: #00ff88; 
         --neon-blue: #00ccff; 
         --neon-purple: #a855f7;
+        --neon-orange: #ff6b35;
         --text-main: #ffffff; 
-        --text-muted: #b0b0b0; /* Restaurado */
-        --border-neon: 1px solid rgba(0, 255, 136, 0.2); /* Restaurado */
+        --text-muted: #b0b0b0;
+        --border-neon: 1px solid rgba(0, 255, 136, 0.2);
         --border-light: 1px solid rgba(255, 255, 255, 0.08);
     }
     html, body { width: 100%; height: 100%; background-color: var(--bg-body); font-family: 'Roboto', sans-serif; color: var(--text-main); overflow: hidden; }
     .admin-container { display: flex; width: 100vw; height: 100vh; }
 
-    /* ===================== 2. SIDEBAR (DISEÑO ORIGINAL RESTAURADO) ===================== */
+    /* ===================== 2. SIDEBAR ===================== */
     .admin-sidebar { 
         width: 280px; height: 100%; 
         background: var(--bg-panel); 
-        border-right: var(--border-neon); /* Borde verde sutil */
+        border-right: var(--border-neon);
         display: flex; flex-direction: column; flex-shrink: 0; z-index: 1000; transition: 0.3s; 
     }
     .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
@@ -53,15 +54,14 @@
         display: flex; align-items: center; gap: 12px; padding: 12px 15px; 
         color: #b0b0b0; text-decoration: none; border-radius: 8px; 
         transition: 0.3s; font-size: 0.95rem; font-weight: 500; 
-        border-left: 3px solid transparent; /* Preparado para el efecto */
+        border-left: 3px solid transparent;
     }
-    /* Efecto Hover y Activo ORIGINAL */
     .nav-item a:hover, .nav-item.active a { 
         background: rgba(0, 255, 136, 0.08); 
         color: var(--neon-green); 
     }
     .nav-item.active a { 
-        border-left: 3px solid var(--neon-green); /* La línea verde a la izquierda de tu foto */
+        border-left: 3px solid var(--neon-green);
         font-weight: 600;
     }
     .nav-item a i { width: 20px; text-align: center; }
@@ -94,7 +94,7 @@
     /* LAYOUT PRINCIPAL */
     .admin-content { padding: 2rem; padding-bottom: 5rem; display: flex; flex-direction: column; gap: 2rem; }
 
-    /* --- SECCIÓN A: FILTROS --- */
+    /* --- SECCIÓN A: FILTROS Y INFO ML --- */
     .filter-container { 
         background: var(--bg-card); backdrop-filter: blur(10px); border: var(--border-light); 
         border-radius: 12px; padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1.5rem;
@@ -110,6 +110,17 @@
         padding: 8px 20px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: 0.2s; 
     }
     .btn-filter:hover { background: #00cc6a; transform: scale(1.05); }
+
+    /* Info ML */
+    .ml-info-container {
+        display: flex; gap: 1rem; align-items: center; margin-left: auto;
+    }
+    .ml-badge {
+        background: rgba(168, 85, 247, 0.1); border: 1px solid var(--neon-purple);
+        padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;
+    }
+    .ml-badge.demo { background: rgba(255, 107, 53, 0.1); border-color: var(--neon-orange); }
+    .ml-badge i { font-size: 0.7rem; }
 
     /* --- SECCIÓN B: KPIs (GRID FLUIDO) --- */
     .stats-container {
@@ -129,7 +140,7 @@
     .kpi-value { font-family: 'Montserrat', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; }
     .kpi-value small { font-size: 1rem; color: var(--neon-green); font-weight: 600; margin-left: 5px; }
 
-    /* ESTILO ESPECIAL PARA KPI DE IA (MORADO) */
+    /* ESTILO ESPECIAL PARA KPI DE IA */
     .kpi-ai {
         border: 1px solid rgba(168, 85, 247, 0.4);
         background: linear-gradient(135deg, rgba(168, 85, 247, 0.05) 0%, rgba(20,20,20,0.8) 100%);
@@ -142,7 +153,7 @@
     /* --- SECCIÓN C: GRÁFICOS (GRID COMPLEJO) --- */
     .charts-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr); /* 2 Columnas base */
+        grid-template-columns: repeat(2, 1fr);
         gap: 1.5rem;
     }
 
@@ -150,6 +161,7 @@
         background: var(--bg-card); border: var(--border-light); border-radius: 16px;
         padding: 1.5rem; min-height: 350px; display: flex; flex-direction: column;
         box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        position: relative;
     }
     .chart-header { 
         display: flex; justify-content: space-between; align-items: center; 
@@ -158,6 +170,16 @@
     .chart-header h3 { font-size: 1rem; font-weight: 700; color: #fff; font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; margin: 0; }
     .chart-body { flex: 1; position: relative; width: 100%; }
 
+    /* Indicador de calidad ML */
+    .ml-quality {
+        position: absolute; top: 15px; right: 15px; display: flex; gap: 8px;
+    }
+    .quality-badge {
+        font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; background: rgba(0,255,136,0.1);
+        border: 1px solid var(--neon-green); color: var(--neon-green);
+    }
+    .quality-badge.warning { background: rgba(255,107,53,0.1); border-color: var(--neon-orange); color: var(--neon-orange); }
+
     /* Estilos específicos de gráficos */
     .chart-prediccion { border-color: rgba(0, 204, 255, 0.3); }
     .chart-prediccion h3 { color: var(--neon-blue); display: flex; align-items: center; gap: 8px; }
@@ -165,18 +187,27 @@
     .chart-clientes { border-color: rgba(168, 85, 247, 0.3); }
     .chart-clientes h3 { color: var(--neon-purple); display: flex; align-items: center; gap: 8px; }
 
-    /* Span completo para gráficos grandes si se desea */
+    /* Span completo para gráficos grandes */
     .col-span-2 { grid-column: span 2; }
+
+    /* Estado de datos */
+    .data-status {
+        display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-muted);
+        margin-top: 0.5rem;
+    }
+    .data-status.real { color: var(--neon-green); }
+    .data-status.demo { color: var(--neon-orange); }
 
     /* ===================== 4. RESPONSIVE ===================== */
     @media (max-width: 1200px) {
-        .charts-grid { grid-template-columns: 1fr; } /* 1 Columna en tablets */
+        .charts-grid { grid-template-columns: 1fr; }
         .col-span-2 { grid-column: span 1; }
     }
     @media (max-width: 768px) {
         .admin-sidebar { display: none; }
         .filter-container { flex-direction: column; align-items: stretch; }
         .filter-inputs { flex-direction: column; }
+        .ml-info-container { margin-left: 0; justify-content: center; }
         .admin-content { padding: 1rem; }
         .kpi-value { font-size: 1.8rem; }
     }
@@ -236,6 +267,20 @@
         <div class="admin-content">
             <div class="filter-container">
                 <h2><i class="fas fa-filter"></i> Rango de Datos</h2>
+                <div class="ml-info-container">
+                    {% if usar_demo %}
+                    <div class="ml-badge demo">
+                        <i class="fas fa-robot"></i> MODO DEMO
+                    </div>
+                    {% else %}
+                    <div class="ml-badge">
+                        <i class="fas fa-database"></i> DATOS REALES
+                    </div>
+                    {% endif %}
+                    <div class="data-status {% if datos_reales %}real{% else %}demo{% endif %}">
+                        <i class="fas fa-chart-line"></i> {{ total_dias_analizados }} días analizados
+                    </div>
+                </div>
                 <form method="GET" class="filter-inputs" style="flex-grow:1; display:flex; gap:10px; justify-content:flex-end;">
                     <input type="date" name="desde" class="filter-input" value="{{ desde|default:'' }}" title="Fecha Inicio">
                     <input type="date" name="hasta" class="filter-input" value="{{ hasta|default:'' }}" title="Fecha Fin">
@@ -265,24 +310,60 @@
                     <i class="fas fa-users kpi-icon"></i>
                     <span class="kpi-label" style="color:rgba(255,255,255,0.8)">Proy. Clientes (7d)</span>
                     <div class="kpi-value">+{{ kpi_proyeccion_clientes }}</div>
+                    {% if metricas_calidad.clientes %}
+                    <div class="data-status real" style="margin-top: 0.5rem; font-size: 0.7rem;">
+                        <i class="fas fa-brain"></i> ML: {{ metricas_calidad.clientes.confianza|default:85 }}% confianza
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="charts-grid">
                 
                 <div class="chart-card">
-                    <div class="chart-header"><h3>Cotizaciones (Histórico)</h3></div>
+                    <div class="chart-header">
+                        <h3>Cotizaciones (Histórico)</h3>
+                        {% if metricas_calidad.cotizaciones.mae %}
+                        <div class="ml-quality">
+                            <span class="quality-badge">MAE: {{ metricas_calidad.cotizaciones.mae }}</span>
+                            <span class="quality-badge {% if metricas_calidad.cotizaciones.confianza < 80 %}warning{% endif %}">
+                                {{ metricas_calidad.cotizaciones.confianza|default:85 }}% conf
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
                     <div class="chart-body"><canvas id="tendenciaChart"></canvas></div>
+                    {% if usar_demo %}
+                    <div class="data-status demo">
+                        <i class="fas fa-info-circle"></i> Datos de demostración - Patrón realista
+                    </div>
+                    {% endif %}
                 </div>
 
                 <div class="chart-card chart-prediccion">
-                    <div class="chart-header"><h3><i class="fas fa-robot"></i> IA: Demanda Futura</h3></div>
+                    <div class="chart-header">
+                        <h3><i class="fas fa-robot"></i> IA: Demanda Futura</h3>
+                        <div class="ml-quality">
+                            <span class="quality-badge">Random Forest</span>
+                        </div>
+                    </div>
                     <div class="chart-body"><canvas id="prediccionChart"></canvas></div>
+                    <div class="data-status real">
+                        <i class="fas fa-microchip"></i> Modelo: Random Forest Regressor
+                    </div>
                 </div>
 
                 <div class="chart-card chart-clientes">
-                    <div class="chart-header"><h3><i class="fas fa-user-plus"></i> IA: Crecimiento Clientes</h3></div>
+                    <div class="chart-header">
+                        <h3><i class="fas fa-user-plus"></i> IA: Crecimiento Clientes</h3>
+                        <div class="ml-quality">
+                            <span class="quality-badge">Regresión</span>
+                        </div>
+                    </div>
                     <div class="chart-body"><canvas id="clientesChart"></canvas></div>
+                    <div class="data-status real">
+                        <i class="fas fa-project-diagram"></i> Predicción acumulativa 7 días
+                    </div>
                 </div>
 
                 <div class="chart-card">
@@ -319,67 +400,212 @@
         
         function getD(id) { try { return JSON.parse(document.getElementById(id).textContent); } catch(e){ return []; } }
 
-        // 1. TENDENCIA
+        // 1. TENDENCIA MEJORADA
         new Chart(document.getElementById('tendenciaChart'), {
             type: 'line',
             data: {
                 labels: getD('d-tend-l'),
-                datasets: [{ label: 'Reales', data: getD('d-tend-v'), borderColor: '#00ff88', backgroundColor: 'rgba(0,255,136,0.1)', fill: true, tension: 0.4, pointRadius: 3 }]
+                datasets: [{ 
+                    label: 'Cotizaciones Reales', 
+                    data: getD('d-tend-v'), 
+                    borderColor: '#00ff88', 
+                    backgroundColor: 'rgba(0,255,136,0.1)', 
+                    fill: true, 
+                    tension: 0.4, 
+                    pointRadius: 3,
+                    pointHoverRadius: 6,
+                    borderWidth: 2
+                }]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: '#00ff88',
+                        bodyColor: '#fff'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
         });
 
-        // 2. PREDICCIÓN COTIZACIONES
+        // 2. PREDICCIÓN COTIZACIONES MEJORADA
         const pV = getD('d-pred-v');
+        const pL = getD('d-pred-l');
         if(pV.length > 0) {
             new Chart(document.getElementById('prediccionChart'), {
                 type: 'line',
                 data: {
-                    labels: getD('d-pred-l'),
-                    datasets: [{ label: 'IA Predicción', data: pV, borderColor: '#00ccff', borderDash: [5,5], pointBackgroundColor: '#00ccff', tension: 0.3 }]
+                    labels: pL,
+                    datasets: [{ 
+                        label: 'Predicción IA', 
+                        data: pV, 
+                        borderColor: '#00ccff', 
+                        backgroundColor: 'rgba(0,204,255,0.1)',
+                        borderWidth: 3,
+                        borderDash: [5,5],
+                        pointBackgroundColor: '#00ccff',
+                        pointBorderColor: '#000',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        fill: true,
+                        tension: 0.3 
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Cotizaciones/día', color: '#888' }
+                        }
+                    }
+                }
             });
-        } else { document.getElementById('prediccionChart').parentElement.innerHTML = "<div style='height:100%;display:flex;align-items:center;justify-content:center;color:#666'><i class='fas fa-info-circle'></i>&nbsp;Faltan datos para IA</div>"; }
+        } else { 
+            document.getElementById('prediccionChart').parentElement.innerHTML = 
+                "<div style='height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#666;gap:10px;'>" +
+                "<i class='fas fa-robot' style='font-size:2rem;opacity:0.5;'></i>" +
+                "<div>Modelo entrenándose...</div>" +
+                "</div>"; 
+        }
 
-        // 3. PREDICCIÓN CLIENTES (IA)
+        // 3. PREDICCIÓN CLIENTES MEJORADA
         const cV = getD('d-cli-v');
+        const cL = getD('d-cli-l');
         if(cV.length > 0) {
             new Chart(document.getElementById('clientesChart'), {
                 type: 'line',
                 data: {
-                    labels: getD('d-cli-l'),
+                    labels: cL,
                     datasets: [{ 
                         label: 'Clientes Proyectados', 
                         data: cV, 
                         borderColor: '#a855f7', 
                         backgroundColor: 'rgba(168, 85, 247, 0.1)',
-                        fill: true, borderWidth: 2, tension: 0.4, pointRadius: 4
+                        fill: true, 
+                        borderWidth: 3, 
+                        tension: 0.4, 
+                        pointRadius: 4,
+                        pointHoverRadius: 7
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'Total Clientes', color: '#888' }
+                        }
+                    }
+                }
             });
-        } else { document.getElementById('clientesChart').parentElement.innerHTML = "<div style='height:100%;display:flex;align-items:center;justify-content:center;color:#666'><i class='fas fa-user-slash'></i>&nbsp;Faltan datos de clientes</div>"; }
+        } else { 
+            document.getElementById('clientesChart').parentElement.innerHTML = 
+                "<div style='height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#666;gap:10px;'>" +
+                "<i class='fas fa-user-plus' style='font-size:2rem;opacity:0.5;'></i>" +
+                "<div>Analizando crecimiento...</div>" +
+                "</div>"; 
+        }
 
-        // 4. EMBUDO
+        // 4. EMBUDO MEJORADO
         new Chart(document.getElementById('embudoChart'), {
             type: 'doughnut',
             data: {
                 labels: getD('d-embudo-l'),
-                datasets: [{ data: getD('d-embudo-v'), backgroundColor: ['#00ff88', '#00ccff', '#ff4757', '#ffa500'], borderColor: '#111' }]
+                datasets: [{ 
+                    data: getD('d-embudo-v'), 
+                    backgroundColor: ['#00ff88', '#00ccff', '#ff6b35', '#ffa500'],
+                    borderColor: '#111',
+                    borderWidth: 2,
+                    hoverOffset: 15
+                }]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#ccc', usePointStyle: true } } } }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { 
+                    legend: { 
+                        position: 'right', 
+                        labels: { 
+                            color: '#ccc', 
+                            usePointStyle: true,
+                            padding: 15
+                        } 
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                } 
+            }
         });
 
-        // 5. PRODUCTOS
+        // 5. PRODUCTOS MEJORADO
         new Chart(document.getElementById('productosChart'), {
             type: 'bar',
             data: {
                 labels: getD('d-prod-l'),
-                datasets: [{ label: 'Solicitudes', data: getD('d-prod-v'), backgroundColor: 'rgba(0,255,136,0.6)', borderColor: '#00ff88', borderWidth: 1, borderRadius: 4 }]
+                datasets: [{ 
+                    label: 'Solicitudes', 
+                    data: getD('d-prod-v'), 
+                    backgroundColor: 'rgba(0,255,136,0.8)', 
+                    borderColor: '#00ff88', 
+                    borderWidth: 1, 
+                    borderRadius: 6,
+                    hoverBackgroundColor: 'rgba(0,255,136,1)'
+                }]
             },
-            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            options: { 
+                indexAxis: 'y', 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    y: {
+                        grid: { display: false }
+                    }
+                }
+            }
         });
+
+        // Efecto visual para indicar datos demo
+        {% if usar_demo %}
+        setTimeout(() => {
+            const demoElements = document.querySelectorAll('.ml-badge.demo');
+            demoElements.forEach(el => {
+                setInterval(() => {
+                    el.style.boxShadow = el.style.boxShadow ? '' : '0 0 15px rgba(255,107,53,0.5)';
+                }, 1000);
+            });
+        }, 500);
+        {% endif %}
     });
 </script>
 </body>
