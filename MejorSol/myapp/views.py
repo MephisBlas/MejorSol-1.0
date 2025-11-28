@@ -404,263 +404,116 @@ def calculos_estadisticas_view(request):
 @login_required
 @user_passes_test(is_admin)
 def reportes_graficos_view(request):
-    """
-    Vista BI con MACHINE LEARNING MEJORADO:
-    - Predicción de Demanda (Cotizaciones) con modelo más robusto
-    - Predicción de Crecimiento de Clientes
-    - Manejo elegante de datos insuficientes
-    - Métricas de error y validación
-    """
+    # 1. DATOS REALES (Sin simulación)
+    hace_90 = timezone.now() - timedelta(days=90)
     
-    # 1. OBTENCIÓN DE DATOS (Últimos 120 días para mejor análisis)
-    hace_120 = timezone.now() - timedelta(days=120)
+    # --- CORRECCIÓN GRÁFICOS (EMBUDO Y PRODUCTOS) ---
+    # Usamos .order_by() vacío al inicio para limpiar el ordenamiento por defecto
+    # que estaba causando los duplicados en los gráficos.
     
-    # Datos reales de la BD
-    data_cotizaciones = list(ChatCotizacion.objects.filter(fecha_creacion__gte=hace_120)
-                             .annotate(dia=TruncDay('fecha_creacion'))
-                             .values('dia').annotate(total=Count('id')).order_by('dia'))
-                             
-    data_clientes = list(User.objects.filter(perfil__tipo_usuario='cliente', date_joined__gte=hace_120)
-                         .annotate(dia=TruncDay('date_joined'))
-                         .values('dia').annotate(nuevos=Count('id')).order_by('dia'))
+    # Embudo (Estado de Cotizaciones)
+    embudo_data = ChatCotizacion.objects.order_by().values('estado').annotate(total=Count('id')).order_by('-total')
+    embudo_labels = [dict(ChatCotizacion.ESTADO_CHOICES).get(x['estado'], x['estado']) for x in embudo_data]
+    embudo_valores = [x['total'] for x in embudo_data]
 
-    # --- MODO PROFESIONAL: Datos de demostración realistas ---
-    usar_demo = len(data_cotizaciones) < 10  # Mayor exigencia para datos reales
+    # Top Productos (Barras)
+    productos_data = ChatCotizacion.objects.order_by().values('producto__nombre').annotate(total=Count('id')).order_by('-total')[:7]
+    productos_labels = [x['producto__nombre'] for x in productos_data]
+    productos_valores = [x['total'] for x in productos_data]
 
-    if usar_demo:
-        data_cotizaciones = []
-        data_clientes = []
-        base_date = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        acum_clientes = 25  # Base más realista
+    # KPIs Simples
+    total = ChatCotizacion.objects.count()
+    aprob = ChatCotizacion.objects.filter(estado='aprobada').count()
+    kpi_tasa = round((aprob/total*100), 1) if total else 0
+    kpi_prom = 0 # Se calculará dinámicamente si se desea
+
+    # --- MACHINE LEARNING 1: PREDICCIÓN DEMANDA (Cotizaciones) ---
+    # Agrupar por día
+    data_cot = list(ChatCotizacion.objects.filter(fecha_creacion__gte=hace_90)
+                    .annotate(dia=TruncDay('fecha_creacion'))
+                    .values('dia').annotate(total=Count('id')).order_by('dia'))
+    
+    pred_l, pred_v, tend_l, tend_v = [], [], [], []
+    
+    df = pd.DataFrame(data_cot)
+    if not df.empty:
+        # Fix Timezone Chile
+        if df['dia'].dt.tz is not None: df['dia'] = df['dia'].dt.tz_localize(None)
         
-        # Simulación más sofisticada con tendencia + estacionalidad
-        for i in range(120, -1, -1):
-            fecha = base_date - timedelta(days=i)
-            dia_num = 120 - i
-            
-            # Cotizaciones con crecimiento + estacionalidad semanal
-            tendencia = 3 + (dia_num * 0.12)  # Crecimiento más suave
-            estacionalidad = 2 * np.sin(2 * np.pi * dia_num / 7)  # Patrón semanal
-            ruido = random.randint(-2, 3)
-            ventas = max(1, int(tendencia + estacionalidad + ruido))
-            data_cotizaciones.append({'dia': fecha, 'total': ventas})
-            
-            # Clientes con crecimiento orgánico
-            if dia_num % 3 == 0:  # Cada 3 días en promedio
-                nuevos = random.randint(1, 3)
-                acum_clientes += nuevos
-            data_clientes.append({'dia': fecha, 'total_acumulado': acum_clientes})
-
-    # Inicializar variables para el template
-    pred_cot_l, pred_cot_v = [], []
-    tendencia_l, tendencia_v = [], []
-    cli_l, cli_v, kpi_proy_cli = [], [], 0
-    metricas_calidad = {'cotizaciones': {}, 'clientes': {}}
-
-    # ------------------------------------------------------------
-    # 2. ML MEJORADO: PREDICCIÓN COTIZACIONES (Random Forest)
-    # ------------------------------------------------------------
-    df = pd.DataFrame(data_cotizaciones)
-    if not df.empty and len(df) > 5:
-        # FIX ZONA HORARIA
-        if df['dia'].dt.tz is not None:
-            df['dia'] = df['dia'].dt.tz_localize(None)
-        
+        # Llenar días vacíos con 0
         df = df.set_index('dia').asfreq('D', fill_value=0).reset_index()
-        
-        # INGENIERÍA DE FEATURES MEJORADA
         df['fecha_num'] = df['dia'].map(datetime.toordinal)
-        df['dia_semana'] = df['dia'].dt.dayofweek
-        df['es_fin_semana'] = df['dia_semana'].isin([5, 6]).astype(int)
-        df['mes'] = df['dia'].dt.month
-        df['rolling_avg_7'] = df['total'].rolling(window=7, min_periods=1).mean()
         
-        # Features para el modelo
-        feature_cols = ['fecha_num', 'dia_semana', 'es_fin_semana', 'mes', 'rolling_avg_7']
-        X = df[feature_cols].fillna(0)
-        y = df['total']
+        # Entrenar ML
+        try:
+            model = LinearRegression()
+            model.fit(df[['fecha_num']], df['total'])
+            
+            # Predecir 3 días
+            last = df['dia'].iloc[-1]
+            future = [last + timedelta(days=i) for i in range(1, 4)]
+            preds = model.predict([[d.toordinal()] for d in future])
+            
+            for i, d in enumerate(future):
+                pred_l.append(d.strftime('%d-%b'))
+                pred_v.append(max(0, round(preds[i], 1)))
+        except: pass
+
+        # Datos Históricos (últimos 30 días para el gráfico)
+        hace_30 = df['dia'].iloc[-1] - timedelta(days=30)
+        df_recent = df[df['dia'] >= hace_30]
+        tend_l = df_recent['dia'].dt.strftime('%d-%b').tolist()
+        tend_v = df_recent['total'].tolist()
+        
+        # KPI Promedio
+        kpi_prom = round(df_recent['total'].mean(), 1)
+
+    # --- MACHINE LEARNING 2: PREDICCIÓN CLIENTES ---
+    data_cli = list(User.objects.filter(perfil__tipo_usuario='cliente', date_joined__gte=hace_90)
+                    .annotate(dia=TruncDay('date_joined'))
+                    .values('dia').annotate(nuevos=Count('id')).order_by('dia'))
+    
+    cli_l, cli_v, kpi_proy = [], [], 0
+    
+    dfc = pd.DataFrame(data_cli)
+    if not dfc.empty:
+        if dfc['dia'].dt.tz is not None: dfc['dia'] = dfc['dia'].dt.tz_localize(None)
+        
+        # Acumulado real
+        dfc = dfc.set_index('dia').asfreq('D', fill_value=0).reset_index()
+        dfc['total_acumulado'] = dfc['nuevos'].cumsum()
         
         try:
-            # USAR RANDOM FOREST PARA MEJOR PREDICCIÓN
-            if len(df) > 10:
-                # Split train/test para validación
-                X_train, X_test, y_train, y_test = train_test_split(
-                    X, y, test_size=0.2, random_state=42
-                )
-                
-                model = RandomForestRegressor(n_estimators=100, random_state=42)
-                model.fit(X_train, y_train)
-                
-                # Calcular métricas de calidad
-                y_pred_test = model.predict(X_test)
-                mae = mean_absolute_error(y_test, y_pred_test)
-                rmse = np.sqrt(mean_squared_error(y_test, y_pred_test))
-                
-                metricas_calidad['cotizaciones'] = {
-                    'mae': round(mae, 2),
-                    'rmse': round(rmse, 2),
-                    'confianza': max(0, 100 - (mae * 10))  # Métrica de confianza simple
-                }
-            else:
-                model = RandomForestRegressor(n_estimators=50, random_state=42)
-                model.fit(X, y)
-                metricas_calidad['cotizaciones'] = {'mae': 'N/A', 'rmse': 'N/A', 'confianza': 85}
+            model_c = LinearRegression()
+            model_c.fit(dfc['dia'].map(datetime.toordinal).values.reshape(-1,1), dfc['total_acumulado'])
             
-            # Predecir próximos 5 días
-            last_date = df['dia'].iloc[-1]
-            next_days = [last_date + timedelta(days=i) for i in range(1, 6)]
+            last = dfc['dia'].iloc[-1]
+            fut = [last + timedelta(days=i) for i in range(1, 8)]
+            prj = model_c.predict(np.array([d.toordinal() for d in fut]).reshape(-1,1))
             
-            for i, d in enumerate(next_days):
-                # Preparar features para predicción futura
-                fecha_num = d.toordinal()
-                dia_semana = d.weekday()
-                es_fin_semana = 1 if dia_semana in [5, 6] else 0
-                mes = d.month
-                rolling_avg = df['total'].tail(7).mean()
-                
-                features_futuro = [[fecha_num, dia_semana, es_fin_semana, mes, rolling_avg]]
-                pred = model.predict(features_futuro)[0]
-                
-                pred_cot_l.append(d.strftime('%d-%b'))
-                pred_cot_v.append(max(0, round(pred, 1)))
-                
-        except Exception as e:
-            # Fallback a Linear Regression si hay error
-            try:
-                model_fallback = LinearRegression()
-                model_fallback.fit(X[['fecha_num']], y)
-                last_date = df['dia'].iloc[-1]
-                next_days = [last_date + timedelta(days=i) for i in range(1, 4)]
-                
-                for i, d in enumerate(next_days):
-                    pred = model_fallback.predict([[d.toordinal()]])[0]
-                    pred_cot_l.append(d.strftime('%d-%b'))
-                    pred_cot_v.append(max(0, round(pred, 1)))
-            except:
-                pass
-
-        # Datos históricos para visualización (últimos 45 días)
-        hace_45 = df['dia'].iloc[-1] - timedelta(days=45)
-        df_recent = df[df['dia'] >= hace_45]
-        tendencia_l = df_recent['dia'].dt.strftime('%d-%b').tolist()
-        tendencia_v = df_recent['total'].tolist()
-
-    # ------------------------------------------------------------
-    # 3. ML: PREDICCIÓN CLIENTES (MEJORADO)
-    # ------------------------------------------------------------
-    df_c = pd.DataFrame(data_clientes)
-    if not df_c.empty and len(df_c) > 5:
-        if df_c['dia'].dt.tz is not None:
-            df_c['dia'] = df_c['dia'].dt.tz_localize(None)
-        
-        if not usar_demo:
-            df_c = df_c.set_index('dia').asfreq('D', fill_value=0).reset_index()
-            df_c['total_acumulado'] = df_c['nuevos'].cumsum()
-        
-        df_c['fecha_num'] = df_c['dia'].map(datetime.toordinal)
-        df_c['dia_semana'] = df_c['dia'].dt.dayofweek
-        
-        try:
-            # Modelo para crecimiento de clientes
-            X_cli = df_c[['fecha_num', 'dia_semana']]
-            y_cli = df_c['total_acumulado']
-            
-            model_cli = RandomForestRegressor(n_estimators=50, random_state=42)
-            model_cli.fit(X_cli, y_cli)
-            
-            # Predecir 7 días
-            last_d = df_c['dia'].iloc[-1]
-            next_d = [last_d + timedelta(days=i) for i in range(1, 8)]
-            
-            for i, d in enumerate(next_d):
-                pred = model_cli.predict([[d.toordinal(), d.weekday()]])[0]
+            for i, d in enumerate(fut):
                 cli_l.append(d.strftime('%d-%b'))
-                cli_v.append(int(pred))
+                cli_v.append(int(prj[i]))
             
-            current_total = df_c['total_acumulado'].iloc[-1]
-            kpi_proy_cli = max(0, int(cli_v[-1] - current_total))
-            
-        except Exception as e:
-            # Fallback
-            try:
-                model_cli_fallback = LinearRegression()
-                model_cli_fallback.fit(df_c[['fecha_num']], df_c['total_acumulado'])
-                last_d = df_c['dia'].iloc[-1]
-                next_d = [last_d + timedelta(days=i) for i in range(1, 8)]
-                
-                for i, d in enumerate(next_d):
-                    pred = model_cli_fallback.predict([[d.toordinal()]])[0]
-                    cli_l.append(d.strftime('%d-%b'))
-                    cli_v.append(int(pred))
-                
-                current_total = df_c['total_acumulado'].iloc[-1]
-                kpi_proy_cli = max(0, int(cli_v[-1] - current_total))
-            except:
-                pass
+            kpi_proy = int(prj[-1] - dfc['total_acumulado'].iloc[-1])
+        except: pass
 
-    # 4. DATOS ESTÁTICOS / KPIs FINALES (MEJORADOS)
-    if usar_demo:
-        embudo_l = ['Aprobada', 'En Proceso', 'Pendiente', 'Rechazada']
-        embudo_v = [42, 28, 15, 8]
-        prod_l = ['Panel Solar 500W', 'Inversor Híbrido', 'Batería Litio', 'Kit Básico', 'Cableado Especial']
-        prod_v = [65, 48, 35, 22, 18]
-        
-        kpi_total = sum(tendencia_v) if tendencia_v else 156
-        kpi_tasa = 42.3
-        kpi_prom = round(kpi_total / 45, 1) if kpi_total else 3.5
-        kpi_aprob = int(kpi_total * 0.42)
-        
-        # Indicador de datos demo
-        datos_reales = False
-    else:
-        total = ChatCotizacion.objects.count()
-        aprob = ChatCotizacion.objects.filter(estado='aprobada').count()
-        kpi_tasa = round((aprob/total*100), 1) if total else 0
-        kpi_total = total
-        kpi_prom = round(kpi_total / 45.0, 1) if kpi_total else 0
-        kpi_aprob = aprob
-        
-        e_data = ChatCotizacion.objects.values('estado').annotate(t=Count('id'))
-        embudo_l = [dict(ChatCotizacion.ESTADO_CHOICES).get(x['estado'], x['estado']) for x in e_data]
-        embudo_v = [x['t'] for x in e_data]
-        
-        p_data = ChatCotizacion.objects.values('producto__nombre').annotate(t=Count('id')).order_by('-t')[:5]
-        prod_l = [x['producto__nombre'] for x in p_data if x['producto__nombre']]
-        prod_v = [x['t'] for x in p_data if x['producto__nombre']]
-        
-        # Si no hay suficientes productos, completar con datos genéricos
-        if len(prod_l) < 3:
-            prod_l.extend(['Producto Varios A', 'Producto Varios B', 'Producto Varios C'][:3-len(prod_l)])
-            prod_v.extend([5, 3, 2][:3-len(prod_v)])
-        
-        datos_reales = True
-
-    # Contexto final para el HTML
     context = {
-        'kpi_tasa_conversion': kpi_tasa, 
-        'kpi_total_cotizaciones': kpi_total,
-        'kpi_promedio_cot_dia': kpi_prom, 
-        'kpi_aprobadas': kpi_aprob,
-        'kpi_proyeccion_clientes': kpi_proy_cli,
+        'kpi_tasa_conversion': kpi_tasa, 'kpi_total_cotizaciones': total,
+        'kpi_promedio_cot_dia': kpi_prom, 'kpi_aprobadas': aprob,
+        'kpi_proyeccion_clientes': kpi_proy,
         
-        'embudo_labels': json.dumps(embudo_l), 
-        'embudo_valores': json.dumps(embudo_v),
-        'tendencia_labels': json.dumps(tendencia_l), 
-        'tendencia_valores': json.dumps(tendencia_v),
-        'productos_labels': json.dumps(prod_l), 
-        'productos_valores': json.dumps(prod_v),
-        'prediccion_labels': json.dumps(pred_cot_l), 
-        'prediccion_valores': json.dumps(pred_cot_v),
-        'clientes_ml_labels': json.dumps(cli_l), 
-        'clientes_ml_valores': json.dumps(cli_v),
+        'embudo_labels': json.dumps(embudo_labels), 'embudo_valores': json.dumps(embudo_valores),
+        'tendencia_labels': json.dumps(tend_l), 'tendencia_valores': json.dumps(tend_v),
+        'productos_labels': json.dumps(productos_labels), 'productos_valores': json.dumps(productos_valores),
+        'prediccion_labels': json.dumps(pred_l), 'prediccion_valores': json.dumps(pred_v),
+        'clientes_ml_labels': json.dumps(cli_l), 'clientes_ml_valores': json.dumps(cli_v),
         
-        # Nuevos datos para mostrar calidad de predicciones
-        'metricas_calidad': metricas_calidad,
-        'datos_reales': datos_reales,
-        'usar_demo': usar_demo,
-        'total_dias_analizados': len(data_cotizaciones),
+        # Pasamos estados para el filtro
+        'estados_posibles': ChatCotizacion.ESTADO_CHOICES
     }
     return render(request, "admin/reportes_graficos.html", context)
+
 
 
 @login_required
